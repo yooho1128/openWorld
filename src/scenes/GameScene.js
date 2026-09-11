@@ -20,8 +20,10 @@ for (let b = 1; b <= 5; b++) FLOOR_INDEXES.push(-b);
 
 const FLOOR_NPCS = {
   1: [{ id: 'reception', name: '안내데스크 직원', x: FLOOR_WIDTH * 0.5, y: 220, texture: 'npc_reception' }],
+  2: [{ id: 'barista', name: '바리스타', x: FLOOR_WIDTH * 0.5, y: 220, texture: 'npc_barista' }],
   9: [{ id: 'teamlead', name: '김 팀장', x: FLOOR_WIDTH * 0.62, y: FLOOR_HEIGHT * 0.45, texture: 'npc_teamlead' }],
   17: [{ id: 'secretary', name: '대표님 비서', x: FLOOR_WIDTH * 0.5, y: 220, texture: 'npc_secretary' }],
+  [-2]: [{ id: 'cafeteria_lady', name: '구내식당 아주머니', x: FLOOR_WIDTH * 0.5, y: 220, texture: 'npc_cafeteria_lady' }],
   [-3]: [{ id: 'security', name: '경비원 아저씨', x: 220, y: FLOOR_HEIGHT - 220, texture: 'npc_security' }],
 };
 
@@ -355,6 +357,8 @@ export class GameScene extends Phaser.Scene {
       ['npc_teamlead', 0x2c3e6b],
       ['npc_secretary', 0x6c5ce7],
       ['npc_security', 0x35424a],
+      ['npc_barista', 0x4a7a5c],
+      ['npc_cafeteria_lady', 0xc97b3d],
     ];
     for (const [key, color] of bodies) {
       g.clear();
