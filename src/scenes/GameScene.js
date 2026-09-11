@@ -6,14 +6,12 @@ import { initElevatorUI, openElevatorPanel, closeElevatorPanel, isElevatorOpen }
 const FLOOR_WIDTH = 1800;
 const FLOOR_HEIGHT = 1100;
 const TILE_SIZE = 64;
-const DESK_COUNT = 26;
-const COFFEE_COUNT = 12;
 const PLAYER_SPEED = 220;
 const ELEVATOR_X = FLOOR_WIDTH / 2;
 const ELEVATOR_Y = FLOOR_HEIGHT - 90;
 const ELEVATOR_INTERACT_RADIUS = 90;
 const SPAWN_X = ELEVATOR_X;
-const SPAWN_Y = ELEVATOR_Y - 90;
+const SPAWN_Y = ELEVATOR_Y - 70;
 
 // Building runs from B5 up to 17F, listed top-down like a real elevator panel.
 const FLOOR_INDEXES = [];
@@ -24,7 +22,49 @@ const FLOOR_NPCS = {
   1: [{ id: 'reception', name: '안내데스크 직원', x: FLOOR_WIDTH * 0.5, y: 220, texture: 'npc_reception' }],
   9: [{ id: 'teamlead', name: '김 팀장', x: FLOOR_WIDTH * 0.62, y: FLOOR_HEIGHT * 0.45, texture: 'npc_teamlead' }],
   17: [{ id: 'secretary', name: '대표님 비서', x: FLOOR_WIDTH * 0.5, y: 220, texture: 'npc_secretary' }],
-  [-1]: [{ id: 'security', name: '경비원 아저씨', x: 220, y: FLOOR_HEIGHT - 220, texture: 'npc_security' }],
+  [-3]: [{ id: 'security', name: '경비원 아저씨', x: 220, y: FLOOR_HEIGHT - 220, texture: 'npc_security' }],
+};
+
+// Per-floor decor themes. Each theme picks a floor tile and a weighted mix
+// of obstacle textures; unlisted floors fall back to 'office'.
+const THEMES = {
+  office: { tile: 'floor_office', obstacles: [{ tex: 'desk', weight: 0.75 }, { tex: 'plant', weight: 0.25 }], count: 26 },
+  lobby: { tile: 'floor_lobby', obstacles: [{ tex: 'plant', weight: 0.6 }, { tex: 'desk', weight: 0.4 }], count: 14 },
+  cafe: { tile: 'floor_cafe', obstacles: [{ tex: 'cafe_table', weight: 0.8 }, { tex: 'plant', weight: 0.2 }], count: 18 },
+  cafeteria: { tile: 'floor_cafeteria', obstacles: [{ tex: 'dining_table', weight: 0.8 }, { tex: 'plant', weight: 0.2 }], count: 16 },
+  server: { tile: 'floor_basement', obstacles: [{ tex: 'server_rack', weight: 1 }], count: 22 },
+  parking: { tile: 'floor_basement', obstacles: [{ tex: 'pillar', weight: 0.4 }, { tex: 'car', weight: 0.6 }], count: 24 },
+  lounge: { tile: 'floor_lounge', obstacles: [{ tex: 'sofa', weight: 0.7 }, { tex: 'plant', weight: 0.3 }], count: 12, coffeeCount: 8 },
+  ceo: { tile: 'floor_lobby', obstacles: [{ tex: 'ceo_desk', weight: 0.3 }, { tex: 'plant', weight: 0.4 }, { tex: 'desk', weight: 0.3 }], count: 10, coffeeCount: 4 },
+};
+
+const FLOOR_THEME_MAP = { 1: 'lobby', 2: 'cafe', 15: 'lounge', 17: 'ceo', [-1]: 'server', [-2]: 'cafeteria' };
+for (let b = 3; b <= 5; b++) FLOOR_THEME_MAP[-b] = 'parking';
+
+const DEFAULT_COFFEE_COUNT = 12;
+
+function getTheme(floorIndex) {
+  return THEMES[FLOOR_THEME_MAP[floorIndex] ?? 'office'];
+}
+
+function pickWeighted(rand, items) {
+  const total = items.reduce((sum, item) => sum + item.weight, 0);
+  let roll = rand() * total;
+  for (const item of items) {
+    if (roll < item.weight) return item.tex;
+    roll -= item.weight;
+  }
+  return items[items.length - 1].tex;
+}
+
+const OBSTACLE_BODY = {
+  desk: [48, 22, 4, 10],
+  car: [52, 26, 4, 4],
+  dining_table: [52, 26, 4, 4],
+  cafe_table: [30, 30, 5, 4],
+  server_rack: [26, 48, 3, 2],
+  sofa: [50, 26, 3, 4],
+  ceo_desk: [60, 28, 4, 6],
 };
 
 function floorLabel(index) {
@@ -160,6 +200,42 @@ export class GameScene extends Phaser.Scene {
     g.generateTexture('floor_basement', TILE_SIZE, TILE_SIZE);
     g.clear();
 
+    // lobby floor tile (marble)
+    g.fillStyle(0xe9e4d6, 1);
+    g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+    g.fillStyle(0xddd6c4, 1);
+    g.fillRect(0, 0, TILE_SIZE / 2, TILE_SIZE / 2);
+    g.fillRect(TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE / 2);
+    g.generateTexture('floor_lobby', TILE_SIZE, TILE_SIZE);
+    g.clear();
+
+    // cafe floor tile (warm wood)
+    g.fillStyle(0xd8c3a5, 1);
+    g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+    g.fillStyle(0xccb48d, 1);
+    g.fillRect(0, 0, TILE_SIZE / 2, TILE_SIZE / 2);
+    g.fillRect(TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE / 2);
+    g.generateTexture('floor_cafe', TILE_SIZE, TILE_SIZE);
+    g.clear();
+
+    // cafeteria floor tile (canteen)
+    g.fillStyle(0xefe7d0, 1);
+    g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+    g.fillStyle(0xe4dabb, 1);
+    g.fillRect(0, 0, TILE_SIZE / 2, TILE_SIZE / 2);
+    g.fillRect(TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE / 2);
+    g.generateTexture('floor_cafeteria', TILE_SIZE, TILE_SIZE);
+    g.clear();
+
+    // lounge floor tile (soft carpet)
+    g.fillStyle(0xb9c6d0, 1);
+    g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+    g.fillStyle(0xaebbc5, 1);
+    g.fillRect(0, 0, TILE_SIZE / 2, TILE_SIZE / 2);
+    g.fillRect(TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE / 2);
+    g.generateTexture('floor_lounge', TILE_SIZE, TILE_SIZE);
+    g.clear();
+
     // player
     g.fillStyle(0x2e86de, 1);
     g.fillRoundedRect(0, 0, 32, 32, 6);
@@ -192,13 +268,61 @@ export class GameScene extends Phaser.Scene {
     g.generateTexture('pillar', 36, 36);
     g.clear();
 
-    // storage box (basement)
-    g.fillStyle(0xc3a06a, 1);
-    g.fillRect(0, 0, 32, 32);
-    g.fillStyle(0x8a6a3f, 1);
-    g.fillRect(0, 14, 32, 4);
-    g.fillRect(14, 0, 4, 32);
-    g.generateTexture('box', 32, 32);
+    // parked car (top-down)
+    g.fillStyle(0x3b5fc4, 1);
+    g.fillRoundedRect(0, 4, 52, 22, 8);
+    g.fillStyle(0x1f3a80, 1);
+    g.fillRoundedRect(14, 0, 24, 12, 4);
+    g.generateTexture('car', 52, 28);
+    g.clear();
+
+    // server rack (basement)
+    g.fillStyle(0x24262b, 1);
+    g.fillRect(0, 0, 26, 48);
+    g.fillStyle(0x2ecc71, 1);
+    g.fillRect(4, 6, 4, 4);
+    g.fillStyle(0xf5c518, 1);
+    g.fillRect(4, 16, 4, 4);
+    g.fillStyle(0xe74c3c, 1);
+    g.fillRect(4, 26, 4, 4);
+    g.generateTexture('server_rack', 26, 48);
+    g.clear();
+
+    // long dining table (cafeteria)
+    g.fillStyle(0x9a7550, 1);
+    g.fillRoundedRect(0, 6, 52, 16, 4);
+    g.fillStyle(0x6f6f6f, 1);
+    g.fillRect(4, 0, 8, 26);
+    g.fillRect(40, 0, 8, 26);
+    g.generateTexture('dining_table', 52, 26);
+    g.clear();
+
+    // round cafe table
+    g.fillStyle(0x8a5a35, 1);
+    g.fillCircle(15, 15, 15);
+    g.fillStyle(0x6f6f6f, 1);
+    g.fillCircle(4, 26, 5);
+    g.fillCircle(26, 26, 5);
+    g.generateTexture('cafe_table', 30, 30);
+    g.clear();
+
+    // sofa (lounge)
+    g.fillStyle(0x3f7f74, 1);
+    g.fillRoundedRect(0, 4, 50, 20, 6);
+    g.fillStyle(0x336a60, 1);
+    g.fillRect(0, 0, 8, 26);
+    g.fillRect(42, 0, 8, 26);
+    g.generateTexture('sofa', 50, 26);
+    g.clear();
+
+    // CEO desk
+    g.fillStyle(0x5c3a21, 1);
+    g.fillRoundedRect(0, 6, 60, 22, 5);
+    g.fillStyle(0xc9a94f, 1);
+    g.fillRect(0, 6, 60, 3);
+    g.fillStyle(0x2c2c2c, 1);
+    g.fillRect(10, 0, 18, 10);
+    g.generateTexture('ceo_desk', 60, 28);
     g.clear();
 
     // coffee cup
@@ -244,9 +368,9 @@ export class GameScene extends Phaser.Scene {
 
   buildFloor(floorIndex) {
     this.currentFloor = floorIndex;
-    const isBasement = floorIndex < 0;
+    const theme = getTheme(floorIndex);
 
-    this.floorTile.setTexture(isBasement ? 'floor_basement' : 'floor_office');
+    this.floorTile.setTexture(theme.tile);
     this.floorText.setText(`현재 층: ${floorLabel(floorIndex)}`);
 
     this.obstacles.clear(true, true);
@@ -257,17 +381,19 @@ export class GameScene extends Phaser.Scene {
     const rand = mulberry32(floorIndex * 7919 + 12345);
     const safeRadius = 150;
 
-    const deskTexture = isBasement ? 'pillar' : 'desk';
-    const decorTexture = isBasement ? 'box' : 'plant';
-
-    for (let i = 0; i < DESK_COUNT; i++) {
+    for (let i = 0; i < theme.count; i++) {
       const { x, y } = this.randomFloorPoint(rand, safeRadius);
-      const texture = rand() < 0.75 ? deskTexture : decorTexture;
+      const texture = pickWeighted(rand, theme.obstacles);
       const obj = this.obstacles.create(x, y, texture);
-      if (texture === 'desk') obj.setSize(48, 22).setOffset(4, 10);
+      const body = OBSTACLE_BODY[texture];
+      if (body) {
+        const [w, h, ox, oy] = body;
+        obj.setSize(w, h).setOffset(ox, oy);
+      }
     }
 
-    for (let i = 0; i < COFFEE_COUNT; i++) {
+    const coffeeCount = theme.coffeeCount ?? DEFAULT_COFFEE_COUNT;
+    for (let i = 0; i < coffeeCount; i++) {
       const { x, y } = this.randomFloorPoint(rand, 80);
       this.coffees.create(x, y, 'coffee');
     }
