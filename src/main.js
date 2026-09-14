@@ -3,6 +3,7 @@ import { BootScene } from './scenes/BootScene.js';
 import { StageSelectScene } from './scenes/StageSelectScene.js';
 import { ShopScene } from './scenes/ShopScene.js';
 import { RunScene } from './scenes/RunScene.js';
+import { LeaderboardScene } from './scenes/LeaderboardScene.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -17,7 +18,7 @@ const config = {
   input: {
     activePointers: 1,
   },
-  scene: [BootScene, StageSelectScene, ShopScene, RunScene],
+  scene: [BootScene, StageSelectScene, ShopScene, RunScene, LeaderboardScene],
 };
 
 new Phaser.Game(config);

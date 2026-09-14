@@ -33,6 +33,23 @@ export function playCaught() {
   beep({ freq: 220, sweepTo: 80, duration: 0.35, type: 'sawtooth', gain: 0.2 });
 }
 
+export function playJump() {
+  beep({ freq: 500, sweepTo: 780, duration: 0.14, type: 'triangle', gain: 0.13 });
+}
+
+export function playDuck() {
+  beep({ freq: 400, sweepTo: 220, duration: 0.14, type: 'triangle', gain: 0.13 });
+}
+
+export function playNearMiss() {
+  beep({ freq: 1400, sweepTo: 900, duration: 0.08, type: 'sine', gain: 0.1 });
+}
+
+export function playMilestone() {
+  beep({ freq: 660, duration: 0.09, gain: 0.16 });
+  setTimeout(() => beep({ freq: 990, duration: 0.14, gain: 0.16 }), 90);
+}
+
 export function playGameOver() {
   beep({ freq: 300, sweepTo: 60, duration: 0.8, type: 'sawtooth', gain: 0.2 });
 }

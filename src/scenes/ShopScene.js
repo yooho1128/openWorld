@@ -22,30 +22,30 @@ export class ShopScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.cardRefs = [];
-    const startY = 120;
-    const gap = 100;
+    const startY = 106;
+    const gap = 78;
     EQUIPMENT.forEach((item, i) => {
       const y = startY + i * gap;
       const owned = this.save.owned.includes(item.id);
 
-      const box = this.add.rectangle(width / 2, y, width - 48, 84, owned ? 0x2f8f4e : 0x2a2a33).setStrokeStyle(2, 0x555555);
+      const box = this.add.rectangle(width / 2, y, width - 48, 68, owned ? 0x2f8f4e : 0x2a2a33).setStrokeStyle(2, 0x555555);
 
       const info = this.add.text(
         40,
         y,
         `${item.emoji} ${item.name}\n${item.desc}`,
-        { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff' },
+        { fontFamily: 'monospace', fontSize: '12px', color: '#ffffff' },
       ).setOrigin(0, 0.5);
 
       const actionText = owned ? '보유중' : `${item.cost} ☕`;
       const action = this.add
         .text(width - 40, y, actionText, {
           fontFamily: 'monospace',
-          fontSize: '15px',
+          fontSize: '13px',
           fontStyle: 'bold',
           color: owned ? '#8fd6a8' : '#f5c518',
           backgroundColor: owned ? '' : '#00000060',
-          padding: { x: 8, y: 4 },
+          padding: { x: 6, y: 3 },
         })
         .setOrigin(1, 0.5);
 

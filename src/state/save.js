@@ -5,6 +5,8 @@ const DEFAULT_SAVE = {
   owned: [],
   clearedStages: [],
   bestDistance: {},
+  attempts: {},
+  playerName: '',
 };
 
 export function loadSave() {
