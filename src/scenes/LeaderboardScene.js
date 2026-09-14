@@ -1,15 +1,11 @@
 import Phaser from 'phaser';
-import { STAGES } from '../data/stages.js';
 
 const RANK_COLORS = ['#f5c518', '#d8d3c6', '#c97b3d'];
+const INFINITE_STAGE_ID = 0;
 
 export class LeaderboardScene extends Phaser.Scene {
   constructor() {
     super('Leaderboard');
-  }
-
-  init(data) {
-    this.stageId = data?.stageId ?? STAGES[0].id;
   }
 
   create() {
@@ -17,26 +13,11 @@ export class LeaderboardScene extends Phaser.Scene {
     this.add.tileSprite(0, 0, width, height, 'runner_bg').setOrigin(0, 0).setAlpha(0.35);
 
     this.add
-      .text(width / 2, 34, '🏆 명예의 전당', { fontFamily: 'monospace', fontSize: '22px', fontStyle: 'bold', color: '#f5c518' })
+      .text(width / 2, 40, '🏆 명예의 전당', { fontFamily: 'monospace', fontSize: '24px', fontStyle: 'bold', color: '#f5c518' })
       .setOrigin(0.5);
-
-    this.tabRefs = [];
-    const tabY = 76;
-    const tabW = (width - 64) / STAGES.length;
-    STAGES.forEach((stage, i) => {
-      const x = 32 + tabW * i + tabW / 2;
-      const btn = this.add
-        .rectangle(x, tabY, tabW - 6, 34, stage.id === this.stageId ? 0x2e86de : 0x33333d)
-        .setStrokeStyle(1, 0x555555)
-        .setInteractive({ useHandCursor: true });
-      this.add.text(x, tabY, `${stage.id}`, { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff' }).setOrigin(0.5);
-      btn.on('pointerdown', () => {
-        this.stageId = stage.id;
-        this.refreshTabs();
-        this.loadEntries();
-      });
-      this.tabRefs.push({ btn, stage });
-    });
+    this.add
+      .text(width / 2, 72, '♾️ 무한모드 최고 거리', { fontFamily: 'monospace', fontSize: '14px', color: '#d8d3c6' })
+      .setOrigin(0.5);
 
     this.listContainer = this.add.container(0, 0);
     this.statusText = this.add
@@ -55,35 +36,29 @@ export class LeaderboardScene extends Phaser.Scene {
     this.loadEntries();
   }
 
-  refreshTabs() {
-    for (const { btn, stage } of this.tabRefs) {
-      btn.setFillStyle(stage.id === this.stageId ? 0x2e86de : 0x33333d);
-    }
-  }
-
   async loadEntries() {
     this.statusText.setText('불러오는 중...').setVisible(true);
     this.listContainer.removeAll(true);
 
     try {
-      const res = await fetch(`/api/leaderboard?stageId=${this.stageId}`);
+      const res = await fetch(`/api/leaderboard?stageId=${INFINITE_STAGE_ID}`);
       if (!res.ok) throw new Error(`status ${res.status}`);
       const data = await res.json();
       const entries = data.entries ?? [];
 
       if (entries.length === 0) {
-        this.statusText.setText('아직 이 스테이지 클리어 기록이 없습니다.\n첫 기록의 주인공이 되어보세요!');
+        this.statusText.setText('아직 무한모드 기록이 없습니다.\n첫 기록의 주인공이 되어보세요!');
         return;
       }
 
       this.statusText.setVisible(false);
       entries.forEach((entry, i) => {
-        const y = 120 + i * 42;
+        const y = 116 + i * 46;
         const rankColor = RANK_COLORS[i] ?? '#aaaaaa';
-        const rank = this.add.text(40, y, `${i + 1}.`, { fontFamily: 'monospace', fontSize: '15px', fontStyle: 'bold', color: rankColor }).setOrigin(0, 0.5);
-        const name = this.add.text(88, y, entry.name, { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff' }).setOrigin(0, 0.5);
+        const rank = this.add.text(40, y, `${i + 1}.`, { fontFamily: 'monospace', fontSize: '16px', fontStyle: 'bold', color: rankColor }).setOrigin(0, 0.5);
+        const name = this.add.text(90, y, entry.name, { fontFamily: 'monospace', fontSize: '15px', color: '#ffffff' }).setOrigin(0, 0.5);
         const stat = this.add
-          .text(this.scale.width - 32, y, `${entry.attempts}트 · ${entry.distance}m`, { fontFamily: 'monospace', fontSize: '12px', color: '#f5c518' })
+          .text(this.scale.width - 32, y, `${entry.distance}m`, { fontFamily: 'monospace', fontSize: '14px', color: '#f5c518' })
           .setOrigin(1, 0.5);
         this.listContainer.add([rank, name, stat]);
       });

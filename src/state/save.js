@@ -7,6 +7,7 @@ const DEFAULT_SAVE = {
   bestDistance: {},
   attempts: {},
   playerName: '',
+  infiniteBest: 0,
 };
 
 export function loadSave() {

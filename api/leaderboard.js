@@ -30,16 +30,16 @@ export default async function handler(req, res) {
   }
 
   const rawStageId = req.method === 'GET' ? req.query.stageId : req.body?.stageId;
-  const stageId = clampInt(rawStageId, 1, 999);
+  const stageId = clampInt(rawStageId, 0, 999);
 
   if (req.method === 'GET') {
     try {
       await ensureTable();
       const rows = await sql`
-        SELECT name, attempts, distance
+        SELECT name, distance
         FROM leaderboard
         WHERE stage_id = ${stageId}
-        ORDER BY attempts ASC, distance DESC
+        ORDER BY distance DESC
         LIMIT ${MAX_RETURNED}
       `;
       return res.json({ entries: rows });
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
     }
 
     const safeName = name.trim().slice(0, 8);
-    const safeAttempts = clampInt(attempts, 1, 999999);
+    const safeAttempts = clampInt(attempts, 0, 999999);
     const safeDistance = clampInt(distance, 0, 999999);
 
     try {
