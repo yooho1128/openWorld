@@ -11,6 +11,9 @@ const HIT_INVULN_MS = 1200;
 const BASE_START_INVULN_MS = 800;
 const COFFEE_SPAWN_RANGE_MS = [500, 900];
 const OBSTACLE_TEXTURES = ['ob_box', 'ob_folder', 'ob_cabinet'];
+// Scales raw scroll pixels down to a calmer "meters" number for the HUD/goal,
+// independent of the actual on-screen scroll speed (which stays in pixels/sec).
+const PIXELS_PER_METER = 60;
 
 function shrinkRect(rect, factor) {
   const dw = (rect.width * (1 - factor)) / 2;
@@ -58,19 +61,23 @@ export class RunScene extends Phaser.Scene {
 
     this.add
       .text(width / 2, 6, this.stage.name, { fontFamily: 'monospace', fontSize: '14px', color: '#f5c518', backgroundColor: '#00000080', padding: { x: 6, y: 2 } })
-      .setOrigin(0.5, 0);
+      .setOrigin(0.5, 0)
+      .setDepth(100);
 
     this.livesText = this.add
       .text(12, 30, '', { fontFamily: 'monospace', fontSize: '18px', color: '#ff6b6b', backgroundColor: '#00000080', padding: { x: 6, y: 3 } })
-      .setScrollFactor(0);
+      .setScrollFactor(0)
+      .setDepth(100);
 
     this.distanceText = this.add
       .text(width / 2, 30, '', { fontFamily: 'monospace', fontSize: '16px', color: '#ffffff', backgroundColor: '#00000080', padding: { x: 6, y: 3 } })
-      .setOrigin(0.5, 0);
+      .setOrigin(0.5, 0)
+      .setDepth(100);
 
     this.coffeeText = this.add
       .text(width - 12, 30, '', { fontFamily: 'monospace', fontSize: '18px', color: '#f5c518', backgroundColor: '#00000080', padding: { x: 6, y: 3 } })
-      .setOrigin(1, 0);
+      .setOrigin(1, 0)
+      .setDepth(100);
 
     this.updateHud();
 
@@ -78,6 +85,23 @@ export class RunScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-A', () => this.moveLane(-1));
     this.input.keyboard.on('keydown-RIGHT', () => this.moveLane(1));
     this.input.keyboard.on('keydown-D', () => this.moveLane(1));
+
+    // Mobile/touch: tap the left or right half of the screen to switch lanes.
+    this.input.on('pointerdown', (pointer) => {
+      this.moveLane(pointer.x < width / 2 ? -1 : 1);
+    });
+
+    const hint = this.add
+      .text(width / 2, height * PLAYER_Y_FRAC - 70, '화면 좌/우 탭 · ←/→ 키로 이동', {
+        fontFamily: 'monospace',
+        fontSize: '13px',
+        color: '#ffffff',
+        backgroundColor: '#00000080',
+        padding: { x: 8, y: 4 },
+      })
+      .setOrigin(0.5)
+      .setDepth(100);
+    this.tweens.add({ targets: hint, alpha: 0, delay: 1800, duration: 500, onComplete: () => hint.destroy() });
 
     this.resultLayer = null;
   }
@@ -97,7 +121,7 @@ export class RunScene extends Phaser.Scene {
 
   spawnObstacleRow() {
     const progress = Phaser.Math.Clamp(this.distance / this.stage.goalDistance, 0, 1);
-    const twoLaneChance = Phaser.Math.Clamp(0.15 + progress * 0.35, 0.15, 0.5);
+    const twoLaneChance = Phaser.Math.Clamp(0.28 + progress * 0.42, 0.28, 0.7);
 
     let blockedLanes;
     if (Math.random() < twoLaneChance) {
@@ -254,7 +278,7 @@ export class RunScene extends Phaser.Scene {
 
     this.elapsedSeconds += delta / 1000;
     const speed = Math.min(this.stage.maxSpeed, this.stage.baseSpeed + this.stage.speedRamp * this.elapsedSeconds);
-    this.distance += (speed * delta) / 1000;
+    this.distance += (speed * delta) / 1000 / PIXELS_PER_METER;
     this.bg.tilePositionY -= (speed * delta) / 1000;
 
     const dy = (speed * delta) / 1000;

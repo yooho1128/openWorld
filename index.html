@@ -2,7 +2,7 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>출근런</title>
     <style>
       html, body {
@@ -11,12 +11,15 @@
         background: #101014;
         overflow: hidden;
         height: 100%;
+        overscroll-behavior: none;
+        touch-action: none;
       }
       #app {
         display: flex;
         align-items: center;
         justify-content: center;
         height: 100vh;
+        height: 100dvh;
       }
     </style>
   </head>

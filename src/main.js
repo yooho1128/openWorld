@@ -10,6 +10,13 @@ const config = {
   width: 480,
   height: 800,
   backgroundColor: '#1b1b22',
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  input: {
+    activePointers: 1,
+  },
   scene: [BootScene, StageSelectScene, ShopScene, RunScene],
 };
 
