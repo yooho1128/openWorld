@@ -18,7 +18,6 @@ const PIXELS_PER_METER = 60;
 // Obstacles/coffee spawn tiny and grow to full size as they reach the
 // player, for a cheap "coming at you" depth cue without a real 3D engine.
 const SPAWN_SCALE = 0.35;
-const NEAR_MISS_WINDOW_PX = 26;
 const STREAK_MILESTONE = 5;
 const JUMP_DURATION_MS = 380;
 const JUMP_INVULN_MS = 460;
@@ -288,7 +287,7 @@ export class RunScene extends Phaser.Scene {
       const texture = type === 'low' ? 'ob_low' : 'ob_high';
       const centerX = PLAY_MARGIN + (this.scale.width - PLAY_MARGIN * 2) / 2;
       const obj = this.add.image(centerX, -40, texture).setScale(SPAWN_SCALE);
-      this.obstacles.push({ obj, lane: -1, type, nearMissed: true });
+      this.obstacles.push({ obj, lane: -1, type });
       return;
     }
 
@@ -306,7 +305,7 @@ export class RunScene extends Phaser.Scene {
     for (const lane of blockedLanes) {
       const texture = Phaser.Utils.Array.GetRandom(OBSTACLE_TEXTURES);
       const obj = this.add.image(this.laneX[lane], -40, texture).setScale(SPAWN_SCALE);
-      this.obstacles.push({ obj, lane, type: 'ground', nearMissed: false });
+      this.obstacles.push({ obj, lane, type: 'ground' });
     }
   }
 
@@ -380,12 +379,6 @@ export class RunScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(150);
     this.tweens.add({ targets: t, y: y - 40, alpha: 0, duration: 700, ease: 'Cubic.Out', onComplete: () => t.destroy() });
-  }
-
-  onNearMiss(entry) {
-    sfx.playNearMiss();
-    this.spawnPopup(entry.obj.x, this.playerY - 40, '아슬아슬!', '#ffffff');
-    this.tweens.add({ targets: this.cameras.main, zoom: 1.06, duration: 70, yoyo: true, ease: 'Sine.Out' });
   }
 
   onObstacleDodged() {
@@ -547,11 +540,6 @@ export class RunScene extends Phaser.Scene {
       entry.obj.y += dy;
       const depthT = Phaser.Math.Clamp(entry.obj.y / this.playerY, 0, 1);
       entry.obj.setScale(Phaser.Math.Linear(SPAWN_SCALE, 1, depthT));
-
-      if (entry.type === 'ground' && !entry.nearMissed && entry.lane !== this.lane && Math.abs(entry.obj.y - this.playerY) < NEAR_MISS_WINDOW_PX) {
-        entry.nearMissed = true;
-        this.onNearMiss(entry);
-      }
     }
     for (const entry of this.coffees) {
       entry.obj.y += dy;

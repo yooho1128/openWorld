@@ -41,10 +41,6 @@ export function playDuck() {
   beep({ freq: 400, sweepTo: 220, duration: 0.14, type: 'triangle', gain: 0.13 });
 }
 
-export function playNearMiss() {
-  beep({ freq: 1400, sweepTo: 900, duration: 0.08, type: 'sine', gain: 0.1 });
-}
-
 export function playMilestone() {
   beep({ freq: 660, duration: 0.09, gain: 0.16 });
   setTimeout(() => beep({ freq: 990, duration: 0.14, gain: 0.16 }), 90);
