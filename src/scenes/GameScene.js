@@ -93,6 +93,7 @@ export class GameScene extends Phaser.Scene {
     this.activeNpc = null;
     this.overlayPaused = false;
     this.npcs = [];
+    this.npcHistories = new Map();
   }
 
   preload() {
@@ -498,17 +499,20 @@ export class GameScene extends Phaser.Scene {
     appendMessage('player', text);
     setLoading(true);
 
+    const history = this.npcHistories.get(npc.id) ?? [];
+
     try {
       const res = await fetch(`/api/npc/${npc.id}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, history }),
       });
 
       if (!res.ok) throw new Error(`status ${res.status}`);
 
       const data = await res.json();
       appendMessage('npc', data.reply ?? '...');
+      this.npcHistories.set(npc.id, data.history ?? history);
     } catch (err) {
       console.error('NPC chat failed:', err);
       appendMessage('npc', '(...대답이 없다. 서버 연결을 확인해 주세요.)');

@@ -1,9 +1,12 @@
 # Open World Prototype - 회사 빌딩
 
 지하 5층 ~ 지상 17층짜리 회사 빌딩 하나를 무대로 삼은 2D 탑다운 프로토타입입니다.
-Phaser 3(클라이언트) + Express(NPC 대화 프록시 서버)로 구성되어 있습니다.
+Phaser 3(클라이언트) + Vercel 서버리스 함수(NPC 대화 API, `api/npc/[npcId]/chat.js`)로 구성되어 있습니다.
 
-## 실행 방법
+## 실행 방법 (로컬)
+
+로컬 개발 서버는 [Vercel CLI](https://vercel.com/docs/cli)의 `vercel dev`로 실행합니다.
+Vite 프론트와 `api/` 아래 서버리스 함수를 함께 띄워줍니다.
 
 ### 1. NPC 대화용 Claude API 키 설정 (선택)
 
@@ -11,8 +14,8 @@ NPC와 대화하려면 Anthropic API 키가 필요합니다. 키가 없어도 �
 NPC에게 말을 걸면 "대답이 없다"는 안내만 표시됩니다.
 
 ```bash
-cp server/.env.example server/.env
-# server/.env 파일을 열어 ANTHROPIC_API_KEY 값을 채워주세요
+cp .env.example .env.local
+# .env.local 파일을 열어 ANTHROPIC_API_KEY 값을 채워주세요
 ```
 
 ### 2. 설치 및 실행
@@ -22,8 +25,16 @@ npm install
 npm run dev
 ```
 
-`npm run dev`는 Vite 클라이언트(5173)와 NPC 프록시 서버(3001)를 동시에 실행합니다.
-브라우저에서 `http://localhost:5173` 접속.
+`http://localhost:3000` (vercel dev 기본 포트)으로 접속합니다.
+
+## 배포 (Vercel)
+
+이 저장소를 Vercel 프로젝트로 그대로 import하면 됩니다 (Framework: Vite 자동 감지).
+배포 전에 Vercel 프로젝트 설정 → Environment Variables에 `ANTHROPIC_API_KEY`를 등록해주세요
+(`.env`/`.env.local` 파일은 배포에 포함되지 않습니다).
+
+> NPC 대화 기록은 서버 메모리가 아니라 클라이언트가 들고 있다가 매 요청에 함께 보냅니다.
+> 서버리스 함수는 인스턴스가 매번 새로 뜰 수 있어 상태를 유지하지 않기 때문입니다.
 
 ## 조작법
 
@@ -60,8 +71,8 @@ npm run dev
 | 김 팀장 | 9F | 회의와 마감에 시달리는 중간관리자 |
 | 대표님 비서 | 17F (대표실) | 대표이사실 앞을 지키는 비서 |
 
-각 NPC는 서버(`server/npcs.js`)에 정의된 페르소나로 Claude API를 호출해 실시간으로 대답합니다.
-대화 기록은 NPC별로 서버 메모리에 유지되며(서버 재시작 시 초기화), 세계관을 벗어난 질문은
+각 NPC는 `lib/npcs.js`에 정의된 페르소나로 Claude API를 호출해 실시간으로 대답합니다.
+대화 기록은 NPC별로 클라이언트가 들고 있다가 매 요청에 함께 전송하며, 세계관을 벗어난 질문은
 캐릭터에 맞게 넘기도록 프롬프트에 규칙을 넣어두었습니다.
 
 ## 다음 단계 후보
