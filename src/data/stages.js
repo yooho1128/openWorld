@@ -1,9 +1,6 @@
-// obstacleTypes weights control which hazard kinds appear on a stage:
-// 'ground' = classic per-lane obstacle (dodge by switching lanes)
-// 'low'    = full-width obstacle, must jump
-// 'high'   = full-width obstacle, must duck
-// Higher stages don't just get faster/longer — they introduce hazard kinds
-// that need a different action, so "harder" means "different", not just "more".
+// obstacleTypes weights control which hazard kinds appear on a stage. Only
+// 'ground' (dodge by switching lanes) is used in normal vertical play now —
+// jump/duck live exclusively in the sidescroll event (see RunScene).
 export const STAGES = [
   {
     id: 1,
@@ -27,10 +24,7 @@ export const STAGES = [
     obstacleGapPx: 230,
     floorTint: 0xcfe0ff,
     sceneryTint: 0x5f83b9,
-    obstacleTypes: [
-      { type: 'ground', weight: 0.7 },
-      { type: 'low', weight: 0.3 },
-    ],
+    obstacleTypes: [{ type: 'ground', weight: 1 }],
   },
   {
     id: 3,
@@ -42,11 +36,7 @@ export const STAGES = [
     obstacleGapPx: 200,
     floorTint: 0xffd6a8,
     sceneryTint: 0xd9793f,
-    obstacleTypes: [
-      { type: 'ground', weight: 0.55 },
-      { type: 'low', weight: 0.25 },
-      { type: 'high', weight: 0.2 },
-    ],
+    obstacleTypes: [{ type: 'ground', weight: 1 }],
   },
   {
     id: 4,
@@ -58,13 +48,24 @@ export const STAGES = [
     obstacleGapPx: 175,
     floorTint: 0xf3e2a8,
     sceneryTint: 0xb0903c,
-    obstacleTypes: [
-      { type: 'ground', weight: 0.42 },
-      { type: 'low', weight: 0.3 },
-      { type: 'high', weight: 0.28 },
-    ],
+    obstacleTypes: [{ type: 'ground', weight: 1 }],
   },
 ];
+
+// Endless mode: no goal distance, difficulty ramps forever (capped at
+// maxSpeed so it stays playable), ends only when you run out of lives.
+// This is the only mode the global leaderboard tracks.
+export const INFINITE_MODE = {
+  id: 'infinite',
+  name: '무한모드',
+  baseSpeed: 260,
+  speedRamp: 5,
+  maxSpeed: 820,
+  obstacleGapPx: 240,
+  floorTint: 0xd9d0ff,
+  sceneryTint: 0x7a5fc9,
+  obstacleTypes: [{ type: 'ground', weight: 1 }],
+};
 
 export function isStageUnlocked(save, stageId) {
   if (stageId === STAGES[0].id) return true;

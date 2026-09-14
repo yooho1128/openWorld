@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { STAGES, pickObstacleType } from '../data/stages.js';
+import { STAGES, INFINITE_MODE, pickObstacleType } from '../data/stages.js';
+import { FLIP_EVENT_MESSAGES, SIDESCROLL_EVENT_MESSAGES } from '../data/events.js';
 import { loadSave, writeSave } from '../state/save.js';
 import { getEquipmentEffects } from '../data/equipment.js';
 import { PLAY_MARGIN } from '../data/layout.js';
@@ -25,6 +26,10 @@ const DUCK_DURATION_MS = 380;
 const DUCK_INVULN_MS = 460;
 const INTRO_DURATION_MS = 1300;
 const ACTION_BUTTON_ZONE_PX = 100;
+const EVENT_DISTANCE_RANGE = [80, 140]; // meters between random events
+const FLIP_EVENT_DURATION_MS = 5000;
+const SIDESCROLL_OBSTACLE_COUNT = 6;
+const SIDESCROLL_SPAWN_RANGE_MS = [700, 1000];
 
 function shrinkRect(rect, factor) {
   const dw = (rect.width * (1 - factor)) / 2;
@@ -38,13 +43,16 @@ export class RunScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.stage = STAGES.find((s) => s.id === data.stageId) ?? STAGES[0];
+    this.isInfinite = data.stageId === 'infinite';
+    this.stage = this.isInfinite ? INFINITE_MODE : STAGES.find((s) => s.id === data.stageId) ?? STAGES[0];
     this.skipIntro = data.skipIntro === true;
 
     this.save = loadSave();
-    this.save.attempts[this.stage.id] = (this.save.attempts[this.stage.id] ?? 0) + 1;
-    this.currentAttempt = this.save.attempts[this.stage.id];
-    writeSave(this.save);
+    if (!this.isInfinite) {
+      this.save.attempts[this.stage.id] = (this.save.attempts[this.stage.id] ?? 0) + 1;
+      this.currentAttempt = this.save.attempts[this.stage.id];
+      writeSave(this.save);
+    }
     this.effects = getEquipmentEffects(this.save);
 
     const playWidth = this.scale.width - PLAY_MARGIN * 2;
@@ -73,6 +81,13 @@ export class RunScene extends Phaser.Scene {
     this.coffees = [];
     this.obstacleTimer = 600;
     this.coffeeTimer = Phaser.Math.Between(...COFFEE_SPAWN_RANGE_MS);
+
+    // Random mid-run events.
+    this.mode = 'vertical';
+    this.controlsReversed = false;
+    this.flipActive = false;
+    this.nextEventAt = Phaser.Math.Between(70, 110);
+    this.sidescrollObstacles = [];
   }
 
   create() {
@@ -130,7 +145,7 @@ export class RunScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-S', () => this.duck());
 
     // Mobile/touch: tap the left or right half of the screen to switch lanes.
-    // The bottom strip is reserved for the jump/duck buttons.
+    // The bottom strip is reserved for the on-screen buttons.
     this.input.on('pointerdown', (pointer) => {
       if (this.introActive) {
         this.finishIntro();
@@ -143,7 +158,7 @@ export class RunScene extends Phaser.Scene {
     this.createActionButtons();
 
     const hint = this.add
-      .text(width / 2, height * PLAYER_Y_FRAC - 90, '화면 좌/우 탭 · ←/→ 이동 · 버튼으로 점프/숙이기', {
+      .text(width / 2, height * PLAYER_Y_FRAC - 90, '화면 좌/우 탭 · ←/→ 이동', {
         fontFamily: 'monospace',
         fontSize: '12px',
         color: '#ffffff',
@@ -163,31 +178,82 @@ export class RunScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const btnY = height - ACTION_BUTTON_ZONE_PX / 2 - 10;
 
-    const jumpBtn = this.add
+    this.rightBtn = this.add
       .rectangle(width - 66, btnY, 108, 70, 0x2e86de, 0.55)
       .setStrokeStyle(2, 0xffffff)
       .setScrollFactor(0)
       .setDepth(120)
       .setInteractive({ useHandCursor: true });
-    this.add
-      .text(width - 66, btnY, '⬆\n점프', { fontFamily: 'monospace', fontSize: '13px', color: '#ffffff', align: 'center' })
+    this.rightBtnLabel = this.add
+      .text(width - 66, btnY, '➡\n오른쪽', { fontFamily: 'monospace', fontSize: '13px', color: '#ffffff', align: 'center' })
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(121);
-    jumpBtn.on('pointerdown', () => this.jump());
+    this.rightBtn.on('pointerdown', () => this.moveLane(1));
 
-    const duckBtn = this.add
+    this.leftBtn = this.add
       .rectangle(66, btnY, 108, 70, 0xc0392b, 0.55)
       .setStrokeStyle(2, 0xffffff)
       .setScrollFactor(0)
       .setDepth(120)
       .setInteractive({ useHandCursor: true });
-    this.add
+    this.leftBtnLabel = this.add
+      .text(66, btnY, '⬅\n왼쪽', { fontFamily: 'monospace', fontSize: '13px', color: '#ffffff', align: 'center' })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+    this.leftBtn.on('pointerdown', () => this.moveLane(-1));
+
+    this.jumpBtn = this.add
+      .rectangle(width - 66, btnY, 108, 70, 0x2e86de, 0.55)
+      .setStrokeStyle(2, 0xffffff)
+      .setScrollFactor(0)
+      .setDepth(120)
+      .setInteractive({ useHandCursor: true });
+    this.jumpBtnLabel = this.add
+      .text(width - 66, btnY, '⬆\n점프', { fontFamily: 'monospace', fontSize: '13px', color: '#ffffff', align: 'center' })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(121);
+    this.jumpBtn.on('pointerdown', () => this.jump());
+
+    this.duckBtn = this.add
+      .rectangle(66, btnY, 108, 70, 0xc0392b, 0.55)
+      .setStrokeStyle(2, 0xffffff)
+      .setScrollFactor(0)
+      .setDepth(120)
+      .setInteractive({ useHandCursor: true });
+    this.duckBtnLabel = this.add
       .text(66, btnY, '⬇\n숙이기', { fontFamily: 'monospace', fontSize: '13px', color: '#ffffff', align: 'center' })
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(121);
-    duckBtn.on('pointerdown', () => this.duck());
+    this.duckBtn.on('pointerdown', () => this.duck());
+
+    this.setSidescrollButtons(false);
+  }
+
+  setSidescrollButtons(active) {
+    this.leftBtn.setVisible(!active);
+    this.leftBtnLabel.setVisible(!active);
+    this.rightBtn.setVisible(!active);
+    this.rightBtnLabel.setVisible(!active);
+    this.jumpBtn.setVisible(active);
+    this.jumpBtnLabel.setVisible(active);
+    this.duckBtn.setVisible(active);
+    this.duckBtnLabel.setVisible(active);
+
+    if (active) {
+      this.leftBtn.disableInteractive();
+      this.rightBtn.disableInteractive();
+      this.jumpBtn.setInteractive({ useHandCursor: true });
+      this.duckBtn.setInteractive({ useHandCursor: true });
+    } else {
+      this.jumpBtn.disableInteractive();
+      this.duckBtn.disableInteractive();
+      this.leftBtn.setInteractive({ useHandCursor: true });
+      this.rightBtn.setInteractive({ useHandCursor: true });
+    }
   }
 
   playIntro() {
@@ -222,7 +288,8 @@ export class RunScene extends Phaser.Scene {
       this.finishIntro();
       return;
     }
-    if (!this.running) return;
+    if (!this.running || this.mode !== 'vertical') return;
+    if (this.controlsReversed) delta = -delta;
     const next = Phaser.Math.Clamp(this.lane + delta, 0, LANE_COUNT - 1);
     if (next === this.lane) return;
     this.lane = next;
@@ -239,7 +306,7 @@ export class RunScene extends Phaser.Scene {
       this.finishIntro();
       return;
     }
-    if (!this.running || this.jumpActive || this.duckActive) return;
+    if (!this.running || this.mode !== 'sidescroll' || this.jumpActive || this.duckActive) return;
     this.jumpActive = true;
     this.jumpUntil = this.time.now + JUMP_INVULN_MS + this.effects.actionInvulnBonusMs;
     sfx.playJump();
@@ -263,7 +330,7 @@ export class RunScene extends Phaser.Scene {
       this.finishIntro();
       return;
     }
-    if (!this.running || this.jumpActive || this.duckActive) return;
+    if (!this.running || this.mode !== 'sidescroll' || this.jumpActive || this.duckActive) return;
     this.duckActive = true;
     this.duckUntil = this.time.now + DUCK_INVULN_MS + this.effects.actionInvulnBonusMs;
     sfx.playDuck();
@@ -280,18 +347,171 @@ export class RunScene extends Phaser.Scene {
     });
   }
 
-  spawnObstacleRow() {
-    const type = pickObstacleType(this.stage);
+  showEventBanner(text) {
+    const { width } = this.scale;
+    const banner = this.add
+      .text(width / 2, 60, text, {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+        backgroundColor: '#000000a0',
+        padding: { x: 10, y: 6 },
+        align: 'center',
+        wordWrap: { width: width - 80 },
+      })
+      .setOrigin(0.5)
+      .setDepth(160)
+      .setAlpha(0);
+    this.tweens.add({ targets: banner, alpha: 1, duration: 200 });
+    this.time.delayedCall(2200, () => {
+      this.tweens.add({ targets: banner, alpha: 0, duration: 400, onComplete: () => banner.destroy() });
+    });
+  }
 
-    if (type !== 'ground') {
-      const texture = type === 'low' ? 'ob_low' : 'ob_high';
-      const centerX = PLAY_MARGIN + (this.scale.width - PLAY_MARGIN * 2) / 2;
-      const obj = this.add.image(centerX, -40, texture).setScale(SPAWN_SCALE);
-      this.obstacles.push({ obj, lane: -1, type });
+  scheduleNextEvent() {
+    this.nextEventAt = this.distance + Phaser.Math.Between(...EVENT_DISTANCE_RANGE);
+  }
+
+  triggerRandomEvent() {
+    this.scheduleNextEvent();
+    if (Math.random() < 0.5) this.startFlipEvent();
+    else this.startSidescrollEvent();
+  }
+
+  startFlipEvent() {
+    this.flipActive = true;
+    this.controlsReversed = true;
+    this.showEventBanner(Phaser.Utils.Array.GetRandom(FLIP_EVENT_MESSAGES));
+    this.flipIndicator = this.add
+      .text(this.scale.width / 2, 56, '⚠ 조작 반전!', { fontFamily: 'monospace', fontSize: '13px', fontStyle: 'bold', color: '#ff8fa8', backgroundColor: '#00000090', padding: { x: 8, y: 3 } })
+      .setOrigin(0.5)
+      .setDepth(140);
+    this.time.delayedCall(FLIP_EVENT_DURATION_MS, () => {
+      this.controlsReversed = false;
+      this.flipActive = false;
+      this.flipIndicator?.destroy();
+      this.flipIndicator = null;
+    });
+  }
+
+  startSidescrollEvent() {
+    this.mode = 'sidescroll';
+
+    for (const entry of this.obstacles) entry.obj.destroy();
+    this.obstacles = [];
+    for (const entry of this.coffees) entry.obj.destroy();
+    this.coffees = [];
+
+    this.bg.setVisible(false);
+    this.sceneryLeft.setVisible(false);
+    this.sceneryRight.setVisible(false);
+
+    this.sideBg = this.add
+      .tileSprite(0, this.playerY - 90, this.scale.width, 180, 'runner_bg')
+      .setOrigin(0, 0)
+      .setTint(this.stage.floorTint ?? 0xffffff)
+      .setDepth(1);
+
+    this.player.x = this.scale.width * 0.28;
+    this.player.setAngle(90);
+
+    this.sidescrollObstacles = [];
+    this.sidescrollCleared = 0;
+    this.sidescrollObstacleTimer = 500;
+
+    this.showEventBanner(Phaser.Utils.Array.GetRandom(SIDESCROLL_EVENT_MESSAGES));
+    this.setSidescrollButtons(true);
+  }
+
+  endSidescrollEvent() {
+    this.mode = 'vertical';
+    this.sideBg.destroy();
+    this.sideBg = null;
+    for (const entry of this.sidescrollObstacles) entry.obj.destroy();
+    this.sidescrollObstacles = [];
+
+    this.bg.setVisible(true);
+    this.sceneryLeft.setVisible(true);
+    this.sceneryRight.setVisible(true);
+
+    this.player.setAngle(0);
+    this.player.setScale(1);
+    this.player.y = this.playerY;
+    this.player.x = this.laneX[this.lane];
+
+    this.setSidescrollButtons(false);
+  }
+
+  spawnSidescrollObstacle() {
+    const isLow = Math.random() < 0.5;
+    const texture = isLow ? 'ob_box' : 'ob_overhead';
+    const y = isLow ? this.playerY + 14 : this.playerY - 30;
+    const obj = this.add.image(this.scale.width + 40, y, texture).setDepth(2);
+    this.sidescrollObstacles.push({ obj, type: isLow ? 'low' : 'high', resolved: false });
+  }
+
+  resolveSideObstacle(entry) {
+    entry.obj.destroy();
+    this.sidescrollObstacles.splice(this.sidescrollObstacles.indexOf(entry), 1);
+    this.sidescrollCleared += 1;
+
+    const now = this.time.now;
+    const dodged = entry.type === 'low' ? now < this.jumpUntil : now < this.duckUntil;
+    if (dodged) {
+      this.onObstacleDodged();
       return;
     }
 
-    const progress = Phaser.Math.Clamp(this.distance / this.stage.goalDistance, 0, 1);
+    if (this.autoSavesRemaining > 0) {
+      this.autoSavesRemaining -= 1;
+      this.onObstacleDodged();
+      this.spawnPopup(this.player.x, this.playerY - 60, '🛡 자동 회피!', '#8fd6ff');
+      sfx.playMilestone();
+      return;
+    }
+
+    this.applyHit();
+  }
+
+  updateSidescroll(delta, speed) {
+    const dx = (speed * delta) / 1000;
+    this.sideBg.tilePositionX += dx;
+
+    for (const entry of this.sidescrollObstacles) entry.obj.x -= dx;
+    this.sidescrollObstacles = this.sidescrollObstacles.filter((entry) => {
+      if (entry.obj.x < -40) {
+        entry.obj.destroy();
+        return false;
+      }
+      return true;
+    });
+
+    this.sidescrollObstacleTimer -= delta;
+    if (this.sidescrollObstacleTimer <= 0 && this.sidescrollCleared < SIDESCROLL_OBSTACLE_COUNT) {
+      this.spawnSidescrollObstacle();
+      this.sidescrollObstacleTimer = Phaser.Math.Between(...SIDESCROLL_SPAWN_RANGE_MS);
+    }
+
+    for (const entry of [...this.sidescrollObstacles]) {
+      if (!entry.resolved && entry.obj.x <= this.player.x + 12) {
+        entry.resolved = true;
+        this.resolveSideObstacle(entry);
+        if (!this.running) return;
+      }
+    }
+
+    if (this.sidescrollCleared >= SIDESCROLL_OBSTACLE_COUNT && this.sidescrollObstacles.length === 0) {
+      this.endSidescrollEvent();
+    }
+  }
+
+  spawnObstacleRow() {
+    const type = pickObstacleType(this.stage);
+
+    if (type !== 'ground') return; // only 'ground' is used in normal vertical play
+
+    const progress = this.isInfinite ? 0.5 : Phaser.Math.Clamp(this.distance / this.stage.goalDistance, 0, 1);
     const twoLaneChance = Phaser.Math.Clamp(0.28 + progress * 0.42, 0.28, 0.7);
 
     let blockedLanes;
@@ -317,7 +537,8 @@ export class RunScene extends Phaser.Scene {
 
   updateHud() {
     this.livesText.setText(`${'❤️'.repeat(Math.max(0, this.lives))}`);
-    this.distanceText.setText(`${Math.floor(this.distance)} / ${this.stage.goalDistance}m`);
+    const goal = this.isInfinite ? '∞' : `${this.stage.goalDistance}m`;
+    this.distanceText.setText(`${Math.floor(this.distance)} / ${goal}`);
     this.coffeeText.setText(`☕ ${this.sessionCoffee}`);
   }
 
@@ -351,28 +572,6 @@ export class RunScene extends Phaser.Scene {
     this.applyHit();
   }
 
-  resolveHazard(entry) {
-    entry.obj.destroy();
-    this.obstacles.splice(this.obstacles.indexOf(entry), 1);
-
-    const now = this.time.now;
-    const dodged = entry.type === 'low' ? now < this.jumpUntil : now < this.duckUntil;
-    if (dodged) {
-      this.onObstacleDodged();
-      return;
-    }
-
-    if (this.autoSavesRemaining > 0) {
-      this.autoSavesRemaining -= 1;
-      this.onObstacleDodged();
-      this.spawnPopup(this.player.x, this.playerY - 60, '🛡 자동 회피!', '#8fd6ff');
-      sfx.playMilestone();
-      return;
-    }
-
-    this.applyHit();
-  }
-
   spawnPopup(x, y, text, color = '#f5c518') {
     const t = this.add
       .text(x, y, text, { fontFamily: 'monospace', fontSize: '15px', fontStyle: 'bold', color, stroke: '#000000', strokeThickness: 3 })
@@ -399,20 +598,28 @@ export class RunScene extends Phaser.Scene {
     const coffeeEarned = Math.round(this.sessionCoffee * this.effects.coffeeMult);
     const save = loadSave();
     save.coffee += coffeeEarned;
-    const prevBest = save.bestDistance[this.stage.id] ?? 0;
-    save.bestDistance[this.stage.id] = Math.max(prevBest, Math.floor(this.distance));
 
-    const isFirstClear = cleared && !save.clearedStages.includes(this.stage.id);
-    if (isFirstClear) save.clearedStages.push(this.stage.id);
+    let isNewBest = false;
+    if (this.isInfinite) {
+      const prevBest = save.infiniteBest ?? 0;
+      isNewBest = Math.floor(this.distance) > prevBest;
+      if (isNewBest) save.infiniteBest = Math.floor(this.distance);
+    } else {
+      const prevBest = save.bestDistance[this.stage.id] ?? 0;
+      save.bestDistance[this.stage.id] = Math.max(prevBest, Math.floor(this.distance));
+      if (cleared && !save.clearedStages.includes(this.stage.id)) {
+        save.clearedStages.push(this.stage.id);
+      }
+    }
     writeSave(save);
 
-    if (cleared) sfx.playClear();
+    if (!this.isInfinite && cleared) sfx.playClear();
     else sfx.playGameOver();
 
-    this.showResult({ cleared, coffeeEarned, isFirstClear });
+    this.showResult({ cleared, coffeeEarned, isNewBest });
   }
 
-  showResult({ cleared, coffeeEarned, isFirstClear }) {
+  showResult({ cleared, coffeeEarned, isNewBest }) {
     const { width, height } = this.scale;
     const layer = this.add.container(0, 0).setDepth(200);
     this.resultLayer = layer;
@@ -421,14 +628,16 @@ export class RunScene extends Phaser.Scene {
     const panel = this.add.rectangle(width / 2, height / 2, width - 56, 380, 0x1b1b22, 0.96).setStrokeStyle(3, 0xf5c518);
     layer.add(panel);
 
-    const title = cleared ? '출근 성공! 🎉' : '중도 낙오... 😵';
+    const title = this.isInfinite ? '질주 종료! 🏃' : cleared ? '출근 성공! 🎉' : '중도 낙오... 😵';
     layer.add(
       this.add
         .text(width / 2, height / 2 - 160, title, { fontFamily: 'monospace', fontSize: '22px', fontStyle: 'bold', color: '#ffffff' })
         .setOrigin(0.5),
     );
 
-    const stats = `이동 거리: ${Math.floor(this.distance)}m / ${this.stage.goalDistance}m\n모은 커피: ${this.sessionCoffee} (+${coffeeEarned} 정산)\n부딪힌 횟수: ${this.hits} · 시도: ${this.currentAttempt}트`;
+    const stats = this.isInfinite
+      ? `이동 거리: ${Math.floor(this.distance)}m (최고 ${this.save.infiniteBest ?? 0}m)\n모은 커피: ${this.sessionCoffee} (+${coffeeEarned} 정산)\n부딪힌 횟수: ${this.hits}`
+      : `이동 거리: ${Math.floor(this.distance)}m / ${this.stage.goalDistance}m\n모은 커피: ${this.sessionCoffee} (+${coffeeEarned} 정산)\n부딪힌 횟수: ${this.hits} · 시도: ${this.currentAttempt}트`;
     layer.add(
       this.add
         .text(width / 2, height / 2 - 100, stats, { fontFamily: 'monospace', fontSize: '13px', color: '#d8d3c6', align: 'center' })
@@ -455,10 +664,10 @@ export class RunScene extends Phaser.Scene {
       if (reviewText.active) reviewText.setText(review);
     });
 
-    if (isFirstClear) {
+    if (this.isInfinite && isNewBest) {
       layer.add(
         this.add
-          .text(width / 2, height / 2 + 95, '🏆 첫 클리어! 오락실 랭킹에 등록됩니다', { fontFamily: 'monospace', fontSize: '11px', color: '#8fd6ff' })
+          .text(width / 2, height / 2 + 95, '🏆 신기록! 무한모드 랭킹에 등록됩니다', { fontFamily: 'monospace', fontSize: '11px', color: '#8fd6ff' })
           .setOrigin(0.5),
       );
       this.submitToLeaderboard();
@@ -466,7 +675,7 @@ export class RunScene extends Phaser.Scene {
 
     const retryBtn = this.add.rectangle(width / 2 - 84, height / 2 + 150, 150, 48, 0x2e86de).setStrokeStyle(2, 0xffffff);
     const retryLabel = this.add.text(width / 2 - 84, height / 2 + 150, '다시 도전', { fontFamily: 'monospace', fontSize: '14px', color: '#fff' }).setOrigin(0.5);
-    retryBtn.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.scene.restart({ stageId: this.stage.id, skipIntro: true }));
+    retryBtn.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.scene.restart({ stageId: this.isInfinite ? 'infinite' : this.stage.id, skipIntro: true }));
 
     const menuBtn = this.add.rectangle(width / 2 + 84, height / 2 + 150, 150, 48, 0x4a4a55).setStrokeStyle(2, 0xffffff);
     const menuLabel = this.add.text(width / 2 + 84, height / 2 + 150, '스테이지 선택', { fontFamily: 'monospace', fontSize: '13px', color: '#fff' }).setOrigin(0.5);
@@ -483,10 +692,10 @@ export class RunScene extends Phaser.Scene {
         body: JSON.stringify({
           stageName: this.stage.name,
           distance: Math.floor(this.distance),
-          goalDistance: this.stage.goalDistance,
+          goalDistance: this.isInfinite ? Math.floor(this.distance) : this.stage.goalDistance,
           coffee: this.sessionCoffee,
           hits: this.hits,
-          cleared,
+          cleared: this.isInfinite ? false : cleared,
         }),
       });
       if (!res.ok) throw new Error(`status ${res.status}`);
@@ -513,9 +722,8 @@ export class RunScene extends Phaser.Scene {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          stageId: this.stage.id,
+          stageId: 0,
           name,
-          attempts: this.currentAttempt,
           distance: Math.floor(this.distance),
         }),
       });
@@ -531,6 +739,28 @@ export class RunScene extends Phaser.Scene {
     const speed = Math.min(this.stage.maxSpeed, this.stage.baseSpeed + this.stage.speedRamp * this.elapsedSeconds);
     this.distance += (speed * delta) / 1000 / PIXELS_PER_METER;
 
+    if (this.mode === 'sidescroll') {
+      this.updateSidescroll(delta, speed);
+    } else {
+      this.updateVertical(delta, speed);
+    }
+
+    if (!this.running) return;
+
+    if (this.mode === 'vertical' && !this.flipActive && this.distance >= this.nextEventAt) {
+      const nearStageEnd = !this.isInfinite && this.distance > this.stage.goalDistance - 40;
+      if (nearStageEnd) {
+        this.nextEventAt = this.distance + 20;
+      } else {
+        this.triggerRandomEvent();
+      }
+    }
+
+    this.updateHud();
+    if (!this.isInfinite && this.distance >= this.stage.goalDistance) this.endRun(true);
+  }
+
+  updateVertical(delta, speed) {
     const dy = (speed * delta) / 1000;
     this.bg.tilePositionY -= dy;
     this.sceneryLeft.tilePositionY -= dy * 0.5;
@@ -547,19 +777,11 @@ export class RunScene extends Phaser.Scene {
       entry.obj.setScale(Phaser.Math.Linear(SPAWN_SCALE, 1, depthT));
     }
 
-    // Full-width hazards resolve by timing (jump/duck window), not overlap.
-    for (const entry of [...this.obstacles]) {
-      if (entry.type !== 'ground' && entry.obj.y >= this.playerY - 10) {
-        this.resolveHazard(entry);
-        if (!this.running) return;
-      }
-    }
-
     const bottomLimit = this.scale.height + 40;
     this.obstacles = this.obstacles.filter((entry) => {
       if (entry.obj.y > bottomLimit) {
         entry.obj.destroy();
-        if (entry.type === 'ground') this.onObstacleDodged();
+        this.onObstacleDodged();
         return false;
       }
       return true;
@@ -587,27 +809,19 @@ export class RunScene extends Phaser.Scene {
     const playerBounds = shrinkRect(this.player.getBounds(), 0.55);
 
     for (const entry of [...this.obstacles]) {
-      if (entry.type !== 'ground') continue;
       if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, shrinkRect(entry.obj.getBounds(), 0.7))) {
         this.hitObstacle(entry);
-        if (!this.running) break;
+        if (!this.running) return;
       }
     }
 
-    if (this.running) {
-      const coffeeBounds = this.effects.magnet
-        ? Phaser.Geom.Rectangle.Inflate(Phaser.Geom.Rectangle.Clone(this.player.getBounds()), 70, 180)
-        : playerBounds;
-      for (const entry of [...this.coffees]) {
-        if (Phaser.Geom.Intersects.RectangleToRectangle(coffeeBounds, entry.obj.getBounds())) {
-          this.collectCoffee(entry);
-        }
+    const coffeeBounds = this.effects.magnet
+      ? Phaser.Geom.Rectangle.Inflate(Phaser.Geom.Rectangle.Clone(this.player.getBounds()), 70, 180)
+      : playerBounds;
+    for (const entry of [...this.coffees]) {
+      if (Phaser.Geom.Intersects.RectangleToRectangle(coffeeBounds, entry.obj.getBounds())) {
+        this.collectCoffee(entry);
       }
-    }
-
-    if (this.running) {
-      this.updateHud();
-      if (this.distance >= this.stage.goalDistance) this.endRun(true);
     }
   }
 }

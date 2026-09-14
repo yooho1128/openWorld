@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { PLAY_WIDTH } from '../data/layout.js';
 
 const TILE_W = 480;
 const TILE_H = 80;
@@ -88,31 +87,14 @@ export class BootScene extends Phaser.Scene {
     g.generateTexture('ob_cabinet', 44, 44);
     g.clear();
 
-    // full-width obstacle: low cable reel — jump over it (orange + up-arrow)
-    const obH = 34;
-    g.fillStyle(0xe08a2b, 1);
-    g.fillRoundedRect(0, obH - 16, PLAY_WIDTH, 16, 4);
-    g.fillStyle(0xc06a10, 1);
-    for (let x = 6; x < PLAY_WIDTH - 6; x += 16) {
-      g.fillRect(x, obH - 16, 3, 16);
-    }
-    g.fillStyle(0xffffff, 1);
-    const cx = PLAY_WIDTH / 2;
-    g.fillTriangle(cx, obH - 32, cx - 10, obH - 18, cx + 10, obH - 18);
-    g.generateTexture('ob_low', PLAY_WIDTH, obH);
-    g.clear();
-
-    // full-width obstacle: hanging banner — duck under it (blue + down-arrow)
-    const obH2 = 34;
+    // sidescroll event obstacle: overhead pipe — duck under it (compact size)
     g.fillStyle(0x3f5fc4, 1);
-    g.fillRoundedRect(0, 0, PLAY_WIDTH, 16, 4);
+    g.fillRoundedRect(2, 6, 46, 18, 4);
     g.fillStyle(0x2c4494, 1);
-    for (let x = 6; x < PLAY_WIDTH - 6; x += 16) {
-      g.fillRect(x, 0, 3, 16);
-    }
+    g.fillRect(2, 6, 46, 4);
     g.fillStyle(0xffffff, 1);
-    g.fillTriangle(cx, obH2 - 2, cx - 10, obH2 - 16, cx + 10, obH2 - 16);
-    g.generateTexture('ob_high', PLAY_WIDTH, obH2);
+    g.fillTriangle(25, 28, 17, 16, 33, 16);
+    g.generateTexture('ob_overhead', 50, 34);
     g.clear();
 
     // side parallax scenery (a window-grid facade sliding past); tinted per
