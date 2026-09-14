@@ -1,8 +1,8 @@
-import { Redis } from '@upstash/redis';
+import { neon } from '@neondatabase/serverless';
 
-const redis = Redis.fromEnv();
+const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+const sql = connectionString ? neon(connectionString) : null;
 
-const MAX_STORED = 200;
 const MAX_RETURNED = 10;
 
 function clampInt(value, min, max) {
@@ -11,31 +11,38 @@ function clampInt(value, min, max) {
   return Math.min(max, Math.max(min, n));
 }
 
+async function ensureTable() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS leaderboard (
+      id SERIAL PRIMARY KEY,
+      stage_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      attempts INTEGER NOT NULL,
+      distance INTEGER NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `;
+}
+
 export default async function handler(req, res) {
+  if (!sql) {
+    return res.status(503).json({ error: 'Leaderboard database is not configured (DATABASE_URL missing)' });
+  }
+
   const rawStageId = req.method === 'GET' ? req.query.stageId : req.body?.stageId;
   const stageId = clampInt(rawStageId, 1, 999);
-  const key = `leaderboard:stage:${stageId}`;
 
   if (req.method === 'GET') {
     try {
-      const raw = await redis.lrange(key, 0, MAX_STORED - 1);
-      // The Upstash client auto-deserializes JSON-looking strings, so entries
-      // may already be objects here rather than the raw strings we stored.
-      const entries = raw
-        .map((s) => {
-          if (typeof s === 'string') {
-            try {
-              return JSON.parse(s);
-            } catch {
-              return null;
-            }
-          }
-          return s && typeof s === 'object' ? s : null;
-        })
-        .filter(Boolean)
-        .sort((a, b) => a.attempts - b.attempts || b.distance - a.distance)
-        .slice(0, MAX_RETURNED);
-      return res.json({ entries });
+      await ensureTable();
+      const rows = await sql`
+        SELECT name, attempts, distance
+        FROM leaderboard
+        WHERE stage_id = ${stageId}
+        ORDER BY attempts ASC, distance DESC
+        LIMIT ${MAX_RETURNED}
+      `;
+      return res.json({ entries: rows });
     } catch (err) {
       console.error('Leaderboard GET failed:', err);
       return res.status(502).json({ error: 'Leaderboard unavailable' });
@@ -48,16 +55,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'name is required' });
     }
 
-    const entry = {
-      name: name.trim().slice(0, 8),
-      attempts: clampInt(attempts, 1, 999999),
-      distance: clampInt(distance, 0, 999999),
-      at: Date.now(),
-    };
+    const safeName = name.trim().slice(0, 8);
+    const safeAttempts = clampInt(attempts, 1, 999999);
+    const safeDistance = clampInt(distance, 0, 999999);
 
     try {
-      await redis.lpush(key, JSON.stringify(entry));
-      await redis.ltrim(key, 0, MAX_STORED - 1);
+      await ensureTable();
+      await sql`
+        INSERT INTO leaderboard (stage_id, name, attempts, distance)
+        VALUES (${stageId}, ${safeName}, ${safeAttempts}, ${safeDistance})
+      `;
       return res.json({ ok: true });
     } catch (err) {
       console.error('Leaderboard POST failed:', err);

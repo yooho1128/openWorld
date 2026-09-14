@@ -86,17 +86,18 @@ npm run dev
 이 저장소를 Vercel 프로젝트로 그대로 import하면 됩니다 (Framework: Vite 자동 감지).
 배포 전에 Vercel 프로젝트 설정 → Environment Variables에 `ANTHROPIC_API_KEY`를 등록해주세요.
 
-### 랭킹 서버 설정 (Redis)
+### 랭킹 서버 설정 (Neon Postgres)
 
-`api/leaderboard.js`는 [`@upstash/redis`](https://www.npmjs.com/package/@upstash/redis)로 모두가
-공유하는 글로벌 랭킹을 저장합니다. Redis 연동 없이는 랭킹 조회/등록이 "랭킹 서버 준비 안됨"으로
-표시될 뿐 게임 자체는 정상 동작합니다. 랭킹을 켜려면:
+`api/leaderboard.js`는 [`@neondatabase/serverless`](https://www.npmjs.com/package/@neondatabase/serverless)로
+모두가 공유하는 글로벌 랭킹을 Postgres 테이블(`leaderboard`, 최초 요청 시 자동 생성)에 저장합니다.
+DB 연동 없이는 랭킹 조회/등록이 "랭킹 서버 준비 안됨"으로 표시될 뿐 게임 자체는 정상 동작합니다.
+랭킹을 켜려면:
 
-1. Vercel 대시보드 → 해당 프로젝트 → **Storage** 탭 → **Marketplace Database Providers**에서
-   **Upstash**의 Redis를 추가하고 프로젝트에 연결합니다.
-2. 연결하면 `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` 환경변수가 자동으로 프로젝트에
-   주입됩니다 (`Redis.fromEnv()`가 이 값을 그대로 사용합니다). 별도 코드 수정은 필요 없습니다.
-3. 재배포하면 랭킹이 활성화됩니다.
+1. Vercel 대시보드 → 해당 프로젝트 → **Storage** 탭에서 **Neon** Postgres를 추가(또는 이미 만든
+   Neon DB를 연결)합니다.
+2. 연결하면 `DATABASE_URL`(또는 `POSTGRES_URL`) 환경변수가 자동으로 프로젝트에 주입됩니다 —
+   코드가 둘 중 있는 값을 그대로 사용하므로 별도 수정은 필요 없습니다.
+3. 재배포하면 랭킹이 활성화됩니다 (테이블은 첫 조회/등록 시 자동으로 만들어집니다).
 
 ## 다음 단계 후보
 

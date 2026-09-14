@@ -89,7 +89,7 @@ export class LeaderboardScene extends Phaser.Scene {
       });
     } catch (err) {
       console.error('Leaderboard load failed:', err);
-      this.statusText.setText('랭킹 서버 준비 안됨\n(Vercel의 Redis(Upstash) 연동이 필요합니다)');
+      this.statusText.setText('랭킹 서버 준비 안됨\n(Vercel에 Neon DB(DATABASE_URL) 연동이 필요합니다)');
     }
   }
 }
