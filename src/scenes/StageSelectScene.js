@@ -54,14 +54,24 @@ export class StageSelectScene extends Phaser.Scene {
     });
 
     const shopY = startY + STAGES.length * gap + 20;
+    const usableW = width - 64;
+    const btnGap = 12;
+    const halfW = (usableW - btnGap) / 2;
+    const leftX = 32 + halfW / 2;
+    const rightX = width - 32 - halfW / 2;
+
     const shopBtn = this.add
-      .rectangle(width / 2, shopY, width - 64, 56, 0x4a7a5c)
+      .rectangle(leftX, shopY, halfW, 56, 0x4a7a5c)
       .setStrokeStyle(2, 0xffffff)
       .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this.scene.start('Shop'));
+    this.add.text(leftX, shopY, '🛒 상점', { fontFamily: 'monospace', fontSize: '17px', color: '#ffffff' }).setOrigin(0.5);
 
-    this.add
-      .text(width / 2, shopY, '🛒 상점 (장비 구매)', { fontFamily: 'monospace', fontSize: '18px', color: '#ffffff' })
-      .setOrigin(0.5);
+    const rankBtn = this.add
+      .rectangle(rightX, shopY, halfW, 56, 0x8a6a2f)
+      .setStrokeStyle(2, 0xffffff)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.scene.start('Leaderboard', { stageId: STAGES[0].id }));
+    this.add.text(rightX, shopY, '🏆 랭킹', { fontFamily: 'monospace', fontSize: '17px', color: '#ffffff' }).setOrigin(0.5);
   }
 }

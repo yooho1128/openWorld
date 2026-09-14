@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
+    "@upstash/redis": "^1.35.6",
     "phaser": "^3.80.1"
   },
   "devDependencies": {
