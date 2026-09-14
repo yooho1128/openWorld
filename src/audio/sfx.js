@@ -25,12 +25,8 @@ function beep({ freq = 440, duration = 0.12, type = 'sine', gain = 0.15, sweepTo
   osc.stop(audioCtx.currentTime + duration);
 }
 
-export function playCoffee(comboLevel = 1) {
-  beep({ freq: 660 + comboLevel * 40, duration: 0.1, type: 'square', gain: 0.12 });
-}
-
-export function playComboUp() {
-  beep({ freq: 880, sweepTo: 1320, duration: 0.15, type: 'triangle', gain: 0.15 });
+export function playCoffee() {
+  beep({ freq: 700, duration: 0.1, type: 'square', gain: 0.12 });
 }
 
 export function playCaught() {
