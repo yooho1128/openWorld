@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { NPC } from '../entities/NPC.js';
 import { initDialogueUI, openDialogue, closeDialogue, isDialogueOpen, appendMessage, setLoading } from '../ui/dialogueUI.js';
 import { initElevatorUI, openElevatorPanel, closeElevatorPanel, isElevatorOpen } from '../ui/elevatorUI.js';
+import { initResultUI, showResult, hideResult } from '../ui/resultUI.js';
+import * as sfx from '../audio/sfx.js';
 
 const FLOOR_WIDTH = 1800;
 const FLOOR_HEIGHT = 1100;
@@ -44,6 +46,20 @@ const FLOOR_THEME_MAP = { 1: 'lobby', 2: 'cafe', 15: 'lounge', 17: 'ceo', [-1]: 
 for (let b = 3; b <= 5; b++) FLOOR_THEME_MAP[-b] = 'parking';
 
 const DEFAULT_COFFEE_COUNT = 12;
+
+// Time-attack + chaser mechanics.
+const TIME_ATTACK_SECONDS = 180;
+const COMBO_WINDOW_MS = 2200;
+const COMBO_MAX_MULTIPLIER = 5;
+const COFFEE_BASE_SCORE = 10;
+const STRESS_MAX = 100;
+const STRESS_PER_CATCH = 25;
+const STRESS_RELIEF_PER_COFFEE = 4;
+const CHASER_SPEED = 150;
+const CHASER_SPAWN_DELAY = [4000, 9000];
+const CHASER_CAUGHT_INVULN_MS = 1500;
+const CHASER_MIN_SPAWN_DIST = 260;
+const HIGH_SCORE_KEY = 'openworld_highscore';
 
 function getTheme(floorIndex) {
   return THEMES[FLOOR_THEME_MAP[floorIndex] ?? 'office'];
@@ -94,6 +110,18 @@ export class GameScene extends Phaser.Scene {
     this.overlayPaused = false;
     this.npcs = [];
     this.npcHistories = new Map();
+
+    this.timeRemaining = TIME_ATTACK_SECONDS;
+    this.stress = 0;
+    this.combo = 0;
+    this.bestCombo = 0;
+    this.lastCoffeeTime = -Infinity;
+    this.chaser = null;
+    this.chaserOverlap = null;
+    this.chaserSpawnEvent = null;
+    this.roundTimerEvent = null;
+    this.roundActive = false;
+    this.invulnerableUntil = 0;
   }
 
   preload() {
@@ -135,7 +163,7 @@ export class GameScene extends Phaser.Scene {
     ];
 
     this.scoreText = this.add
-      .text(16, 16, '커피: 0', {
+      .text(16, 16, '점수: 0', {
         fontFamily: 'monospace',
         fontSize: '20px',
         color: '#ffffff',
@@ -144,6 +172,38 @@ export class GameScene extends Phaser.Scene {
       })
       .setScrollFactor(0)
       .setDepth(100);
+
+    this.stressLabel = this.add
+      .text(16, 60, '스트레스', { fontFamily: 'monospace', fontSize: '12px', color: '#f5f0e6' })
+      .setScrollFactor(0)
+      .setDepth(100);
+    this.stressBarFill = this.add.graphics().setPosition(16, 78).setScrollFactor(0).setDepth(100);
+
+    this.timerText = this.add
+      .text(this.scale.width / 2, 16, '', {
+        fontFamily: 'monospace',
+        fontSize: '20px',
+        color: '#ffffff',
+        backgroundColor: '#00000080',
+        padding: { x: 8, y: 4 },
+      })
+      .setOrigin(0.5, 0)
+      .setScrollFactor(0)
+      .setDepth(100);
+
+    this.comboText = this.add
+      .text(this.scale.width / 2, 60, '', {
+        fontFamily: 'monospace',
+        fontSize: '28px',
+        fontStyle: 'bold',
+        color: '#f5c518',
+        stroke: '#000000',
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(110)
+      .setVisible(false);
 
     this.floorText = this.add
       .text(this.scale.width - 16, 16, '', {
@@ -156,6 +216,28 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setScrollFactor(0)
       .setDepth(100);
+
+    this.sparkEmitter = this.add
+      .particles(0, 0, 'spark', {
+        speed: { min: 60, max: 160 },
+        scale: { start: 1, end: 0 },
+        alpha: { start: 1, end: 0 },
+        lifespan: 400,
+        quantity: 8,
+        emitting: false,
+      })
+      .setDepth(95);
+
+    this.dangerEmitter = this.add
+      .particles(0, 0, 'spark_red', {
+        speed: { min: 80, max: 200 },
+        scale: { start: 1.2, end: 0 },
+        alpha: { start: 1, end: 0 },
+        lifespan: 450,
+        quantity: 14,
+        emitting: false,
+      })
+      .setDepth(95);
 
     this.interactPrompt = this.add
       .text(0, 0, '', {
@@ -179,7 +261,10 @@ export class GameScene extends Phaser.Scene {
       onClose: () => this.endElevator(),
     });
 
+    initResultUI({ onRestart: () => this.restartRound() });
+
     this.buildFloor(this.currentFloor);
+    this.startRound();
   }
 
   generateTextures() {
@@ -348,6 +433,17 @@ export class GameScene extends Phaser.Scene {
     g.generateTexture('elevator', 64, 40);
     g.clear();
 
+    // particle sparks (coffee pickup / caught-by-chaser feedback)
+    g.fillStyle(0xf5c518, 1);
+    g.fillCircle(4, 4, 4);
+    g.generateTexture('spark', 8, 8);
+    g.clear();
+
+    g.fillStyle(0xe74c3c, 1);
+    g.fillCircle(5, 5, 5);
+    g.generateTexture('spark_red', 10, 10);
+    g.clear();
+
     this.generateNpcTextures(g);
     g.destroy();
   }
@@ -360,6 +456,7 @@ export class GameScene extends Phaser.Scene {
       ['npc_security', 0x35424a],
       ['npc_barista', 0x4a7a5c],
       ['npc_cafeteria_lady', 0xc97b3d],
+      ['npc_chaser', 0xaa2222],
     ];
     for (const [key, color] of bodies) {
       g.clear();
@@ -382,6 +479,12 @@ export class GameScene extends Phaser.Scene {
     this.coffees.clear(true, true);
     for (const npc of this.npcs) npc.sprite.destroy();
     this.npcs = [];
+
+    this.destroyChaser();
+    if (this.chaserSpawnEvent) {
+      this.chaserSpawnEvent.remove();
+      this.chaserSpawnEvent = null;
+    }
 
     const rand = mulberry32(floorIndex * 7919 + 12345);
     const safeRadius = 150;
@@ -409,6 +512,8 @@ export class GameScene extends Phaser.Scene {
       this.obstacles.add(npc.sprite);
       this.npcs.push(npc);
     }
+
+    if (this.roundActive) this.scheduleChaserSpawn();
   }
 
   randomFloorPoint(rand, avoidRadius) {
@@ -429,9 +534,207 @@ export class GameScene extends Phaser.Scene {
   }
 
   collectCoffee(player, coffee) {
+    if (!this.roundActive) return;
     coffee.destroy();
-    this.score += 1;
-    this.scoreText.setText(`커피: ${this.score}`);
+
+    const now = this.time.now;
+    this.combo = now - this.lastCoffeeTime <= COMBO_WINDOW_MS ? this.combo + 1 : 1;
+    this.lastCoffeeTime = now;
+    this.bestCombo = Math.max(this.bestCombo, this.combo);
+
+    const multiplier = Math.min(this.combo, COMBO_MAX_MULTIPLIER);
+    const points = COFFEE_BASE_SCORE * multiplier;
+    this.score += points;
+    this.stress = Math.max(0, this.stress - STRESS_RELIEF_PER_COFFEE);
+
+    this.scoreText.setText(`점수: ${this.score}`);
+    this.updateStressBar();
+    this.spawnScorePopup(coffee.x, coffee.y, points, multiplier);
+    this.sparkEmitter.explode(8, coffee.x, coffee.y);
+
+    if (multiplier > 1) {
+      this.comboText.setText(`콤보 x${multiplier}!`).setVisible(true).setScale(1.4);
+      this.tweens.add({ targets: this.comboText, scale: 1, duration: 180, ease: 'Back.Out' });
+      sfx.playComboUp();
+    } else {
+      this.comboText.setVisible(false);
+      sfx.playCoffee(this.combo);
+    }
+  }
+
+  spawnScorePopup(x, y, points, multiplier) {
+    const label = multiplier > 1 ? `+${points} (x${multiplier})` : `+${points}`;
+    const text = this.add
+      .text(x, y - 10, label, {
+        fontFamily: 'monospace',
+        fontSize: '16px',
+        fontStyle: 'bold',
+        color: '#fff2b8',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5)
+      .setDepth(96);
+
+    this.tweens.add({
+      targets: text,
+      y: y - 50,
+      alpha: 0,
+      duration: 700,
+      ease: 'Cubic.Out',
+      onComplete: () => text.destroy(),
+    });
+  }
+
+  startRound() {
+    this.score = 0;
+    this.combo = 0;
+    this.bestCombo = 0;
+    this.stress = 0;
+    this.timeRemaining = TIME_ATTACK_SECONDS;
+    this.lastCoffeeTime = -Infinity;
+    this.invulnerableUntil = 0;
+    this.roundActive = true;
+    this.overlayPaused = false;
+
+    this.scoreText.setText('점수: 0');
+    this.updateTimerText();
+    this.updateStressBar();
+    this.comboText.setVisible(false);
+    hideResult();
+
+    if (!this.roundTimerEvent) {
+      this.roundTimerEvent = this.time.addEvent({ delay: 1000, loop: true, callback: () => this.tickTimer() });
+    }
+    this.scheduleChaserSpawn();
+  }
+
+  restartRound() {
+    this.buildFloor(this.currentFloor);
+    this.player.setPosition(SPAWN_X, SPAWN_Y);
+    this.player.setVelocity(0, 0);
+    this.startRound();
+  }
+
+  tickTimer() {
+    if (!this.roundActive) return;
+    this.timeRemaining = Math.max(0, this.timeRemaining - 1);
+    this.updateTimerText();
+    if (this.timeRemaining <= 0) this.endRound('clear');
+  }
+
+  updateTimerText() {
+    const m = Math.floor(this.timeRemaining / 60).toString().padStart(2, '0');
+    const s = Math.floor(this.timeRemaining % 60).toString().padStart(2, '0');
+    this.timerText.setText(`⏱ ${m}:${s}`);
+    this.timerText.setColor(this.timeRemaining <= 30 ? '#ff5555' : '#ffffff');
+  }
+
+  updateStressBar() {
+    const ratio = Phaser.Math.Clamp(this.stress / STRESS_MAX, 0, 1);
+    const r = Math.round(46 + (231 - 46) * ratio);
+    const g = Math.round(204 + (76 - 204) * ratio);
+    const b = Math.round(113 + (60 - 113) * ratio);
+    const color = Phaser.Display.Color.GetColor(r, g, b);
+
+    this.stressBarFill.clear();
+    this.stressBarFill.fillStyle(0x2c2c33, 1);
+    this.stressBarFill.fillRect(0, 0, 160, 14);
+    this.stressBarFill.fillStyle(color, 1);
+    this.stressBarFill.fillRect(2, 2, Math.max(0, 156 * ratio), 10);
+  }
+
+  scheduleChaserSpawn() {
+    if (this.chaserSpawnEvent) this.chaserSpawnEvent.remove();
+    const delay = Phaser.Math.Between(CHASER_SPAWN_DELAY[0], CHASER_SPAWN_DELAY[1]);
+    this.chaserSpawnEvent = this.time.delayedCall(delay, () => this.spawnChaser());
+  }
+
+  spawnChaser() {
+    if (!this.roundActive || this.chaser) return;
+
+    let point;
+    let tries = 0;
+    do {
+      point = this.randomFloorPoint(Math.random, 80);
+      tries += 1;
+    } while (tries < 20 && Phaser.Math.Distance.Between(point.x, point.y, this.player.x, this.player.y) < CHASER_MIN_SPAWN_DIST);
+
+    const chaser = this.physics.add.sprite(point.x, point.y, 'npc_chaser');
+    chaser.body.setSize(24, 26).setOffset(4, 8);
+    this.physics.add.collider(chaser, this.obstacles);
+    this.chaserOverlap = this.physics.add.overlap(this.player, chaser, this.catchPlayer, null, this);
+    this.chaser = chaser;
+  }
+
+  destroyChaser() {
+    if (this.chaser) {
+      this.chaser.destroy();
+      this.chaser = null;
+    }
+    if (this.chaserOverlap) {
+      this.chaserOverlap.destroy();
+      this.chaserOverlap = null;
+    }
+  }
+
+  catchPlayer(player, chaserSprite) {
+    if (!this.roundActive || this.overlayPaused) return;
+    if (this.time.now < this.invulnerableUntil) return;
+
+    this.stress = Math.min(STRESS_MAX, this.stress + STRESS_PER_CATCH);
+    this.combo = 0;
+    this.comboText.setVisible(false);
+    this.updateStressBar();
+    this.invulnerableUntil = this.time.now + CHASER_CAUGHT_INVULN_MS;
+
+    sfx.playCaught();
+    this.cameras.main.shake(220, 0.012);
+    this.dangerEmitter.explode(14, chaserSprite.x, chaserSprite.y);
+    this.flashPlayer();
+
+    this.destroyChaser();
+    this.scheduleChaserSpawn();
+
+    if (this.stress >= STRESS_MAX) this.endRound('burnout');
+  }
+
+  flashPlayer() {
+    this.player.setTintFill(0xff4444);
+    this.time.delayedCall(160, () => {
+      if (this.player.active) this.player.clearTint();
+    });
+  }
+
+  endRound(reason) {
+    this.roundActive = false;
+    this.overlayPaused = true;
+    this.player.setVelocity(0, 0);
+
+    this.destroyChaser();
+    if (this.chaserSpawnEvent) {
+      this.chaserSpawnEvent.remove();
+      this.chaserSpawnEvent = null;
+    }
+
+    const prevHigh = Number(localStorage.getItem(HIGH_SCORE_KEY) ?? 0);
+    const isNewHighScore = this.score > prevHigh;
+    if (isNewHighScore) localStorage.setItem(HIGH_SCORE_KEY, String(this.score));
+    const highScore = isNewHighScore ? this.score : prevHigh;
+
+    if (reason === 'clear') {
+      sfx.playClear();
+    } else {
+      sfx.playGameOver();
+    }
+
+    showResult({
+      title: reason === 'clear' ? '출근 성공! 🎉' : '번아웃으로 조퇴... 😵',
+      score: this.score,
+      bestCombo: this.bestCombo,
+      highScore,
+      isNewHighScore,
+    });
   }
 
   findNearestNpc() {
@@ -452,7 +755,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   handleInteractKey() {
-    if (isDialogueOpen() || isElevatorOpen()) return;
+    if (!this.roundActive || isDialogueOpen() || isElevatorOpen()) return;
 
     const npc = this.findNearestNpc();
     const nearElevator = this.distanceToElevator() < ELEVATOR_INTERACT_RADIUS;
@@ -524,7 +827,18 @@ export class GameScene extends Phaser.Scene {
   update() {
     if (this.overlayPaused) {
       this.player.setVelocity(0, 0);
+      if (this.chaser) this.chaser.setVelocity(0, 0);
       return;
+    }
+
+    if (this.combo > 0 && this.time.now - this.lastCoffeeTime > COMBO_WINDOW_MS) {
+      this.combo = 0;
+      this.comboText.setVisible(false);
+    }
+
+    if (this.chaser && this.roundActive) {
+      this.physics.moveToObject(this.chaser, this.player, CHASER_SPEED);
+      this.chaser.setFlipX(this.chaser.body.velocity.x < 0);
     }
 
     const npc = this.findNearestNpc();
