@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getLocation } from '../data/locations.js';
+import { activeHomeTasks, rollRandomFlavor } from '../data/homeLife.js';
 import {
   visitLocation,
   advanceAge,
@@ -7,16 +8,29 @@ import {
   applyInjury,
   applyStatDeltas,
   getJobInfo,
+  getLifeStage,
 } from '../state/character.js';
 import { rollLifeOutcome } from '../data/mortality.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 
 const INTERACT_DISTANCE = 50;
 
+const OBJECT_LAYOUT = [
+  { id: 'bed', name: '침대', x: 80, y: 180, tint: 0xdd6688 },
+  { id: 'desk', name: '책상', x: 240, y: 180, tint: 0x6a8a5a },
+  { id: 'sink', name: '세면대', x: 400, y: 180, tint: 0x66aadd },
+  { id: 'table', name: '식탁', x: 80, y: 340, tint: 0x9a6a3d },
+  { id: 'parent', name: null, x: 240, y: 340, tint: 0xffd27a, texture: 'player' },
+  { id: 'trash', name: '쓰레기통', x: 400, y: 340, tint: 0x777777 },
+];
+
 // Home is the one location you actually walk around in instead of just
-// chatting through a modal: there's a bed, a table, a sink, your parents,
-// and a door back out to town. Skip the sink before leaving and you get
-// scolded on the way out.
+// chatting through a modal. Which chores are active (and which are required
+// vs. just a bonus) shifts with age (see src/data/homeLife.js) — a kid has
+// homework and room-tidying, an adult just has to check in with their
+// parents — plus a random age-appropriate flavor moment on the way out, so
+// home life actually changes shape as the character grows up instead of
+// replaying the same two outcomes forever.
 export class HomeScene extends Phaser.Scene {
   constructor() {
     super('Home');
@@ -30,21 +44,18 @@ export class HomeScene extends Phaser.Scene {
       return;
     }
 
-    this.handwashed = false;
+    this.tasks = activeHomeTasks(this.character.age);
+    this.taskByObject = new Map(this.tasks.map((t) => [t.object, t]));
+    this.taskDone = {};
     this.chatLog = [];
 
     this.add.tileSprite(0, 0, 480, 800, 'floor').setOrigin(0, 0);
 
-    this.objects = [
-      { id: 'bed', name: '침대', x: 90, y: 230, tint: 0xdd6688, texture: 'prop' },
-      { id: 'table', name: '식탁', x: 240, y: 230, tint: 0x9a6a3d, texture: 'prop' },
-      { id: 'sink', name: '세면대', x: 390, y: 230, tint: 0x66aadd, texture: 'prop' },
-      { id: 'parent', name: this.location.npcName, x: 240, y: 460, tint: 0xffd27a, texture: 'player' },
-      { id: 'door', name: '문 (나가기)', x: 240, y: 760, tint: 0x66dd66, texture: 'prop' },
-    ];
+    this.objects = OBJECT_LAYOUT.map((o) => ({ ...o, name: o.id === 'parent' ? this.location.npcName : o.name }));
+    this.objects.push({ id: 'door', name: '문 (나가기)', x: 240, y: 760, tint: 0x66dd66 });
 
     for (const obj of this.objects) {
-      this.add.sprite(obj.x, obj.y, obj.texture).setTint(obj.tint);
+      this.add.sprite(obj.x, obj.y, obj.texture ?? 'prop').setTint(obj.tint);
       this.add.text(obj.x, obj.y + 30, obj.name, { fontSize: '11px', color: '#ffffff' }).setOrigin(0.5);
     }
 
@@ -59,7 +70,7 @@ export class HomeScene extends Phaser.Scene {
     }).setOrigin(0.5).setVisible(false);
 
     this.hud = this.add.text(8, 4, '', {
-      fontSize: '12px',
+      fontSize: '11px',
       color: '#ffffff',
       backgroundColor: '#000000aa',
       padding: { x: 6, y: 4 },
@@ -71,8 +82,13 @@ export class HomeScene extends Phaser.Scene {
   }
 
   refreshHud() {
-    const status = this.handwashed ? '🧼 손을 씻었다' : '🧼 손을 아직 안 씻었다';
-    this.hud.setText(`${this.character.name}의 집\n${status}`);
+    // Plain bracket markers instead of emoji glyphs: Phaser draws HUD text on
+    // a canvas, and headless/some browsers lack a color-emoji font, which
+    // makes emoji glyphs render as invisible/tofu there.
+    const todo = this.tasks
+      .map((t) => `[${this.taskDone[t.id] ? '완료' : t.required ? '필수' : '선택'}] ${t.label}`)
+      .join('  ');
+    this.hud.setText(`${this.character.name}의 집\n${todo}`);
   }
 
   update(_, delta) {
@@ -107,21 +123,21 @@ export class HomeScene extends Phaser.Scene {
   }
 
   interact(obj) {
-    if (obj.id === 'sink') return this.useSink();
-    if (obj.id === 'parent') return this.openChat();
     if (obj.id === 'door') return this.leave();
-    this.toast(`${obj.name}...`);
-  }
 
-  useSink() {
-    if (this.handwashed) {
-      this.toast('이미 손을 씻었다.');
-      return;
+    const task = this.taskByObject.get(obj.id);
+    if (task && !this.taskDone[task.id]) {
+      this.taskDone[task.id] = true;
+      applyStatDeltas(this.character, task.doneDelta ?? {});
+      this.refreshHud();
+      this.toast(task.doneMessage);
+    } else if (task) {
+      this.toast('이미 했다.');
+    } else {
+      this.toast(`${obj.name}...`);
     }
-    this.handwashed = true;
-    applyStatDeltas(this.character, { happiness: 2 });
-    this.refreshHud();
-    this.toast('손을 깨끗이 씻었다! 상쾌하다.');
+
+    if (obj.id === 'parent') this.openChat();
   }
 
   toast(message) {
@@ -130,8 +146,10 @@ export class HomeScene extends Phaser.Scene {
       color: '#ffffff',
       backgroundColor: '#000000cc',
       padding: { x: 8, y: 5 },
+      wordWrap: { width: 420 },
+      align: 'center',
     }).setOrigin(0.5);
-    this.time.delayedCall(1600, () => text.destroy());
+    this.time.delayedCall(1800, () => text.destroy());
   }
 
   openChat() {
@@ -203,11 +221,20 @@ export class HomeScene extends Phaser.Scene {
     }
     advanceAge(this.character);
 
-    this.scoldMessage = null;
-    if (!this.handwashed) {
-      applyStatDeltas(this.character, { happiness: -5 });
-      this.character.history.push(`${this.character.age}세 - 손을 안 씻고 나가다가 엄마한테 혼났다.`);
-      this.scoldMessage = '엄마: "손도 안 씻고 그냥 가니?!"';
+    this.visitLog = [];
+    for (const task of this.tasks) {
+      if (task.required && !this.taskDone[task.id]) {
+        applyStatDeltas(this.character, task.missDelta ?? {});
+        this.character.history.push(`${this.character.age}세 - ${task.missMessage}`);
+        this.visitLog.push({ type: 'scold', text: task.missMessage });
+      }
+    }
+
+    const flavor = rollRandomFlavor(getLifeStage(this.character.age));
+    if (flavor) {
+      applyStatDeltas(this.character, flavor.delta);
+      this.character.history.push(`${this.character.age}세 - ${flavor.text}`);
+      this.visitLog.push({ type: flavor.type, text: flavor.text });
     }
 
     const outcome = rollLifeOutcome({
@@ -236,7 +263,9 @@ export class HomeScene extends Phaser.Scene {
   }
 
   renderLeaveSummary() {
-    const scoldHtml = this.scoldMessage ? `<p class="error">${this.scoldMessage}</p>` : '';
+    const logHtml = this.visitLog
+      .map((entry) => `<p class="${entry.type === 'scold' ? 'error' : ''}">${entry.type === 'praise' ? '😊' : '😠'} ${entry.text}</p>`)
+      .join('');
     const injuryHtml = this.injuryMessage ? `<p class="error">⚠ ${this.injuryMessage}</p>` : '';
 
     const eventHtml = this.eventScenario
@@ -249,7 +278,8 @@ export class HomeScene extends Phaser.Scene {
 
     openPanel(`
       <div class="panel">
-        ${scoldHtml}
+        <h2>오늘 하루</h2>
+        ${logHtml || '<p>조용한 하루였다.</p>'}
         ${injuryHtml}
         ${eventHtml}
       </div>
