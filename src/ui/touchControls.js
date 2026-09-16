@@ -6,29 +6,38 @@ export function createTouchControls(scene) {
   const state = { up: false, down: false, left: false, right: false, interactJustPressed: false };
 
   const makeButton = (x, y, label, onDown, onUp) => {
-    const circle = scene.add.circle(x, y, 26, 0x000000, 0.35).setScrollFactor(0).setDepth(1000);
-    circle.setStrokeStyle(2, 0xffffff, 0.6);
-    scene.add.text(x, y, label, { fontSize: '16px', color: '#ffffff' })
+    const circle = scene.add.circle(x, y, 32, 0x000000, 0.4).setScrollFactor(0).setDepth(1000);
+    circle.setStrokeStyle(2, 0xffffff, 0.7);
+    scene.add.text(x, y, label, { fontSize: '18px', color: '#ffffff' })
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(1001);
     circle.setInteractive({ useHandCursor: true });
-    circle.on('pointerdown', onDown);
-    circle.on('pointerup', onUp);
-    circle.on('pointerout', onUp);
+    // Visible press feedback — without it a touch press feels unresponsive,
+    // since there's no native :active state on a canvas-drawn button.
+    circle.on('pointerdown', () => {
+      circle.setFillStyle(0xffffff, 0.35);
+      onDown();
+    });
+    const release = () => {
+      circle.setFillStyle(0x000000, 0.4);
+      onUp();
+    };
+    circle.on('pointerup', release);
+    circle.on('pointerout', release);
     return circle;
   };
 
-  const padX = 60;
-  const padY = 700;
-  const gap = 44;
+  const padX = 64;
+  const padY = 690;
+  const gap = 54;
 
   makeButton(padX, padY - gap, '▲', () => { state.up = true; }, () => { state.up = false; });
   makeButton(padX, padY + gap, '▼', () => { state.down = true; }, () => { state.down = false; });
   makeButton(padX - gap, padY, '◀', () => { state.left = true; }, () => { state.left = false; });
   makeButton(padX + gap, padY, '▶', () => { state.right = true; }, () => { state.right = false; });
 
-  makeButton(420, 700, 'E', () => { state.interactJustPressed = true; }, () => {});
+  makeButton(416, 690, 'E', () => { state.interactJustPressed = true; }, () => {});
 
   return {
     state,
