@@ -92,6 +92,6 @@ export class CreateScene extends Phaser.Scene {
     }).catch(() => {});
 
     closePanel();
-    this.scene.start('Town');
+    this.scene.start('Birth');
   }
 }

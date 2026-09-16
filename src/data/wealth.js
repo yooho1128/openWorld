@@ -1,12 +1,15 @@
-// Parents' wealth, rolled once at character creation. Middle class is by far
-// the most likely outcome; both extremes are rare — poor a bit more common
-// than filthy rich, matching how real income distributions skew.
+// Parents' wealth, rolled once at character creation. Middle-of-the-road
+// tiers are by far the most likely outcome; both extremes are rare — poor
+// a bit more common than filthy rich, matching how real income distributions
+// skew. `housing` is the home the character is born into (shown in the birth
+// intro and on the town map's home building) and doubles as a quick visual
+// cue for the wealth tier during play.
 export const WEALTH_TIERS = [
-  { id: 'poor', label: '빈민층', weight: 8, startMoney: 200000 },
-  { id: 'workingClass', label: '서민층', weight: 27, startMoney: 800000 },
-  { id: 'middle', label: '중산층', weight: 45, startMoney: 2000000 },
-  { id: 'upperMiddle', label: '부유층', weight: 16, startMoney: 8000000 },
-  { id: 'conglomerate', label: '재벌급', weight: 4, startMoney: 50000000 },
+  { id: 'poor', label: '빈민', housing: '원룸', weight: 8, startMoney: 200000 },
+  { id: 'workingClass', label: '중하', housing: '빌라', weight: 27, startMoney: 800000 },
+  { id: 'middle', label: '중상', housing: '아파트', weight: 45, startMoney: 2000000 },
+  { id: 'upperMiddle', label: '상', housing: '고급 아파트', weight: 16, startMoney: 8000000 },
+  { id: 'conglomerate', label: '재벌', housing: '대저택', weight: 4, startMoney: 50000000 },
 ];
 
 export function rollWealthTier() {

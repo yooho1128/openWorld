@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { availableLocations } from '../data/locations.js';
 import { getLifeStage } from '../state/character.js';
+import { getWealthTier } from '../data/wealth.js';
 
 const GRID_COLS = 3;
 const GRID_START_X = 90;
@@ -82,7 +83,8 @@ export class TownScene extends Phaser.Scene {
 
       const sprite = this.add.sprite(x, y, 'building').setScale(0.7);
       sprite.setTint(locked ? 0x555555 : entry.data.color);
-      this.add.text(x, y + 38, `${entry.data.emoji} ${entry.data.name}`, {
+      const housingSuffix = entry.data.id === 'home' ? ` (${getWealthTier(this.character.wealthTier).housing})` : '';
+      this.add.text(x, y + 38, `${entry.data.emoji} ${entry.data.name}${housingSuffix}`, {
         fontSize: '11px',
         color: locked ? '#888888' : '#ffffff',
         align: 'center',
@@ -137,6 +139,10 @@ export class TownScene extends Phaser.Scene {
   enter(entry) {
     if (entry.kind === 'lottery') {
       this.scene.start('Lottery');
+      return;
+    }
+    if (entry.data.id === 'home') {
+      this.scene.start('Home');
       return;
     }
     this.scene.start('Location', { locationId: entry.data.id });

@@ -41,6 +41,23 @@ export class BootScene extends Phaser.Scene {
     markerGfx.generateTexture('marker', 12, 12);
     markerGfx.destroy();
 
+    const floorGfx = this.make.graphics({ x: 0, y: 0, add: false });
+    floorGfx.fillStyle(0xc9a66b, 1);
+    floorGfx.fillRect(0, 0, 64, 64);
+    floorGfx.lineStyle(1, 0xa9865a, 1);
+    floorGfx.strokeRect(0, 0, 64, 64);
+    floorGfx.generateTexture('floor', 64, 64);
+    floorGfx.destroy();
+
+    // Plain tintable rounded rect for indoor furniture/props.
+    const propGfx = this.make.graphics({ x: 0, y: 0, add: false });
+    propGfx.fillStyle(0xffffff, 1);
+    propGfx.fillRoundedRect(0, 0, 48, 48, 8);
+    propGfx.lineStyle(2, 0x1b1b22, 1);
+    propGfx.strokeRoundedRect(0, 0, 48, 48, 8);
+    propGfx.generateTexture('prop', 48, 48);
+    propGfx.destroy();
+
     this.scene.start('Login');
   }
 }
