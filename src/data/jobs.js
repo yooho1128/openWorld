@@ -1,6 +1,7 @@
-// 장래희망: chosen at creation. Drives which stat the player is nudged to
-// grow, which adult-only locations unlock once the character turns 19, and
-// how risky that life path is (dangerLevel + riskTags feed src/data/mortality.js).
+// 장래희망: chosen at the end of school (see CareerScene), not at birth —
+// the character spends their school years as a stat-less kid first. Drives
+// which adult-only locations unlock once a path is picked, and how risky
+// that life path is (dangerLevel + riskTags feed src/data/mortality.js).
 // Deliberately mixes wholesome dream jobs with grittier, "잘 안 풀린 인생" style
 // paths so the select box reflects a realistic range of outcomes, not just
 // success stories.
@@ -21,5 +22,6 @@ export const JOBS = [
 ];
 
 export function getJob(id) {
-  return JOBS.find((j) => j.id === id) ?? JOBS[0];
+  if (!id) return null;
+  return JOBS.find((j) => j.id === id) ?? null;
 }

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene.js';
 import { LoginScene } from './scenes/LoginScene.js';
 import { CreateScene } from './scenes/CreateScene.js';
+import { CareerScene } from './scenes/CareerScene.js';
 import { TownScene } from './scenes/TownScene.js';
 import { LocationScene } from './scenes/LocationScene.js';
 import { LotteryScene } from './scenes/LotteryScene.js';
@@ -20,7 +21,7 @@ const config = {
   input: {
     activePointers: 1,
   },
-  scene: [BootScene, LoginScene, CreateScene, TownScene, LocationScene, LotteryScene, EndingScene],
+  scene: [BootScene, LoginScene, CreateScene, CareerScene, TownScene, LocationScene, LotteryScene, EndingScene],
 };
 
 new Phaser.Game(config);

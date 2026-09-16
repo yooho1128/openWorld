@@ -11,14 +11,16 @@ export function getLifeStage(age) {
 
 // wealthOverrideId is the hidden easter-egg hook (see CreateScene's Konami
 // listener) — normal play always leaves it undefined and gets the weighted roll.
-export function createCharacter({ nickname, name, gender, job, wealthOverrideId }) {
+// job/dream start out null: the character picks a path at the end of school
+// (see CareerScene), not at birth.
+export function createCharacter({ nickname, name, gender, wealthOverrideId }) {
   const tier = wealthOverrideId ? getWealthTier(wealthOverrideId) : rollWealthTier();
   return {
     nickname,
     name,
     gender,
-    job,
-    dream: job,
+    job: null,
+    dream: null,
     wealthTier: tier.id,
     money: tier.startMoney,
     age: 0,
@@ -70,5 +72,11 @@ export function advanceAge(character) {
 }
 
 export function getJobInfo(character) {
-  return getJob(character.job);
+  return character.job ? getJob(character.job) : null;
+}
+
+export function chooseJob(character, jobId) {
+  character.job = jobId;
+  character.dream = jobId;
+  character.history.push(`${character.age}세 - 진로를 "${getJob(jobId)?.label ?? jobId}"(으)로 정했다.`);
 }
