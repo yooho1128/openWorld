@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
-import { JOBS } from '../data/jobs.js';
 import { WEALTH_TIERS } from '../data/wealth.js';
 import { createCharacter } from '../state/character.js';
 
@@ -22,8 +21,6 @@ export class CreateScene extends Phaser.Scene {
   create() {
     this.add.text(240, 120, '새 캐릭터 만들기', { fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
 
-    const jobOptions = JOBS.map((j) => `<option value="${j.id}">${j.emoji} ${j.label}</option>`).join('');
-
     openPanel(`
       <div class="panel">
         <h2>캐릭터 정보</h2>
@@ -35,9 +32,7 @@ export class CreateScene extends Phaser.Scene {
           <option value="male">남성</option>
           <option value="female">여성</option>
         </select>
-
-        <label for="char-job">장래희망 / 직업</label>
-        <select id="char-job">${jobOptions}</select>
+        <p style="font-size:12px;color:#999;">직업은 학창시절을 보내며 나중에 정하게 됩니다.</p>
 
         <div id="wealth-override-field" style="display:none;">
           <label for="wealth-override">부모님 재산 (직접 지정)</label>
@@ -78,7 +73,6 @@ export class CreateScene extends Phaser.Scene {
   async handleSubmit() {
     const name = qs('char-name').value.trim();
     const gender = qs('char-gender').value;
-    const job = qs('char-job').value;
     const wealthOverrideId = qs('wealth-override')?.value || undefined;
     const errorEl = qs('create-error');
 
@@ -87,7 +81,7 @@ export class CreateScene extends Phaser.Scene {
       return;
     }
 
-    const character = createCharacter({ nickname: this.nickname, name, gender, job, wealthOverrideId });
+    const character = createCharacter({ nickname: this.nickname, name, gender, wealthOverrideId });
     this.registry.set('nickname', this.nickname);
     this.registry.set('character', character);
 

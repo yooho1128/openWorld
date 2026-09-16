@@ -84,7 +84,7 @@ export class LocationScene extends Phaser.Scene {
   characterSummary() {
     const c = this.character;
     const job = getJobInfo(c);
-    return `이름 ${c.name}, ${c.age}세, 직업 ${job.label}, 체력 ${c.stats.stamina} 지능 ${c.stats.intelligence} 매력 ${c.stats.charm} 행복 ${c.stats.happiness}`;
+    return `이름 ${c.name}, ${c.age}세, 직업 ${job?.label ?? '학생'}, 체력 ${c.stats.stamina} 지능 ${c.stats.intelligence} 매력 ${c.stats.charm} 행복 ${c.stats.happiness}`;
   }
 
   renderPanel() {

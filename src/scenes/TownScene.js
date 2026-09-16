@@ -33,6 +33,13 @@ export class TownScene extends Phaser.Scene {
       this.character.history.push('7세 - 유아기를 지나 어린이가 되었다.');
     }
 
+    // School years are spent stat-building; the job/path choice happens once,
+    // right at the doorstep of adulthood, informed by whatever stats grew.
+    if (this.character.age >= 19 && !this.character.job) {
+      this.scene.start('Career');
+      return;
+    }
+
     this.add.tileSprite(0, 0, 480, 800, 'ground').setOrigin(0, 0);
 
     this.buildings = this.buildBuildings();
