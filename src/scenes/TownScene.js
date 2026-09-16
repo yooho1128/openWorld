@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { availableLocations } from '../data/locations.js';
 import { getInterior } from '../data/interiors.js';
-import { getLifeStage, getJobInfo } from '../state/character.js';
+import { getLifeStage, getJobInfo, computeLifeScore, updateQuest } from '../state/character.js';
 import { getWealthTier } from '../data/wealth.js';
 import { STATS } from '../data/stats.js';
 import { createTouchControls } from '../ui/touchControls.js';
@@ -66,13 +66,30 @@ export class TownScene extends Phaser.Scene {
       backgroundColor: '#000000aa',
       padding: { x: 6, y: 4 },
     });
+
+    const completedQuest = updateQuest(this.character);
     this.refreshHud();
+    if (completedQuest) {
+      this.toast(`목표 달성! ${STATS[completedQuest.statKey]?.label ?? completedQuest.statKey} ${completedQuest.target} 도달 — 보너스 획득!`);
+    }
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D,E,SPACE');
     this.touch = createTouchControls(this);
 
     this.persist();
+  }
+
+  toast(message) {
+    const text = this.add.text(240, 100, message, {
+      fontSize: '13px',
+      color: '#ffffff',
+      backgroundColor: '#000000cc',
+      padding: { x: 8, y: 5 },
+      wordWrap: { width: 420 },
+      align: 'center',
+    }).setOrigin(0.5);
+    this.time.delayedCall(2200, () => text.destroy());
   }
 
   buildBuildings() {
@@ -104,17 +121,22 @@ export class TownScene extends Phaser.Scene {
     const c = this.character;
     const stage = STAGE_LABEL[getLifeStage(c.age)];
     const statLine = Object.entries(c.stats).map(([k, v]) => `${k[0].toUpperCase()}${v}`).join(' ');
-    const lifeScore = Object.values(c.stats).reduce((sum, v) => sum + v, 0) + Math.floor(c.money / 10000);
+    const lifeScore = computeLifeScore(c);
 
     const job = getJobInfo(c);
     const goalLine = job
       ? `꿈: ${job.label} — ${STATS[job.primaryStat]?.label ?? job.primaryStat} ${Math.min(c.stats[job.primaryStat] ?? 0, DREAM_TARGET)}/${DREAM_TARGET}`
       : '꿈: 아직 못 정했다 (성인이 되면 정하게 된다)';
 
+    const q = c.quest;
+    const questLine = q
+      ? `목표: ${STATS[q.statKey]?.label ?? q.statKey} ${Math.min(c.stats[q.statKey] ?? 0, q.target)}/${q.target} (보너스 있음)`
+      : '';
+
     this.hud.setText(
       `${c.name} (${c.gender === 'male' ? '남' : '여'}) | ${c.age}세 · ${stage} | 인생점수 ${lifeScore}\n` +
       `${c.money.toLocaleString()}원 | ${statLine}\n` +
-      goalLine
+      `${goalLine}\n${questLine}`
     );
   }
 

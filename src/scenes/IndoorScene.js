@@ -137,6 +137,10 @@ export class IndoorScene extends Phaser.Scene {
 
     const task = this.taskByObject.get(obj.id);
     if (task && !this.taskDone[task.id]) {
+      if (task.choices) {
+        this.renderChoicePanel(task);
+        return;
+      }
       this.taskDone[task.id] = true;
       applyStatDeltas(this.character, task.doneDelta ?? {});
       this.refreshHud();
@@ -148,6 +152,29 @@ export class IndoorScene extends Phaser.Scene {
     }
 
     if (obj.isNpc) this.openChat();
+  }
+
+  // A couple of the recurring required tasks (attend class, handle work)
+  // give the player an actual pick instead of an automatic pass — a small
+  // amount of agency in an otherwise walk-up-and-press-E interaction.
+  renderChoicePanel(task) {
+    const buttonsHtml = task.choices.map((_, i) => `<button id="choice-${i}">${task.choices[i].label}</button>`).join('');
+    openPanel(`
+      <div class="panel">
+        <h2>${task.label}</h2>
+        <p>어떻게 할까?</p>
+        ${buttonsHtml}
+      </div>
+    `);
+    task.choices.forEach((choice, i) => {
+      qs(`choice-${i}`).addEventListener('click', () => {
+        this.taskDone[task.id] = true;
+        applyStatDeltas(this.character, choice.delta ?? {});
+        this.refreshHud();
+        closePanel();
+        this.toast(choice.message);
+      });
+    });
   }
 
   toast(message) {

@@ -14,6 +14,10 @@ export class LoginScene extends Phaser.Scene {
       align: 'center',
     }).setOrigin(0.5);
 
+    this.renderLoginForm();
+  }
+
+  renderLoginForm() {
     openPanel(`
       <div class="panel">
         <h2>닉네임 입력</h2>
@@ -21,15 +25,48 @@ export class LoginScene extends Phaser.Scene {
         <input id="nickname" type="text" maxlength="20" placeholder="예: 홍길동" autocomplete="off" />
         <div class="error" id="login-error"></div>
         <button id="login-submit">이어하기 / 새로 시작</button>
+        <button id="login-leaderboard" class="secondary">명예의 전당 보기</button>
       </div>
     `);
 
     const submit = () => this.handleSubmit();
     qs('login-submit').addEventListener('click', submit);
+    qs('login-leaderboard').addEventListener('click', () => this.showLeaderboard());
     qs('nickname').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') submit();
     });
     qs('nickname').focus();
+  }
+
+  async showLeaderboard() {
+    openPanel(`
+      <div class="panel">
+        <h2>명예의 전당</h2>
+        <p><em>불러오는 중...</em></p>
+      </div>
+    `);
+
+    let rowsHtml = '<p>기록을 불러올 수 없다.</p>';
+    try {
+      const res = await fetch('/api/leaderboard');
+      const { entries } = await res.json();
+      rowsHtml = entries.length
+        ? entries
+          .map((e, i) => `<div>${i + 1}. ${e.name} — ${e.score}점 (${e.age}세, ${e.job ?? '무직'}, ${e.deathCause ?? '?'})</div>`)
+          .join('')
+        : '<p>아직 아무도 기록을 남기지 않았다. 첫 번째 기록의 주인공이 되어보자!</p>';
+    } catch {
+      // keep default error text
+    }
+
+    openPanel(`
+      <div class="panel">
+        <h2>명예의 전당</h2>
+        ${rowsHtml}
+        <button id="leaderboard-back">돌아가기</button>
+      </div>
+    `);
+    qs('leaderboard-back').addEventListener('click', () => this.renderLoginForm());
   }
 
   async handleSubmit() {
