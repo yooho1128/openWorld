@@ -3,6 +3,7 @@ import { availableLocations } from '../data/locations.js';
 import { getInterior } from '../data/interiors.js';
 import { getLifeStage } from '../state/character.js';
 import { getWealthTier } from '../data/wealth.js';
+import { createTouchControls } from '../ui/touchControls.js';
 
 const GRID_COLS = 3;
 const GRID_START_X = 90;
@@ -66,6 +67,7 @@ export class TownScene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D,E,SPACE');
+    this.touch = createTouchControls(this);
 
     this.persist();
   }
@@ -110,10 +112,10 @@ export class TownScene extends Phaser.Scene {
     const speed = 160 * (delta / 1000);
     let dx = 0;
     let dy = 0;
-    if (this.cursors.left.isDown || this.wasd.A.isDown) dx -= speed;
-    if (this.cursors.right.isDown || this.wasd.D.isDown) dx += speed;
-    if (this.cursors.up.isDown || this.wasd.W.isDown) dy -= speed;
-    if (this.cursors.down.isDown || this.wasd.S.isDown) dy += speed;
+    if (this.cursors.left.isDown || this.wasd.A.isDown || this.touch.state.left) dx -= speed;
+    if (this.cursors.right.isDown || this.wasd.D.isDown || this.touch.state.right) dx += speed;
+    if (this.cursors.up.isDown || this.wasd.W.isDown || this.touch.state.up) dy -= speed;
+    if (this.cursors.down.isDown || this.wasd.S.isDown || this.touch.state.down) dy += speed;
 
     this.playerPos.x = Phaser.Math.Clamp(this.playerPos.x + dx, 16, 464);
     this.playerPos.y = Phaser.Math.Clamp(this.playerPos.y + dy, 90, 780);
@@ -131,7 +133,9 @@ export class TownScene extends Phaser.Scene {
       this.promptText.setVisible(false);
     }
 
-    const interactPressed = Phaser.Input.Keyboard.JustDown(this.wasd.E) || Phaser.Input.Keyboard.JustDown(this.wasd.SPACE);
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.wasd.E)
+      || Phaser.Input.Keyboard.JustDown(this.wasd.SPACE)
+      || this.touch.consumeInteract();
     if (near && !near.locked && interactPressed) {
       this.enter(near);
     }

@@ -21,7 +21,8 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   input: {
-    activePointers: 1,
+    // 2 so a thumb can hold a d-pad direction while the other taps interact.
+    activePointers: 2,
   },
   scene: [BootScene, LoginScene, CreateScene, BirthScene, CareerScene, TownScene, IndoorScene, LocationScene, LotteryScene, EndingScene],
 };
