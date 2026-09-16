@@ -1,9 +1,11 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene.js';
-import { StageSelectScene } from './scenes/StageSelectScene.js';
-import { ShopScene } from './scenes/ShopScene.js';
-import { RunScene } from './scenes/RunScene.js';
-import { LeaderboardScene } from './scenes/LeaderboardScene.js';
+import { LoginScene } from './scenes/LoginScene.js';
+import { CreateScene } from './scenes/CreateScene.js';
+import { TownScene } from './scenes/TownScene.js';
+import { LocationScene } from './scenes/LocationScene.js';
+import { LotteryScene } from './scenes/LotteryScene.js';
+import { EndingScene } from './scenes/EndingScene.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -18,7 +20,7 @@ const config = {
   input: {
     activePointers: 1,
   },
-  scene: [BootScene, StageSelectScene, ShopScene, RunScene, LeaderboardScene],
+  scene: [BootScene, LoginScene, CreateScene, TownScene, LocationScene, LotteryScene, EndingScene],
 };
 
 new Phaser.Game(config);
