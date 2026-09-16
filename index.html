@@ -3,17 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>인생네컷: 오픈월드</title>
+    <title>에버글렌 연대기</title>
     <style>
       html, body {
         margin: 0;
         padding: 0;
-        background: #101014;
+        background: radial-gradient(circle at 50% 30%, #263a32 0%, #0b100e 72%);
         overflow: hidden;
         height: 100%;
         overscroll-behavior: none;
         touch-action: none;
-        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+        font-family: Georgia, 'Malgun Gothic', 'Apple SD Gothic Neo', serif;
       }
       #stage {
         position: relative;
@@ -25,6 +25,7 @@
       }
       #app {
         line-height: 0;
+        box-shadow: 0 0 0 2px #7d6038, 0 0 40px #000;
       }
       #overlay {
         display: none;
@@ -32,41 +33,68 @@
         inset: 0;
         align-items: center;
         justify-content: center;
-        background: rgba(10, 10, 14, 0.72);
+        background: radial-gradient(circle, rgba(23, 18, 13, 0.68), rgba(5, 7, 6, 0.91));
         z-index: 10;
         padding: 16px;
         box-sizing: border-box;
       }
       #overlay .panel {
-        background: #1d1d24;
-        border: 1px solid #3a3a46;
-        border-radius: 12px;
-        padding: 20px;
+        position: relative;
+        background:
+          linear-gradient(rgba(255,255,255,.04), rgba(0,0,0,.08)),
+          #d8c397;
+        border: 3px solid #5b3d23;
+        outline: 1px solid #cda75c;
+        border-radius: 8px;
+        padding: 24px;
         width: min(360px, 100%);
         max-height: 90%;
         overflow-y: auto;
-        color: #f0f0f5;
+        color: #2b2017;
         box-sizing: border-box;
+        box-shadow: 0 18px 55px #000a, inset 0 0 35px #76511d33;
+        line-height: 1.45;
+      }
+      #overlay .panel::before,
+      #overlay .panel::after {
+        content: '◆';
+        position: absolute;
+        top: 7px;
+        color: #80602c;
+        font-size: 11px;
+      }
+      #overlay .panel::before { left: 9px; }
+      #overlay .panel::after { right: 9px; }
+      #overlay p { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
       }
       #overlay h2 {
         margin: 0 0 12px;
-        font-size: 18px;
+        font-size: 21px;
+        color: #3b2717;
+        text-align: center;
+        letter-spacing: .04em;
+        border-bottom: 1px solid #9e7b43;
+        padding-bottom: 9px;
       }
       #overlay label {
         display: block;
         font-size: 13px;
         margin: 10px 0 4px;
-        color: #c7c7d6;
+        color: #5a432b;
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+        font-weight: 700;
       }
       #overlay input, #overlay select, #overlay textarea {
         width: 100%;
         box-sizing: border-box;
         padding: 8px;
-        border-radius: 6px;
-        border: 1px solid #4a4a58;
-        background: #2a2a33;
-        color: #f0f0f5;
+        border-radius: 4px;
+        border: 1px solid #755b38;
+        background: #f4e7c7;
+        color: #2b2017;
         font-size: 14px;
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+        box-shadow: inset 0 2px 5px #5e421624;
       }
       #overlay textarea {
         resize: vertical;
@@ -77,19 +105,26 @@
         width: 100%;
         padding: 10px;
         border: none;
-        border-radius: 6px;
-        background: #4f7cff;
-        color: white;
+        border-radius: 4px;
+        border: 1px solid #d1a858;
+        background: linear-gradient(#6d3f2d, #3d241d);
+        color: #ffedbb;
         font-size: 14px;
         font-weight: bold;
         cursor: pointer;
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+        box-shadow: 0 3px 0 #24130e, inset 0 1px #ffffff25;
+        transition: transform .12s, filter .12s;
+      }
+      #overlay button:hover { filter: brightness(1.14); transform: translateY(-1px); }
+      #overlay button:active { transform: translateY(2px); box-shadow: 0 1px 0 #24130e; }
       }
       #overlay button.secondary {
-        background: #3a3a46;
+        background: linear-gradient(#536052, #313b32);
         margin-top: 8px;
       }
       #overlay .error {
-        color: #ff6b6b;
+        color: #8f231d;
         font-size: 12px;
         margin-top: 6px;
         min-height: 14px;
@@ -104,12 +139,14 @@
       }
       #overlay .chat-line {
         font-size: 13px;
-        background: #2a2a33;
+        background: #f0dfba;
+        border: 1px solid #a98a56;
         padding: 6px 8px;
         border-radius: 6px;
       }
       #overlay .chat-line.me {
-        background: #3a4a7c;
+        background: #becb9c;
+        border-color: #748451;
         align-self: flex-end;
       }
     </style>

@@ -6,21 +6,27 @@ export function createTouchControls(scene) {
   const state = { up: false, down: false, left: false, right: false, interactJustPressed: false };
 
   const makeButton = (x, y, label, onDown, onUp) => {
-    const circle = scene.add.circle(x, y, 32, 0x000000, 0.4).setScrollFactor(0).setDepth(1000);
-    circle.setStrokeStyle(2, 0xffffff, 0.7);
-    scene.add.text(x, y, label, { fontSize: '18px', color: '#ffffff' })
+    const circle = scene.add.circle(x, y, 30, 0x24190f, 0.82).setScrollFactor(0).setDepth(1000);
+    circle.setStrokeStyle(3, 0xc89d52, 0.92);
+    scene.add.circle(x, y, 24, 0x6e4a2d, 0.28).setScrollFactor(0).setDepth(1001);
+    scene.add.text(x, y, label, {
+      fontFamily: 'Georgia, serif', fontSize: label === 'E' ? '16px' : '18px', fontStyle: 'bold', color: '#ffe8ad',
+      stroke: '#2a160d', strokeThickness: 2,
+    })
       .setOrigin(0.5)
       .setScrollFactor(0)
-      .setDepth(1001);
+      .setDepth(1002);
     circle.setInteractive({ useHandCursor: true });
     // Visible press feedback — without it a touch press feels unresponsive,
     // since there's no native :active state on a canvas-drawn button.
     circle.on('pointerdown', () => {
-      circle.setFillStyle(0xffffff, 0.35);
+      circle.setFillStyle(0xc89d52, 0.8);
+      circle.setScale(0.94);
       onDown();
     });
     const release = () => {
-      circle.setFillStyle(0x000000, 0.4);
+      circle.setFillStyle(0x24190f, 0.82);
+      circle.setScale(1);
       onUp();
     };
     circle.on('pointerup', release);
@@ -37,7 +43,7 @@ export function createTouchControls(scene) {
   makeButton(padX - gap, padY, '◀', () => { state.left = true; }, () => { state.left = false; });
   makeButton(padX + gap, padY, '▶', () => { state.right = true; }, () => { state.right = false; });
 
-  makeButton(416, 690, 'E', () => { state.interactJustPressed = true; }, () => {});
+  makeButton(416, 690, '행동', () => { state.interactJustPressed = true; }, () => {});
 
   return {
     state,

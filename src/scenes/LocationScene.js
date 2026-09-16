@@ -10,6 +10,8 @@ import {
 } from '../state/character.js';
 import { rollLifeOutcome } from '../data/mortality.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
+import { addFantasyBackdrop, addSceneTitle, fantasyName } from '../ui/fantasyTheme.js';
+import { monstersForLocation } from '../data/monsters.js';
 
 export class LocationScene extends Phaser.Scene {
   constructor() {
@@ -28,18 +30,29 @@ export class LocationScene extends Phaser.Scene {
       return;
     }
 
-    this.add.tileSprite(0, 0, 480, 800, 'ground').setOrigin(0, 0);
-    this.add.sprite(240, 260, 'building').setScale(2.2).setTint(this.location.color);
-    this.add.text(240, 400, `${this.location.emoji} ${this.location.name}`, {
-      fontSize: '18px',
-      color: '#ffffff',
-    }).setOrigin(0.5);
+    addFantasyBackdrop(this, { dark: (this.location.dangerLevel ?? 0) >= 2 });
+    addSceneTitle(this, fantasyName(this.location), this.location.npcName);
+    this.add.circle(240, 310, 122, this.location.color, 0.13);
+    this.add.sprite(240, 292, 'building').setScale(1.9);
+    const localMonsters = monstersForLocation(this.location.id, 3);
+    localMonsters.forEach((monster, index) => {
+      const x = 112 + index * 128;
+      const sprite = this.add.sprite(x, 383, monster.texture).setScale(index === 2 ? 1.08 : 0.92);
+      this.tweens.add({ targets: sprite, y: sprite.y - 6, duration: 800 + index * 180, yoyo: true, repeat: -1 });
+      this.add.text(x, 426, monster.name, {
+        fontSize: '10px', color: '#f6e7bc', backgroundColor: '#1b130dcc', padding: { x: 4, y: 2 },
+      }).setOrigin(0.5);
+    });
+    this.add.text(240, 425, `✦ ${fantasyName(this.location)} ✦`, {
+      fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '20px', fontStyle: 'bold',
+      color: '#f4dc9c', stroke: '#25150d', strokeThickness: 4,
+    }).setOrigin(0.5).setY(470);
 
     const visit = visitLocation(this.character, this.location);
     if (!visit.ok) {
       openPanel(`
         <div class="panel">
-          <h2>${this.location.name}</h2>
+          <h2>${fantasyName(this.location)}</h2>
           <p>돈이 부족해서 들어갈 수 없다. (필요 금액: ${this.location.cost.toLocaleString()}원)</p>
           <button id="loc-back">돌아가기</button>
         </div>

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { applyStatDeltas } from '../state/character.js';
+import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
 const TICKET_COST = 5000;
 const JACKPOT = 200000;
@@ -17,9 +18,13 @@ export class LotteryScene extends Phaser.Scene {
       return;
     }
 
-    this.add.tileSprite(0, 0, 480, 800, 'ground').setOrigin(0, 0);
-    this.add.sprite(240, 260, 'building').setScale(2.2).setTint(0xaa55ff);
-    this.add.text(240, 400, '🎟️ 복권방', { fontSize: '18px', color: '#ffffff' }).setOrigin(0.5);
+    addFantasyBackdrop(this, { dark: true });
+    addSceneTitle(this, '운명의 수정구', '별빛이 선택한 숫자를 맞혀 보세요');
+    this.add.circle(240, 285, 98, 0x8d62cf, 0.16);
+    this.add.circle(240, 285, 68, 0x9d7fe3, 0.35).setStrokeStyle(3, 0xf1d790, 0.8);
+    this.add.circle(220, 263, 20, 0xffffff, 0.17);
+    this.add.text(240, 285, '?', { fontFamily: 'Georgia, serif', fontSize: '64px', color: '#f7e8b7' }).setOrigin(0.5);
+    this.add.sprite(240, 380, 'goblin').setScale(1.2);
 
     this.renderPanel();
   }
@@ -31,13 +36,13 @@ export class LotteryScene extends Phaser.Scene {
 
     openPanel(`
       <div class="panel">
-        <h2>복권 한 장 (${TICKET_COST.toLocaleString()}원)</h2>
-        <p>1부터 10까지 숫자 중 하나를 맞히면 ${JACKPOT.toLocaleString()}원 당첨!</p>
-        <label for="lotto-number">번호 선택</label>
+        <h2>예언 한 번 (${TICKET_COST.toLocaleString()}원)</h2>
+        <p>수정구가 택할 1부터 10까지의 숫자를 맞히면 ${JACKPOT.toLocaleString()}원을 얻습니다.</p>
+        <label for="lotto-number">운명의 숫자</label>
         <select id="lotto-number">${options}</select>
         <div class="error" id="lotto-error"></div>
         ${resultHtml}
-        <button id="lotto-buy">구매하기</button>
+        <button id="lotto-buy">수정구에 묻기</button>
         <button id="lotto-back" class="secondary">돌아가기</button>
       </div>
     `);

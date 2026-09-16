@@ -12,6 +12,7 @@ import {
 import { rollLifeOutcome } from '../data/mortality.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { createTouchControls } from '../ui/touchControls.js';
+import { fantasyName, HUD_STYLE, PROMPT_STYLE } from '../ui/fantasyTheme.js';
 
 const INTERACT_DISTANCE = 60;
 const MOVE_SPEED = 180;
@@ -47,6 +48,7 @@ export class IndoorScene extends Phaser.Scene {
     this.chatLog = [];
 
     this.add.tileSprite(0, 0, 480, 800, 'floor').setOrigin(0, 0).setTint(this.interior.floorTint ?? 0xffffff);
+    this.buildRoomFrame();
 
     this.objects = this.interior.objects.map((o) => ({
       ...o,
@@ -55,31 +57,36 @@ export class IndoorScene extends Phaser.Scene {
     this.objects.push({ id: 'door', name: '문 (나가기)', x: 240, y: 760, tint: 0x66dd66 });
 
     for (const obj of this.objects) {
-      this.add.sprite(obj.x, obj.y, obj.texture ?? 'prop').setTint(obj.tint);
-      this.add.text(obj.x, obj.y + 30, obj.name, { fontSize: '11px', color: '#ffffff' }).setOrigin(0.5);
+      const sprite = this.add.sprite(obj.x, obj.y, obj.texture ?? 'prop');
+      if (obj.tint) sprite.setTint(obj.tint);
+      this.add.text(obj.x, obj.y + 32, obj.name, {
+        fontSize: '11px', color: '#fff0c5', backgroundColor: '#21160dcc', padding: { x: 4, y: 2 },
+      }).setOrigin(0.5);
     }
 
     this.playerSprite = this.add.sprite(240, 700, 'player');
     this.playerPos = { x: 240, y: 700 };
 
-    this.promptText = this.add.text(240, 670, '', {
-      fontSize: '13px',
-      color: '#ffffaa',
-      backgroundColor: '#000000aa',
-      padding: { x: 6, y: 3 },
-    }).setOrigin(0.5).setVisible(false);
+    this.promptText = this.add.text(240, 670, '', PROMPT_STYLE).setOrigin(0.5).setDepth(30).setVisible(false);
 
-    this.hud = this.add.text(8, 4, '', {
-      fontSize: '11px',
-      color: '#ffffff',
-      backgroundColor: '#000000aa',
-      padding: { x: 6, y: 4 },
-    });
+    this.hud = this.add.text(8, 4, '', HUD_STYLE).setDepth(50);
     this.refreshHud();
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D,E,SPACE');
     this.touch = createTouchControls(this);
+  }
+
+  buildRoomFrame() {
+    const walls = this.add.graphics();
+    walls.fillStyle(0x251b17, 0.95).fillRect(0, 92, 480, 24).fillRect(0, 116, 18, 684).fillRect(462, 116, 18, 684);
+    walls.lineStyle(3, 0xb58a4b, 0.85).lineBetween(0, 116, 480, 116);
+    walls.lineStyle(1, 0xe0bd72, 0.45).lineBetween(0, 121, 480, 121);
+    this.add.sprite(34, 139, 'torch');
+    this.add.sprite(446, 139, 'torch');
+    this.add.text(240, 103, fantasyName(this.location), {
+      fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '15px', fontStyle: 'bold', color: '#f2d99a',
+    }).setOrigin(0.5);
   }
 
   refreshHud() {
@@ -89,7 +96,7 @@ export class IndoorScene extends Phaser.Scene {
     const todo = this.tasks
       .map((t) => `[${this.taskDone[t.id] ? '완료' : t.required ? '필수' : '선택'}] ${t.label}`)
       .join('  ');
-    this.hud.setText(`${this.location.name}\n${todo}`);
+    this.hud.setText(`${fantasyName(this.location)}\n${todo}`);
   }
 
   update(_, delta) {
@@ -180,12 +187,12 @@ export class IndoorScene extends Phaser.Scene {
   toast(message) {
     const text = this.add.text(240, 100, message, {
       fontSize: '13px',
-      color: '#ffffff',
-      backgroundColor: '#000000cc',
+      color: '#ffeab4',
+      backgroundColor: '#24170eef',
       padding: { x: 8, y: 5 },
       wordWrap: { width: 420 },
       align: 'center',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(100);
     this.time.delayedCall(1800, () => text.destroy());
   }
 

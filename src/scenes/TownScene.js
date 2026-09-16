@@ -5,6 +5,8 @@ import { getLifeStage, getJobInfo, computeLifeScore, updateQuest } from '../stat
 import { getWealthTier } from '../data/wealth.js';
 import { STATS } from '../data/stats.js';
 import { createTouchControls } from '../ui/touchControls.js';
+import { fantasyName, HUD_STYLE, PROMPT_STYLE } from '../ui/fantasyTheme.js';
+import { monstersForLocation } from '../data/monsters.js';
 
 const GRID_COLS = 3;
 const GRID_START_X = 90;
@@ -47,25 +49,16 @@ export class TownScene extends Phaser.Scene {
     }
 
     this.add.tileSprite(0, 0, 480, 800, 'ground').setOrigin(0, 0);
+    this.buildTownBackdrop();
 
     this.buildings = this.buildBuildings();
 
-    this.playerSprite = this.add.sprite(240, 720, 'player');
+    this.playerSprite = this.add.sprite(240, 720, 'player').setDepth(20);
     this.playerPos = { x: 240, y: 720 };
 
-    this.promptText = this.add.text(240, 690, '', {
-      fontSize: '13px',
-      color: '#ffffaa',
-      backgroundColor: '#000000aa',
-      padding: { x: 6, y: 3 },
-    }).setOrigin(0.5).setVisible(false);
+    this.promptText = this.add.text(240, 690, '', PROMPT_STYLE).setOrigin(0.5).setDepth(30).setVisible(false);
 
-    this.hud = this.add.text(8, 4, '', {
-      fontSize: '12px',
-      color: '#ffffff',
-      backgroundColor: '#000000aa',
-      padding: { x: 6, y: 4 },
-    });
+    this.hud = this.add.text(8, 4, '', HUD_STYLE).setDepth(50);
 
     const completedQuest = updateQuest(this.character);
     this.refreshHud();
@@ -76,19 +69,53 @@ export class TownScene extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D,E,SPACE');
     this.touch = createTouchControls(this);
+    this.wasd.M = this.input.keyboard.addKey('M');
+    this.buildDexButton();
 
     this.persist();
+  }
+
+  buildDexButton() {
+    const bg = this.add.rectangle(426, 38, 90, 44, 0x332218, 0.94)
+      .setStrokeStyle(2, 0xd1a75a, 0.9).setDepth(100).setInteractive({ useHandCursor: true });
+    this.add.text(426, 38, '도감 120', {
+      fontSize: '12px', fontStyle: 'bold', color: '#ffe7a9',
+    }).setOrigin(0.5).setDepth(101);
+    bg.on('pointerdown', () => this.scene.start('MonsterDex'));
+  }
+
+  buildTownBackdrop() {
+    this.add.tileSprite(0, 112, 480, 54, 'cobble').setOrigin(0).setAlpha(0.72);
+    this.add.tileSprite(215, 110, 52, 690, 'cobble').setOrigin(0).setAlpha(0.72);
+    const decor = this.add.graphics();
+    decor.fillStyle(0x172f23, 0.75);
+    decor.fillCircle(25, 185, 28).fillCircle(458, 230, 32).fillCircle(24, 495, 34).fillCircle(458, 545, 30);
+    decor.fillStyle(0x6a5c43, 0.8);
+    [[35, 300], [445, 390], [35, 620], [452, 700]].forEach(([x, y]) => decor.fillEllipse(x, y, 18, 10));
+    this.add.text(240, 113, '✦  에버글렌 왕국  ✦', {
+      fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '15px', fontStyle: 'bold',
+      color: '#f4dda0', backgroundColor: '#1a160fdd', padding: { x: 12, y: 5 },
+    }).setOrigin(0.5).setDepth(5);
+
+    const creatures = [
+      this.add.sprite(35, 560, 'monster-forest-slime').setScale(0.72),
+      this.add.sprite(445, 650, 'monster-forest-goblin').setScale(0.68),
+    ];
+    creatures.forEach((creature, i) => {
+      creature.setAlpha(0.9).setDepth(4);
+      this.tweens.add({ targets: creature, y: creature.y - 5, duration: 850 + i * 170, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    });
   }
 
   toast(message) {
     const text = this.add.text(240, 100, message, {
       fontSize: '13px',
-      color: '#ffffff',
-      backgroundColor: '#000000cc',
-      padding: { x: 8, y: 5 },
+      color: '#ffeab4',
+      backgroundColor: '#24170eef',
+      padding: { x: 10, y: 7 },
       wordWrap: { width: 420 },
       align: 'center',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(100);
     this.time.delayedCall(2200, () => text.destroy());
   }
 
@@ -104,14 +131,25 @@ export class TownScene extends Phaser.Scene {
       const y = GRID_START_Y + row * GRID_SPACING_Y;
       const locked = entry.data.minAge !== undefined && this.character.age < entry.data.minAge;
 
-      const sprite = this.add.sprite(x, y, 'building').setScale(0.7);
-      sprite.setTint(locked ? 0x555555 : entry.data.color);
+      this.add.circle(x, y + 8, 43, locked ? 0x343434 : entry.data.color, locked ? 0.16 : 0.2);
+      const sprite = this.add.sprite(x, y, 'building').setScale(0.72).setDepth(3);
+      if (locked) sprite.setTint(0x565656);
       const housingSuffix = entry.data.id === 'home' ? ` (${getWealthTier(this.character.wealthTier).housing})` : '';
-      this.add.text(x, y + 38, `${entry.data.emoji} ${entry.data.name}${housingSuffix}`, {
+      this.add.text(x, y + 43, `${fantasyName(entry.data)}${housingSuffix}`, {
         fontSize: '11px',
-        color: locked ? '#888888' : '#ffffff',
+        fontStyle: 'bold',
+        color: locked ? '#908b80' : '#fff0c5',
+        backgroundColor: '#1d160fd9',
+        padding: { x: 5, y: 3 },
         align: 'center',
-      }).setOrigin(0.5);
+      }).setOrigin(0.5).setDepth(6);
+
+      if (!locked && (entry.data.dangerLevel ?? 0) >= 2) {
+        const localMonsters = monstersForLocation(entry.data.id, 3);
+        const monsterData = localMonsters[entry.data.dangerLevel >= 3 ? 2 : 1] ?? localMonsters[0];
+        const monster = this.add.sprite(x + 38, y + 16, monsterData.texture).setScale(0.42).setDepth(5);
+        this.tweens.add({ targets: monster, angle: 4, duration: 600, yoyo: true, repeat: -1 });
+      }
 
       return { ...entry, x, y, locked };
     });
@@ -167,7 +205,8 @@ export class TownScene extends Phaser.Scene {
 
     if (near) {
       this.promptText.setPosition(this.playerPos.x, this.playerPos.y - 30);
-      this.promptText.setText(near.locked ? `${near.data.name}: 아직 이용할 수 없다` : `[E] ${near.data.name} 들어가기`);
+      const placeName = fantasyName(near.data);
+      this.promptText.setText(near.locked ? `${placeName}: 아직 봉인이 풀리지 않았다` : `[E] ${placeName} 입장`);
       this.promptText.setVisible(true);
     } else {
       this.promptText.setVisible(false);
@@ -179,6 +218,7 @@ export class TownScene extends Phaser.Scene {
     if (near && !near.locked && interactPressed) {
       this.enter(near);
     }
+    if (Phaser.Input.Keyboard.JustDown(this.wasd.M)) this.scene.start('MonsterDex');
   }
 
   enter(entry) {
