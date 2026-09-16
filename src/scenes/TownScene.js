@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import { availableLocations } from '../data/locations.js';
 import { getInterior } from '../data/interiors.js';
-import { getLifeStage } from '../state/character.js';
+import { getLifeStage, getJobInfo } from '../state/character.js';
 import { getWealthTier } from '../data/wealth.js';
+import { STATS } from '../data/stats.js';
 import { createTouchControls } from '../ui/touchControls.js';
 
 const GRID_COLS = 3;
@@ -10,7 +11,9 @@ const GRID_START_X = 90;
 const GRID_START_Y = 150;
 const GRID_SPACING_X = 150;
 const GRID_SPACING_Y = 130;
-const INTERACT_DISTANCE = 55;
+const INTERACT_DISTANCE = 65;
+const MOVE_SPEED = 190;
+const DREAM_TARGET = 70;
 
 const STAGE_LABEL = { infant: '유아기', child: '유년기', teen: '청소년기', adult: '성인' };
 
@@ -101,21 +104,36 @@ export class TownScene extends Phaser.Scene {
     const c = this.character;
     const stage = STAGE_LABEL[getLifeStage(c.age)];
     const statLine = Object.entries(c.stats).map(([k, v]) => `${k[0].toUpperCase()}${v}`).join(' ');
+    const lifeScore = Object.values(c.stats).reduce((sum, v) => sum + v, 0) + Math.floor(c.money / 10000);
+
+    const job = getJobInfo(c);
+    const goalLine = job
+      ? `꿈: ${job.label} — ${STATS[job.primaryStat]?.label ?? job.primaryStat} ${Math.min(c.stats[job.primaryStat] ?? 0, DREAM_TARGET)}/${DREAM_TARGET}`
+      : '꿈: 아직 못 정했다 (성인이 되면 정하게 된다)';
+
     this.hud.setText(
-      `${c.name} (${c.gender === 'male' ? '남' : '여'}) | ${c.age}세 · ${stage}\n` +
-      `${c.money.toLocaleString()}원 | ${statLine}`
+      `${c.name} (${c.gender === 'male' ? '남' : '여'}) | ${c.age}세 · ${stage} | 인생점수 ${lifeScore}\n` +
+      `${c.money.toLocaleString()}원 | ${statLine}\n` +
+      goalLine
     );
   }
 
   update(_, delta) {
     if (!this.character.alive) return;
-    const speed = 160 * (delta / 1000);
     let dx = 0;
     let dy = 0;
-    if (this.cursors.left.isDown || this.wasd.A.isDown || this.touch.state.left) dx -= speed;
-    if (this.cursors.right.isDown || this.wasd.D.isDown || this.touch.state.right) dx += speed;
-    if (this.cursors.up.isDown || this.wasd.W.isDown || this.touch.state.up) dy -= speed;
-    if (this.cursors.down.isDown || this.wasd.S.isDown || this.touch.state.down) dy += speed;
+    if (this.cursors.left.isDown || this.wasd.A.isDown || this.touch.state.left) dx -= 1;
+    if (this.cursors.right.isDown || this.wasd.D.isDown || this.touch.state.right) dx += 1;
+    if (this.cursors.up.isDown || this.wasd.W.isDown || this.touch.state.up) dy -= 1;
+    if (this.cursors.down.isDown || this.wasd.S.isDown || this.touch.state.down) dy += 1;
+
+    if (dx !== 0 || dy !== 0) {
+      // Normalize so diagonal movement isn't ~41% faster than cardinal moves.
+      const len = Math.hypot(dx, dy);
+      const speed = MOVE_SPEED * (delta / 1000);
+      dx = (dx / len) * speed;
+      dy = (dy / len) * speed;
+    }
 
     this.playerPos.x = Phaser.Math.Clamp(this.playerPos.x + dx, 16, 464);
     this.playerPos.y = Phaser.Math.Clamp(this.playerPos.y + dy, 90, 780);

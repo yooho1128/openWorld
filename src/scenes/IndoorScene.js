@@ -13,7 +13,8 @@ import { rollLifeOutcome } from '../data/mortality.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { createTouchControls } from '../ui/touchControls.js';
 
-const INTERACT_DISTANCE = 50;
+const INTERACT_DISTANCE = 60;
+const MOVE_SPEED = 180;
 
 // Generic walkable interior for any location listed in src/data/interiors.js
 // (home, school, company, ...): a floor, a handful of props tied to
@@ -92,13 +93,20 @@ export class IndoorScene extends Phaser.Scene {
   }
 
   update(_, delta) {
-    const speed = 150 * (delta / 1000);
     let dx = 0;
     let dy = 0;
-    if (this.cursors.left.isDown || this.wasd.A.isDown || this.touch.state.left) dx -= speed;
-    if (this.cursors.right.isDown || this.wasd.D.isDown || this.touch.state.right) dx += speed;
-    if (this.cursors.up.isDown || this.wasd.W.isDown || this.touch.state.up) dy -= speed;
-    if (this.cursors.down.isDown || this.wasd.S.isDown || this.touch.state.down) dy += speed;
+    if (this.cursors.left.isDown || this.wasd.A.isDown || this.touch.state.left) dx -= 1;
+    if (this.cursors.right.isDown || this.wasd.D.isDown || this.touch.state.right) dx += 1;
+    if (this.cursors.up.isDown || this.wasd.W.isDown || this.touch.state.up) dy -= 1;
+    if (this.cursors.down.isDown || this.wasd.S.isDown || this.touch.state.down) dy += 1;
+
+    if (dx !== 0 || dy !== 0) {
+      // Normalize so diagonal movement isn't ~41% faster than cardinal moves.
+      const len = Math.hypot(dx, dy);
+      const speed = MOVE_SPEED * (delta / 1000);
+      dx = (dx / len) * speed;
+      dy = (dy / len) * speed;
+    }
 
     this.playerPos.x = Phaser.Math.Clamp(this.playerPos.x + dx, 16, 464);
     this.playerPos.y = Phaser.Math.Clamp(this.playerPos.y + dy, 110, 780);
