@@ -5,7 +5,7 @@ import { CreateScene } from './scenes/CreateScene.js';
 import { BirthScene } from './scenes/BirthScene.js';
 import { CareerScene } from './scenes/CareerScene.js';
 import { TownScene } from './scenes/TownScene.js';
-import { HomeScene } from './scenes/HomeScene.js';
+import { IndoorScene } from './scenes/IndoorScene.js';
 import { LocationScene } from './scenes/LocationScene.js';
 import { LotteryScene } from './scenes/LotteryScene.js';
 import { EndingScene } from './scenes/EndingScene.js';
@@ -23,7 +23,7 @@ const config = {
   input: {
     activePointers: 1,
   },
-  scene: [BootScene, LoginScene, CreateScene, BirthScene, CareerScene, TownScene, HomeScene, LocationScene, LotteryScene, EndingScene],
+  scene: [BootScene, LoginScene, CreateScene, BirthScene, CareerScene, TownScene, IndoorScene, LocationScene, LotteryScene, EndingScene],
 };
 
 new Phaser.Game(config);

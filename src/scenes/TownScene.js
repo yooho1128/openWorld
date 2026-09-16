@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { availableLocations } from '../data/locations.js';
+import { getInterior } from '../data/interiors.js';
 import { getLifeStage } from '../state/character.js';
 import { getWealthTier } from '../data/wealth.js';
 
@@ -141,8 +142,8 @@ export class TownScene extends Phaser.Scene {
       this.scene.start('Lottery');
       return;
     }
-    if (entry.data.id === 'home') {
-      this.scene.start('Home');
+    if (getInterior(entry.data.id)) {
+      this.scene.start('Indoor', { locationId: entry.data.id });
       return;
     }
     this.scene.start('Location', { locationId: entry.data.id });

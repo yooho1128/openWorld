@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { getLocation } from '../data/locations.js';
-import { activeHomeTasks, rollRandomFlavor } from '../data/homeLife.js';
+import { getInterior, activeTasks, rollRandomFlavor } from '../data/interiors.js';
 import {
   visitLocation,
   advanceAge,
@@ -8,50 +8,48 @@ import {
   applyInjury,
   applyStatDeltas,
   getJobInfo,
-  getLifeStage,
 } from '../state/character.js';
 import { rollLifeOutcome } from '../data/mortality.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 
 const INTERACT_DISTANCE = 50;
 
-const OBJECT_LAYOUT = [
-  { id: 'bed', name: '침대', x: 80, y: 180, tint: 0xdd6688 },
-  { id: 'desk', name: '책상', x: 240, y: 180, tint: 0x6a8a5a },
-  { id: 'sink', name: '세면대', x: 400, y: 180, tint: 0x66aadd },
-  { id: 'table', name: '식탁', x: 80, y: 340, tint: 0x9a6a3d },
-  { id: 'parent', name: null, x: 240, y: 340, tint: 0xffd27a, texture: 'player' },
-  { id: 'trash', name: '쓰레기통', x: 400, y: 340, tint: 0x777777 },
-];
-
-// Home is the one location you actually walk around in instead of just
-// chatting through a modal. Which chores are active (and which are required
-// vs. just a bonus) shifts with age (see src/data/homeLife.js) — a kid has
-// homework and room-tidying, an adult just has to check in with their
-// parents — plus a random age-appropriate flavor moment on the way out, so
-// home life actually changes shape as the character grows up instead of
-// replaying the same two outcomes forever.
-export class HomeScene extends Phaser.Scene {
+// Generic walkable interior for any location listed in src/data/interiors.js
+// (home, school, company, ...): a floor, a handful of props tied to
+// age-gated chores, an NPC to chat with, and a door back to town. Which
+// chores are required (skip it, get scolded) vs. optional (do it anyway,
+// get praised) and which random flavor moments can fire is entirely driven
+// by that location's interior config — this scene has no location-specific
+// logic of its own.
+export class IndoorScene extends Phaser.Scene {
   constructor() {
-    super('Home');
+    super('Indoor');
+  }
+
+  init(data) {
+    this.locationId = data?.locationId;
   }
 
   create() {
     this.character = this.registry.get('character');
-    this.location = getLocation('home');
-    if (!this.character || !this.location) {
+    this.location = getLocation(this.locationId);
+    this.interior = getInterior(this.locationId);
+    if (!this.character || !this.location || !this.interior) {
       this.scene.start('Town');
       return;
     }
 
-    this.tasks = activeHomeTasks(this.character.age);
+    this.tasks = activeTasks(this.interior.tasks, this.character.age);
     this.taskByObject = new Map(this.tasks.map((t) => [t.object, t]));
     this.taskDone = {};
     this.chatLog = [];
 
-    this.add.tileSprite(0, 0, 480, 800, 'floor').setOrigin(0, 0);
+    this.add.tileSprite(0, 0, 480, 800, 'floor').setOrigin(0, 0).setTint(this.interior.floorTint ?? 0xffffff);
 
-    this.objects = OBJECT_LAYOUT.map((o) => ({ ...o, name: o.id === 'parent' ? this.location.npcName : o.name }));
+    this.objects = this.interior.objects.map((o) => ({
+      ...o,
+      name: o.isNpc ? this.location.npcName : o.name,
+    }));
     this.objects.push({ id: 'door', name: '문 (나가기)', x: 240, y: 760, tint: 0x66dd66 });
 
     for (const obj of this.objects) {
@@ -88,7 +86,7 @@ export class HomeScene extends Phaser.Scene {
     const todo = this.tasks
       .map((t) => `[${this.taskDone[t.id] ? '완료' : t.required ? '필수' : '선택'}] ${t.label}`)
       .join('  ');
-    this.hud.setText(`${this.character.name}의 집\n${todo}`);
+    this.hud.setText(`${this.location.name}\n${todo}`);
   }
 
   update(_, delta) {
@@ -137,7 +135,7 @@ export class HomeScene extends Phaser.Scene {
       this.toast(`${obj.name}...`);
     }
 
-    if (obj.id === 'parent') this.openChat();
+    if (obj.isNpc) this.openChat();
   }
 
   toast(message) {
@@ -200,7 +198,7 @@ export class HomeScene extends Phaser.Scene {
         body: JSON.stringify({
           npcName: this.location.npcName,
           npcPersona: this.location.npcPersona,
-          locationName: '집',
+          locationName: this.location.name,
           characterSummary: this.characterSummary(),
           playerMessage: message,
         }),
@@ -230,7 +228,7 @@ export class HomeScene extends Phaser.Scene {
       }
     }
 
-    const flavor = rollRandomFlavor(getLifeStage(this.character.age));
+    const flavor = rollRandomFlavor(this.interior.flavor, this.character.age);
     if (flavor) {
       applyStatDeltas(this.character, flavor.delta);
       this.character.history.push(`${this.character.age}세 - ${flavor.text}`);
@@ -274,7 +272,7 @@ export class HomeScene extends Phaser.Scene {
         <textarea id="event-response" maxlength="200" placeholder="어떻게 대응할지 적어보세요"></textarea>
         <button id="event-submit">대응하기</button>
       `
-      : `<button id="home-leave-confirm">마을로 나가기</button>`;
+      : `<button id="indoor-leave-confirm">마을로 나가기</button>`;
 
     openPanel(`
       <div class="panel">
@@ -288,7 +286,7 @@ export class HomeScene extends Phaser.Scene {
     if (this.eventScenario) {
       qs('event-submit').addEventListener('click', () => this.handleEventSubmit());
     } else {
-      qs('home-leave-confirm').addEventListener('click', () => {
+      qs('indoor-leave-confirm').addEventListener('click', () => {
         closePanel();
         this.scene.start('Town');
       });
