@@ -80,3 +80,39 @@ export function chooseJob(character, jobId) {
   character.dream = jobId;
   character.history.push(`${character.age}세 - 진로를 "${getJob(jobId)?.label ?? jobId}"(으)로 정했다.`);
 }
+
+// The one number the whole game is chasing: shown live on the town HUD and
+// submitted to the global leaderboard on death.
+export function computeLifeScore(character) {
+  const statSum = Object.values(character.stats).reduce((sum, v) => sum + v, 0);
+  return statSum + Math.floor(character.money / 10000);
+}
+
+const QUEST_STAT_KEYS = ['stamina', 'intelligence', 'language', 'charm', 'happiness', 'health'];
+const QUEST_STEP = 8;
+const QUEST_BONUS_MONEY = 30000;
+const QUEST_BONUS_HAPPINESS = 5;
+
+// A rotating short-term goal shown on the town HUD alongside the long-term
+// dream stat, so there's always something small and concrete to chase
+// between visits, not just the eventual "reach 70" dream check. Call this
+// once per Town visit; it clears+rewards a finished quest and always leaves
+// a fresh one queued up. Returns the just-completed quest, or null.
+export function updateQuest(character) {
+  let completed = null;
+  if (character.quest) {
+    const { statKey, target } = character.quest;
+    if ((character.stats[statKey] ?? 0) >= target) {
+      completed = character.quest;
+      applyStatDeltas(character, { happiness: QUEST_BONUS_HAPPINESS, money: QUEST_BONUS_MONEY });
+      character.history.push(`${character.age}세 - 목표 달성(${statKey} ${target})! 보너스를 받았다.`);
+      character.quest = null;
+    }
+  }
+  if (!character.quest) {
+    const statKey = QUEST_STAT_KEYS[Math.floor(Math.random() * QUEST_STAT_KEYS.length)];
+    const target = Math.min(100, (character.stats[statKey] ?? 0) + QUEST_STEP);
+    character.quest = { statKey, target };
+  }
+  return completed;
+}
