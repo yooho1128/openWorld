@@ -66,7 +66,6 @@
       #overlay .panel::before { left: 9px; }
       #overlay .panel::after { right: 9px; }
       #overlay p { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
-      }
       #overlay h2 {
         margin: 0 0 12px;
         font-size: 21px;
@@ -165,6 +164,35 @@
       #overlay button.dialogue-choice { margin-top: 7px; text-align: left; background: linear-gradient(#5e4936, #3e2d22); }
       .conversation-count { display: block; margin-top: 10px; color: #826c4c; text-align: center; font-size: 10px; }
       .empty-state { text-align: center; color: #786447; font-size: 12px; padding: 18px 4px; }
+      #overlay h3 { margin: 14px 0 6px; color: #4c3420; font-size: 14px; border-bottom: 1px solid #aa8954; padding-bottom: 4px; }
+      .status-panel, .forge-panel, .inventory-panel { width: min(430px, 100%) !important; }
+      .class-badge { margin: -5px auto 10px; width: fit-content; padding: 3px 12px; border: 1px solid #8d6a39; border-radius: 999px; background: #3b2b21; color: #ffe3a1; font-size: 11px; font-weight: 700; }
+      .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font: 11px 'Malgun Gothic', sans-serif; }
+      .stat-grid span { padding: 6px 8px; background: #eddbb6; border: 1px solid #ac8b55; border-radius: 4px; }
+      .equipped-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+      .equip-slot { position: relative; min-height: 43px; padding: 6px 7px; border: 1px solid #9b815c; border-radius: 5px; background: #e7d3ab; box-sizing: border-box; font-family: 'Malgun Gothic', sans-serif; }
+      .equip-slot > span, .gear-card small, .forge-card small { display: block; color: #6d5a41; font-size: 9px; }
+      .equip-slot > strong { display: block; margin-right: 39px; font-size: 10px; line-height: 1.3; }
+      #overlay .equip-slot button { position: absolute; right: 5px; bottom: 5px; width: auto; margin: 0; padding: 3px 6px; font-size: 9px; }
+      .gear-list, .forge-list { display: flex; flex-direction: column; gap: 7px; margin: 7px 0; }
+      .gear-card, .forge-card { display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid #9d835c; border-radius: 5px; background: #ead8b1; font-family: 'Malgun Gothic', sans-serif; }
+      .gear-card > div, .forge-card > div { flex: 1; min-width: 0; }
+      .gear-card strong, .forge-card strong { display: block; font-size: 11px; line-height: 1.35; }
+      #overlay .gear-card button, #overlay .forge-card button { width: auto; flex: 0 0 auto; margin: 0; padding: 7px 8px; font-size: 10px; }
+      .forge-actions { display: flex; flex-direction: column; gap: 5px; flex: 0 0 auto !important; }
+      #overlay .forge-actions button.repair { background: linear-gradient(#4d725f, #29483a); border-color: #8fc29f; }
+      #overlay button:disabled { filter: grayscale(.8); opacity: .52; cursor: not-allowed; }
+      .forge-risk { margin-top: 3px; color: #8b332c !important; font-weight: 700; }
+      .forge-message { padding: 8px; border-radius: 5px; border: 1px solid #a5844f; background: #f5e6bd; font-size: 12px; text-align: center; }
+      .forge-message.success { color: #24532c; border-color: #638b58; background: #ccdbb0; }
+      .forge-message.fail { color: #7a3328; border-color: #a96d59; background: #e5c1ae; }
+      .forge-message.destroyed { color: #ffe0c2; border-color: #da4d3f; background: #542622; box-shadow: 0 0 18px #c6372c99; }
+      .rarity-normal { border-color: #96938c !important; }
+      .rarity-rare { border-color: #318dd8 !important; box-shadow: inset 3px 0 #4a9fe8; }
+      .rarity-unique { border-color: #a447d2 !important; background: linear-gradient(105deg, #e8d5b0, #d9bee5) !important; box-shadow: inset 3px 0 #b45de0, 0 0 8px #a64ed455; }
+      .rarity-legendary { border-color: #e78727 !important; background: linear-gradient(105deg, #ebd5a7, #edbf87) !important; box-shadow: inset 3px 0 #f09a38, 0 0 11px #e8792877; animation: rarityPulse 1.8s infinite alternate; }
+      .rarity-mythic { border-color: #e8324a !important; background: linear-gradient(115deg, #ecc29b, #e9a9b2, #d9b9ea) !important; box-shadow: inset 3px 0 #ff4f5e, 0 0 14px #ff405e99; animation: rarityPulse 1s infinite alternate; }
+      @keyframes rarityPulse { from { filter: brightness(.96); } to { filter: brightness(1.12); } }
     </style>
   </head>
   <body>

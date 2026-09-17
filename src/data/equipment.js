@@ -1,0 +1,159 @@
+import { MONSTERS } from './monsters.js';
+
+export const EQUIPMENT_SLOTS = [
+  { id: 'helmet', name: '투구', icon: '♛' }, { id: 'armor', name: '갑옷', icon: '♜' },
+  { id: 'gloves', name: '장갑', icon: '✥' }, { id: 'boots', name: '신발', icon: '♟' },
+  { id: 'weapon', name: '무기', icon: '⚔' }, { id: 'ring', name: '반지', icon: '◉' },
+  { id: 'necklace', name: '목걸이', icon: '◇' }, { id: 'earring', name: '귀걸이', icon: '◈' },
+];
+
+export const RARITIES = {
+  normal: { name: '노멀', color: 0xb8b4aa, multiplier: 1, order: 0, className: 'normal' },
+  rare: { name: '레어', color: 0x4a9fe8, multiplier: 1.55, order: 1, className: 'rare' },
+  unique: { name: '유니크', color: 0xb45de0, multiplier: 2.35, order: 2, className: 'unique' },
+  legendary: { name: '레전더리', color: 0xf09a38, multiplier: 3.6, order: 3, className: 'legendary' },
+  mythic: { name: '신화', color: 0xff4f5e, multiplier: 5.4, order: 4, className: 'mythic' },
+};
+
+const BIOMES = [
+  ['forest', '숲의', 0x5d9b45], ['frozen', '설원의', 0x88cbe8], ['blood', '피빛', 0x9f2738],
+  ['swamp', '늪지의', 0x65783c], ['desert', '사막의', 0xc99548], ['volcanic', '화염의', 0xd64a2e],
+  ['storm', '폭풍의', 0x586e9e], ['abyss', '심연의', 0x49386f], ['undead', '망령의', 0x66766f],
+  ['demonic', '마계의', 0x70273f], ['celestial', '성광의', 0xc9b66a], ['crystal', '수정의', 0x6e62b5],
+];
+const VARIANTS = ['추적자', '수호자', '파수꾼', '정복자', '방랑자', '군주의'];
+const CLASS_IDS = ['warrior', 'mage', 'ranger', 'cleric', 'rogue'];
+const CLASS_WEAPONS = { warrior: '대검', mage: '마도 지팡이', ranger: '장궁', cleric: '성전 철퇴', rogue: '쌍단검' };
+
+function baseStats(slot, power) {
+  const stats = { attack: 0, defense: 0, hp: 0, mp: 0, agility: 0 };
+  if (slot === 'weapon') { stats.attack = 7 + power * 3; stats.agility = Math.round(power * 0.18); }
+  if (slot === 'armor') { stats.defense = 6 + power * 2; stats.hp = 15 + power * 5; }
+  if (slot === 'helmet') { stats.defense = 3 + power; stats.hp = 8 + power * 3; }
+  if (slot === 'gloves') { stats.attack = 2 + power; stats.defense = 2 + power; stats.agility = 2 + Math.round(power * 0.5); }
+  if (slot === 'boots') { stats.defense = 2 + power; stats.hp = 5 + power * 2; stats.agility = 3 + power; }
+  if (slot === 'ring') { stats.attack = 2 + power * 2; stats.agility = 2 + Math.round(power * 0.8); }
+  if (slot === 'necklace') { stats.hp = 10 + power * 4; stats.mp = 5 + power * 3; stats.agility = Math.round(power * 0.25); }
+  if (slot === 'earring') { stats.attack = 1 + power; stats.mp = 4 + power * 2; stats.agility = 2 + Math.round(power * 0.6); }
+  return stats;
+}
+
+function createEquipment({ id, name, slot, rarity, biome, color, variant, classId = null, source = null }) {
+  const rarityData = RARITIES[rarity];
+  const slotIndex = EQUIPMENT_SLOTS.findIndex((entry) => entry.id === slot) + 1;
+  const power = Math.round((slotIndex + 2 + variant) * rarityData.multiplier);
+  const stats = baseStats(slot, power);
+  return {
+    id, catalogId: id, name, type: 'equipment', slot, rarity, biome, color,
+    classId, enhancement: 0, stats, value: Math.round((35 + power * 13) * rarityData.multiplier),
+    source, quantity: 1, durability: 100, maxDurability: 100,
+  };
+}
+
+const generated = [];
+for (const [biome, biomeName, color] of BIOMES) {
+  for (const slot of EQUIPMENT_SLOTS) {
+    for (const [rarity, rarityData] of Object.entries(RARITIES)) {
+      for (let variant = 0; variant < 6; variant += 1) {
+        const weaponClass = slot.id === 'weapon' ? CLASS_IDS[variant % CLASS_IDS.length] : null;
+        const baseName = slot.id === 'weapon' ? CLASS_WEAPONS[weaponClass] : slot.name;
+        generated.push(createEquipment({
+          id: `eq-${biome}-${slot.id}-${rarity}-${variant}`,
+          name: `${biomeName} ${VARIANTS[variant]} ${baseName}`,
+          slot: slot.id, rarity, biome, color, variant, classId: weaponClass,
+        }));
+      }
+    }
+  }
+}
+
+// 120 named class relics complete the catalog at exactly 3,000 pieces.
+for (const classId of CLASS_IDS) {
+  for (let variant = 0; variant < 24; variant += 1) {
+    const [biome, biomeName, color] = BIOMES[variant % BIOMES.length];
+    generated.push(createEquipment({
+      id: `relic-${classId}-${variant}`,
+      name: `${biomeName} 서약의 ${CLASS_WEAPONS[classId]} · ${variant + 1}식`,
+      slot: 'weapon', rarity: 'unique', biome, color, variant: variant % 6, classId, source: 'class-relic',
+    }));
+  }
+}
+
+export const EQUIPMENT_CATALOG = generated;
+export const EQUIPMENT_COUNT = EQUIPMENT_CATALOG.length;
+export const getRarity = (id) => RARITIES[id] ?? RARITIES.normal;
+export const getSlot = (id) => EQUIPMENT_SLOTS.find((slot) => slot.id === id);
+
+function cloneItem(item, suffix = '') {
+  return { ...item, id: `${item.catalogId}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}${suffix}`, stats: { ...item.stats } };
+}
+
+export function equipmentForMonster(monster, classId, level = 1) {
+  const special = ['B', 'A', 'S'].includes(monster.rank);
+  const boss = ['A', 'S'].includes(monster.rank);
+  const roll = Math.random();
+  let rarity = null;
+  if (boss && roll < 0.0002) rarity = 'mythic';
+  else if (boss && roll < 0.0015) rarity = 'legendary';
+  else if (special && roll < 0.012) rarity = 'unique';
+  else if (roll < 0.09) rarity = 'rare';
+  else if (roll < 0.38) rarity = 'normal';
+  if (!rarity) return null;
+  const eligible = EQUIPMENT_CATALOG.filter((item) => item.biome === monster.biome && item.rarity === rarity && (!item.classId || item.classId === classId));
+  const base = eligible[Math.floor(Math.random() * eligible.length)];
+  if (!base) return null;
+  const item = cloneItem(base);
+  item.level = Math.max(1, level);
+  if (Math.random() < 0.16) {
+    item.name = `쓰러진 모험가의 ${base.name}`;
+    item.source = `fallen-${monster.id}`;
+    item.stats = Object.fromEntries(Object.entries(item.stats).map(([key, value]) => [key, Math.ceil(value * 1.12)]));
+  } else item.source = monster.id;
+  return item;
+}
+
+export function shopEquipment(classId, level = 1) {
+  const pool = EQUIPMENT_CATALOG.filter((item) => ['normal', 'rare'].includes(item.rarity) && (!item.classId || item.classId === classId));
+  const seed = Math.floor(Date.now() / 3600000) + level * 17;
+  return Array.from({ length: 8 }, (_, index) => cloneItem(pool[(seed * (index + 3) * 97) % pool.length], `-shop-${index}`));
+}
+
+export function classCouponWeapon(classId) {
+  const base = EQUIPMENT_CATALOG.find((item) => item.source === 'class-relic' && item.classId === classId);
+  return cloneItem(base, '-coupon');
+}
+
+export function enhancementStats(item) {
+  const multiplier = 1 + (item.enhancement ?? 0) * 0.11 + Math.max(0, (item.enhancement ?? 0) - 10) * 0.025;
+  const durability = durabilityMultiplier(item);
+  return Object.fromEntries(Object.entries(item.stats).map(([key, value]) => [key, Math.round(value * multiplier * durability)]));
+}
+
+export function durabilityMultiplier(item) {
+  const ratio = (item.durability ?? 100) / (item.maxDurability ?? 100);
+  if (ratio <= 0) return 0.1;
+  if (ratio < 0.25) return 0.25;
+  if (ratio < 0.5) return 0.5;
+  if (ratio < 0.75) return 0.75;
+  return 1;
+}
+
+export function masterEquipmentSet(classId) {
+  const desired = ['helmet', 'armor', 'gloves', 'boots', 'weapon', 'necklace', 'ring', 'ring', 'earring', 'earring'];
+  const usage = {};
+  return desired.map((slot) => {
+    const candidates = EQUIPMENT_CATALOG.filter((item) => item.slot === slot && item.rarity === 'mythic' && (!item.classId || item.classId === classId));
+    const index = usage[slot] ?? 0;
+    usage[slot] = index + 1;
+    const item = cloneItem(candidates[index % candidates.length], '-master');
+    return { ...item, enhancement: 20, durability: 100, maxDurability: 100, source: 'master-account' };
+  });
+}
+
+export function equipmentDisplayName(item) {
+  return `${item.enhancement > 0 ? `+${item.enhancement} ` : ''}${item.name}`;
+}
+
+export function catalogStats() {
+  return { total: EQUIPMENT_COUNT, rarities: Object.keys(RARITIES).length, monsterFamilies: new Set(MONSTERS.map((monster) => monster.biome)).size };
+}

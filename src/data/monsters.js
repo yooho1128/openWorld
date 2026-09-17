@@ -1,4 +1,4 @@
-// Twelve regional families x ten species = 120 illustrated monsters.
+// Twelve regional families x twenty species = 240 illustrated monsters.
 // Every entry is deterministic so saves and the bestiary keep stable ids.
 const BIOMES = [
   { id: 'forest', label: '숲', primary: 0x5d9b45, secondary: 0xb7d86a, accent: 0xf5d66f },
@@ -26,6 +26,16 @@ const SPECIES = [
   { id: 'dragon', label: '드래곤', rank: 'S', body: 'dragon' },
   { id: 'demon', label: '악마', rank: 'A', body: 'demon' },
   { id: 'mazoku', label: '마족', rank: 'A', body: 'mazoku' },
+  { id: 'troll', label: '트롤', rank: 'C', body: 'ogre' },
+  { id: 'harpy', label: '하피', rank: 'D', body: 'wyvern' },
+  { id: 'basilisk', label: '바실리스크', rank: 'B', body: 'beast' },
+  { id: 'lich', label: '리치', rank: 'A', body: 'demon' },
+  { id: 'behemoth', label: '베히모스', rank: 'S', body: 'ogre' },
+  { id: 'griffin', label: '그리핀', rank: 'B', body: 'wyvern' },
+  { id: 'mimic', label: '미믹', rank: 'C', body: 'golem' },
+  { id: 'hydra', label: '히드라', rank: 'A', body: 'dragon' },
+  { id: 'vampire', label: '흡혈귀', rank: 'A', body: 'mazoku' },
+  { id: 'titan', label: '고대 거신', rank: 'S', body: 'golem' },
 ];
 
 const TRAITS = {

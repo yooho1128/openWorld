@@ -1,19 +1,56 @@
 export const CLASSES = [
-  { id: 'warrior', name: '수호 전사', icon: '⚔', color: 0xb95d46, hp: 145, mp: 35, attack: 18, defense: 13, skill: '방패 강타', skillPower: 1.7, description: '높은 체력과 방어력으로 전선을 지킨다.' },
-  { id: 'mage', name: '원소 마도사', icon: '✦', color: 0x745fc7, hp: 92, mp: 90, attack: 24, defense: 7, skill: '별불꽃', skillPower: 2.25, description: '강력한 마법으로 한 번에 큰 피해를 준다.' },
-  { id: 'ranger', name: '황야 추적자', icon: '➶', color: 0x4f9860, hp: 112, mp: 55, attack: 21, defense: 9, skill: '삼연사', skillPower: 1.95, description: '빠르고 안정적인 원거리 공격에 능하다.' },
-  { id: 'cleric', name: '새벽 성직자', icon: '✚', color: 0xd0aa55, hp: 120, mp: 75, attack: 15, defense: 11, skill: '성스러운 빛', skillPower: 1.55, heal: 30, description: '회복과 성광으로 오래 싸울 수 있다.' },
-  { id: 'rogue', name: '그림자 도적', icon: '◆', color: 0x4f596b, hp: 104, mp: 50, attack: 23, defense: 8, skill: '급소 찌르기', skillPower: 2.1, description: '치명타와 전리품 획득에 유리하다.' },
+  { id: 'warrior', name: '수호 전사', icon: '⚔', color: 0xb95d46, hp: 145, mp: 35, attack: 18, defense: 13, agility: 8, skill: '방패 강타', skillPower: 1.7, description: '높은 체력과 방어력으로 전선을 지킨다.' },
+  { id: 'mage', name: '원소 마도사', icon: '✦', color: 0x745fc7, hp: 92, mp: 90, attack: 24, defense: 7, agility: 11, skill: '별불꽃', skillPower: 2.25, description: '강력한 마법으로 한 번에 큰 피해를 준다.' },
+  { id: 'ranger', name: '황야 추적자', icon: '➶', color: 0x4f9860, hp: 112, mp: 55, attack: 21, defense: 9, agility: 18, skill: '삼연사', skillPower: 1.95, description: '빠르고 안정적인 원거리 공격에 능하다.' },
+  { id: 'cleric', name: '새벽 성직자', icon: '✚', color: 0xd0aa55, hp: 120, mp: 75, attack: 15, defense: 11, agility: 9, skill: '성스러운 빛', skillPower: 1.55, heal: 30, description: '회복과 성광으로 오래 싸울 수 있다.' },
+  { id: 'rogue', name: '그림자 도적', icon: '◆', color: 0x4f596b, hp: 104, mp: 50, attack: 23, defense: 8, agility: 23, skill: '급소 찌르기', skillPower: 2.1, description: '치명타와 전리품 획득에 유리하다.' },
 ];
 
-export const REGIONS = [
-  { id: 'forest', name: '속삭이는 숲', subtitle: '초보 사냥터', minLevel: 1, danger: 1, color: 0x4c8b4b },
-  { id: 'frozen', name: '서리왕의 설원', subtitle: '빙결 몬스터 출몰', minLevel: 3, danger: 2, color: 0x79b9d9 },
-  { id: 'blood', name: '피의 협곡', subtitle: '광폭한 오크 부족', minLevel: 5, danger: 3, color: 0xa63843 },
-  { id: 'swamp', name: '독안개 늪지', subtitle: '맹독에 주의', minLevel: 7, danger: 4, color: 0x687746 },
-  { id: 'volcanic', name: '용암 심장부', subtitle: '화염룡의 둥지', minLevel: 10, danger: 5, color: 0xc54a30 },
-  { id: 'abyss', name: '끝없는 심연', subtitle: '마족의 왕좌', minLevel: 14, danger: 6, color: 0x59437f },
+export const ADVANCEMENTS = {
+  warrior: [
+    { id: 'berserker', name: '광전사', color: 0xc9473c, skills: [{ name: '피의 폭주', power: 2.8, cost: 18, effect: 'rage' }, { name: '대지 가르기', power: 2.2, cost: 14, effect: 'quake' }] },
+    { id: 'guardian', name: '성벽 기사', color: 0x6485a8, skills: [{ name: '철벽 반격', power: 1.7, cost: 12, effect: 'shield' }, { name: '왕국의 방패', power: 1.2, cost: 16, effect: 'barrier' }] },
+  ],
+  mage: [
+    { id: 'archmage', name: '대마도사', color: 0x8d63df, skills: [{ name: '메테오', power: 3.2, cost: 24, effect: 'meteor' }, { name: '마력 폭풍', power: 2.45, cost: 17, effect: 'arcane' }] },
+    { id: 'frostweaver', name: '빙결술사', color: 0x6abfe6, skills: [{ name: '절대영도', power: 2.6, cost: 20, effect: 'frost' }, { name: '서리 감옥', power: 1.9, cost: 14, effect: 'freeze' }] },
+  ],
+  ranger: [
+    { id: 'sniper', name: '천공 저격수', color: 0x65a95f, skills: [{ name: '혜성 저격', power: 3.0, cost: 20, effect: 'snipe' }, { name: '화살비', power: 2.2, cost: 15, effect: 'arrows' }] },
+    { id: 'beastmaster', name: '마수 조련사', color: 0x8b7946, skills: [{ name: '야수의 포효', power: 2.35, cost: 17, effect: 'beast' }, { name: '독수리 강습', power: 2.0, cost: 13, effect: 'eagle' }] },
+  ],
+  cleric: [
+    { id: 'paladin', name: '성광 성기사', color: 0xe0bb55, skills: [{ name: '천벌', power: 2.6, cost: 19, effect: 'holy' }, { name: '성역', power: 1.4, cost: 17, effect: 'sanctuary', heal: 42 }] },
+    { id: 'oracle', name: '별의 예언자', color: 0xd3c68c, skills: [{ name: '운명의 별빛', power: 2.3, cost: 17, effect: 'stars' }, { name: '시간 치유', power: 1.2, cost: 15, effect: 'time', heal: 55 }] },
+  ],
+  rogue: [
+    { id: 'assassin', name: '심연 암살자', color: 0x494461, skills: [{ name: '그림자 처형', power: 3.15, cost: 21, effect: 'shadow' }, { name: '독무', power: 2.1, cost: 14, effect: 'poison' }] },
+    { id: 'trickster', name: '환영 괴도', color: 0x7d689b, skills: [{ name: '환영 난무', power: 2.65, cost: 18, effect: 'illusion' }, { name: '운명 훔치기', power: 2.0, cost: 13, effect: 'fortune' }] },
+  ],
+};
+
+const REGION_BLUEPRINTS = [
+  ['forest', '속삭이는 숲', '초보 사냥터', 1, 0x4c8b4b], ['frozen', '서리왕의 설원', '빙결 몬스터 출몰', 3, 0x79b9d9],
+  ['blood', '피의 협곡', '광폭한 오크 부족', 5, 0xa63843], ['swamp', '독안개 늪지', '맹독에 주의', 7, 0x687746],
+  ['volcanic', '용암 심장부', '화염룡의 둥지', 10, 0xc54a30], ['abyss', '끝없는 심연', '마족의 전초기지', 14, 0x59437f],
+  ['desert', '태양이 잠든 사막', '모래 아래의 포식자', 20, 0xc99548], ['storm', '뇌명의 고원', '번개를 먹는 마수', 30, 0x586e9e],
+  ['undead', '망자의 공동묘지', '죽지 못한 군단', 45, 0x66766f], ['crystal', '수정 미궁', '반사되는 마력', 60, 0x6e62b5],
+  ['demonic', '마계 균열', '악마 군단의 침공', 80, 0x70273f], ['celestial', '별빛 성역', '타락한 천상의 수호자', 105, 0xc9b66a],
+  ['forest', '세계수의 뿌리', '고대 정령의 시험', 135, 0x397d45], ['frozen', '영겁빙하', '시간마저 얼어붙은 땅', 170, 0x64b6dc],
+  ['blood', '붉은 왕의 전장', '피로 물든 정복자의 길', 210, 0x8f2635], ['swamp', '멸망의 독해', '숨 쉬는 늪의 심장', 255, 0x536936],
+  ['volcanic', '태초 화산', '고룡이 깨어난 불바다', 305, 0xb93d26], ['storm', '폭풍신의 계단', '하늘을 찢는 천둥', 360, 0x4b6295],
+  ['abyss', '공허의 회랑', '별을 삼킨 그림자', 420, 0x433268], ['undead', '영혼왕의 묘역', '망령 군주의 궁전', 485, 0x566961],
+  ['crystal', '천공 수정궁', '차원을 비추는 보석', 555, 0x6255aa], ['demonic', '일곱 지옥문', '마왕들의 사냥터', 630, 0x612034],
+  ['celestial', '신들의 폐허', '몰락한 신성의 잔향', 710, 0xbca653], ['desert', '시간의 모래바다', '천 년을 걷는 거신', 795, 0xb6813b],
+  ['frozen', '절대영도의 왕좌', '빙하룡 황제의 영토', 885, 0x5ea9cd], ['blood', '종말의 붉은 달', '재앙이 내려앉은 전장', 950, 0x7f1f30],
+  ['abyss', '세계의 끝', '최후의 마신이 기다리는 곳', 999, 0x33244f],
 ];
+
+export const REGIONS = REGION_BLUEPRINTS.map(([biome, name, subtitle, minLevel, color], index) => ({
+  id: index < 6 ? biome : `${biome}-${minLevel}`,
+  biome, name, subtitle, minLevel, color,
+  danger: Math.min(10, 1 + Math.floor(index / 3)),
+}));
 
 export const NPCS = [
   { id: 'merchant', name: '상인 리아', role: '왕국 상인', persona: '눈치가 빠르고 실용적인 여성 상인. 친한 손님에게는 정이 많지만 무례한 손님에게는 값을 올린다.', color: 0xc18a45 },
@@ -32,6 +69,9 @@ export const COMPANIONS = [
 ];
 
 export function getClass(id) { return CLASSES.find((entry) => entry.id === id); }
+export function getAdvancement(id) {
+  return Object.values(ADVANCEMENTS).flat().find((entry) => entry.id === id);
+}
 export function getNpc(id) { return NPCS.find((entry) => entry.id === id); }
 export function getCompanion(id) { return COMPANIONS.find((entry) => entry.id === id); }
 

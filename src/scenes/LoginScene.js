@@ -1,6 +1,11 @@
 import Phaser from 'phaser';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
+import { createMasterCharacter, ensureRpgCharacter, saveCharacter } from '../state/rpgCharacter.js';
+
+const MASTER_ACCOUNTS = {
+  '마스터_전사': 'warrior', '마스터_마법사': 'mage', '마스터_궁수': 'ranger', '마스터_성직자': 'cleric', '마스터_도적': 'rogue',
+};
 
 export class LoginScene extends Phaser.Scene {
   constructor() { super('Login'); }
@@ -32,6 +37,15 @@ export class LoginScene extends Phaser.Scene {
   async submit() {
     const nickname = qs('nickname').value.trim();
     if (!nickname) { qs('login-error').textContent = '별명을 입력해주세요.'; return; }
+    if (MASTER_ACCOUNTS[nickname]) {
+      const character = createMasterCharacter(nickname, MASTER_ACCOUNTS[nickname]);
+      this.registry.set('nickname', nickname);
+      this.registry.set('character', character);
+      saveCharacter(this);
+      closePanel();
+      this.scene.start('Town');
+      return;
+    }
     qs('login-error').textContent = '길드 기록을 찾는 중...';
     try {
       const response = await fetch(`/api/character?nickname=${encodeURIComponent(nickname)}`);
@@ -39,7 +53,7 @@ export class LoginScene extends Phaser.Scene {
         const { character } = await response.json();
         if (character?.version === 'rpg-1') {
           this.registry.set('nickname', nickname);
-          this.registry.set('character', character);
+          this.registry.set('character', ensureRpgCharacter(character));
           closePanel();
           this.scene.start(character.classId ? 'Town' : 'ClassSelect');
           return;
