@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless';
-import { adminPasswordConfigured, verifyAdminPassword } from '../lib/adminAuth.js';
+import { adminPasswordConfigured, hasValidAdminSession, isMasterNickname, verifyAdminPassword } from '../lib/adminAuth.js';
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
@@ -20,17 +20,21 @@ async function ensureTable() {
 }
 
 // Reusable coupon-management tool: create/update, list, or disable coupon
-// codes directly against the coupons table, without a code deploy. Guarded
-// by the same admin password as /api/admin-login (no game account/cookie
-// needed - this is an ops tool, not a player-facing endpoint).
+// codes directly against the coupons table, without a code deploy. Two ways
+// in: the same admin-login session cookie the in-game Settings screen
+// already holds for a logged-in master account, or the raw admin password
+// for scripting/curl use outside the browser.
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'method_not_allowed' });
   }
   if (!sql) return res.status(503).json({ ok: false, error: 'database_not_configured' });
-  if (!adminPasswordConfigured()) return res.status(503).json({ ok: false, error: 'admin_password_not_configured' });
-  if (!verifyAdminPassword(req.body?.password)) return res.status(401).json({ ok: false, error: 'invalid_password' });
+
+  const nickname = typeof req.body?.nickname === 'string' ? req.body.nickname.trim() : '';
+  const hasSession = nickname && isMasterNickname(nickname) && hasValidAdminSession(req, nickname);
+  const hasPassword = adminPasswordConfigured() && verifyAdminPassword(req.body?.password);
+  if (!hasSession && !hasPassword) return res.status(401).json({ ok: false, error: 'unauthorized' });
 
   await ensureTable();
   const action = typeof req.body?.action === 'string' ? req.body.action : 'create';

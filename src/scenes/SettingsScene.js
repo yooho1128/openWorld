@@ -17,12 +17,27 @@ export class SettingsScene extends Phaser.Scene {
 
   render(message = '') {
     const adminJobs = this.character.isAdmin ? (ADVANCEMENTS[this.character.classId] ?? []).map((job, index) => `<button id="admin-job-${index}" class="secondary">전직 테스트: ${job.name}</button>`).join('') : '';
+    const couponAdminHtml = this.character.isAdmin ? `
+        <h3>쿠폰 관리</h3>
+        <label for="admin-coupon-code">쿠폰 코드</label><input id="admin-coupon-code" maxlength="60" placeholder="새 쿠폰 코드" autocomplete="off" />
+        <label for="admin-coupon-effect">효과</label>
+        <select id="admin-coupon-effect">
+          <option value="gold">골드 지급</option>
+          <option value="weapon">직업 유니크 무기 지급</option>
+          <option value="drain">골드 전부 삭제(장난용)</option>
+        </select>
+        <label for="admin-coupon-amount">골드량 (골드 지급일 때만)</label><input id="admin-coupon-amount" type="number" min="0" placeholder="예: 200000" />
+        <label style="display:flex;align-items:center;gap:6px;"><input id="admin-coupon-reusable" type="checkbox" style="width:auto;" />여러 번 사용 가능(재사용)</label>
+        <button id="admin-coupon-submit" class="secondary">쿠폰 등록/수정</button>
+        <button id="admin-coupon-list" class="secondary">등록된 쿠폰 목록 보기</button>
+    ` : '';
     openPanel(`
       <div class="panel"><h2>게임 설정</h2>
         <label for="coupon-code">쿠폰 코드</label><input id="coupon-code" maxlength="40" placeholder="쿠폰 코드를 입력하세요" autocomplete="off" />
         ${message ? `<p class="trade-message">${message}</p>` : ''}
         <button id="coupon-submit">쿠폰 사용</button>
         ${this.character.isAdmin ? `<h3>운영자 전용</h3><p class="gold-line">전직을 바꾸면 해당 전직 스킬을 즉시 테스트할 수 있습니다.</p>${adminJobs}` : ''}
+        ${couponAdminHtml}
         <button id="settings-back" class="secondary">길드로 돌아가기</button>
       </div>
     `);
@@ -32,6 +47,8 @@ export class SettingsScene extends Phaser.Scene {
       saveCharacter(this);
       this.render(`${job.name}(으)로 전직 테스트 상태를 변경했습니다.`);
     }));
+    qs('admin-coupon-submit')?.addEventListener('click', () => this.createCoupon());
+    qs('admin-coupon-list')?.addEventListener('click', () => this.listCoupons());
     qs('settings-back').addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Town'); });
   }
 
@@ -75,5 +92,46 @@ export class SettingsScene extends Phaser.Scene {
     this.character.gold = 0;
     saveCharacter(this);
     this.render('쿠폰의 악마 같은 힘으로 보유 골드가 모두 사라졌습니다.');
+  }
+
+  // Admin-only: create or update a coupon directly in the coupons table, no
+  // code deploy needed. Auth rides the same admin-login session cookie used
+  // to reach this screen in the first place.
+  async createCoupon() {
+    const code = qs('admin-coupon-code').value.trim();
+    if (!code) return this.render('쿠폰 코드를 입력하세요.');
+    const effect = qs('admin-coupon-effect').value;
+    const amountRaw = qs('admin-coupon-amount').value.trim();
+    const amount = amountRaw ? Number(amountRaw) : null;
+    const reusable = qs('admin-coupon-reusable').checked;
+    let result;
+    try {
+      const response = await fetch('/api/admin-coupon', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: this.registry.get('nickname'), action: 'create', code, effect, amount, reusable }),
+      });
+      result = await response.json();
+    } catch {
+      return this.render('쿠폰 관리 서버에 연결할 수 없습니다.');
+    }
+    if (!result.ok) return this.render(`쿠폰 등록 실패: ${result.error ?? '알 수 없는 오류'}`);
+    this.render(`쿠폰 「${code}」 등록 완료! (${effect}${amount ? ` · ${amount.toLocaleString()}G` : ''}${reusable ? ' · 재사용가능' : ''})`);
+  }
+
+  async listCoupons() {
+    let result;
+    try {
+      const response = await fetch('/api/admin-coupon', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: this.registry.get('nickname'), action: 'list' }),
+      });
+      result = await response.json();
+    } catch {
+      return this.render('쿠폰 관리 서버에 연결할 수 없습니다.');
+    }
+    if (!result.ok) return this.render(`쿠폰 목록 조회 실패: ${result.error ?? '알 수 없는 오류'}`);
+    if (!result.coupons.length) return this.render('등록된 쿠폰이 없습니다.');
+    const lines = result.coupons.map((c) => `${c.code} · ${c.effect}${c.amount ? ` ${Number(c.amount).toLocaleString()}G` : ''}${c.reusable ? ' · 재사용' : ''}${c.enabled ? '' : ' · 비활성'}`);
+    this.render(lines.join('<br>'));
   }
 }
