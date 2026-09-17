@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { getClass, getAdvancement } from '../data/rpg.js';
 import { getRarity, getSlot, equipmentDisplayName, enhancementStats } from '../data/equipment.js';
+import { BIOME_LABELS } from '../data/monsters.js';
 import { combatStats, ensureRpgCharacter, equipItem, unequipItem, saveCharacter } from '../state/rpgCharacter.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
@@ -43,11 +44,18 @@ export class StatusScene extends Phaser.Scene {
       const blocked = item.classId && item.classId !== c.classId;
       return `<div class="gear-card rarity-${item.rarity}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}</small><small>${statsText}</small></div><button id="equip-${index}" ${blocked ? 'disabled' : ''}>${blocked ? '타 직업' : '착용'}</button></div>`;
     }).join('') : '<p class="empty-state">착용할 장비가 없습니다.</p>';
+    const setBonus = stats.setBonus;
+    const setBonusHtml = setBonus?.tier
+      ? `<div class="relationship friendly">세트 효과 · ${BIOME_LABELS[setBonus.biome]} 계열 ${setBonus.count}종 · 전체 스탯 +${Math.round(setBonus.tier.statMultiplier * 100)}%</div>`
+      : setBonus?.count > 0
+        ? `<div class="relationship hostile">세트 효과 없음 · ${BIOME_LABELS[setBonus.biome]} 계열 ${setBonus.count}종 (3종부터 발동)</div>`
+        : '';
     openPanel(`
       <div class="panel status-panel">
         <h2>${c.name} · Lv.${c.level}</h2>
         <div class="class-badge">${advancement?.name ?? job.name}</div>
         <div class="stat-grid"><span>HP <strong>${c.hp}/${stats.maxHp}</strong></span><span>MP <strong>${c.mp}/${stats.maxMp}</strong></span><span>공격력 <strong>${stats.attack}</strong></span><span>방어력 <strong>${stats.defense}</strong></span><span>민첩 <strong>${stats.agility}</strong></span><span>탈주 확률 <strong>적과 비교 계산</strong></span></div>
+        ${setBonusHtml}
         ${message ? `<p class="trade-message">${message}</p>` : ''}
         <h3>착용 장비</h3><div class="equipped-grid">${equippedHtml}</div>
         <h3>장비 가방</h3><div class="gear-list">${bagHtml}</div>

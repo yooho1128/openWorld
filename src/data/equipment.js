@@ -150,6 +150,34 @@ export function masterEquipmentSet(classId) {
   });
 }
 
+// 같은 지역(biome) 장비를 여러 개 착용하면 전체 스탯에 보너스를 준다.
+export const SET_BONUS_TIERS = [
+  { count: 3, statMultiplier: 0.06 },
+  { count: 5, statMultiplier: 0.14 },
+  { count: 8, statMultiplier: 0.25 },
+];
+
+export function equipmentSetBonus(items) {
+  const counts = {};
+  for (const item of items) {
+    if (!item?.biome) continue;
+    counts[item.biome] = (counts[item.biome] ?? 0) + 1;
+  }
+  let bestBiome = null;
+  let bestCount = 0;
+  for (const [biome, count] of Object.entries(counts)) {
+    if (count > bestCount) {
+      bestCount = count;
+      bestBiome = biome;
+    }
+  }
+  let tier = null;
+  for (const candidate of SET_BONUS_TIERS) {
+    if (bestCount >= candidate.count) tier = candidate;
+  }
+  return { biome: bestBiome, count: bestCount, tier, multiplier: tier?.statMultiplier ?? 0 };
+}
+
 export function equipmentDisplayName(item) {
   return `${item.enhancement > 0 ? `+${item.enhancement} ` : ''}${item.name}`;
 }

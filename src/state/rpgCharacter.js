@@ -1,9 +1,10 @@
-import { ADVANCEMENTS, getClass, xpForLevel } from '../data/rpg.js';
-import { enhancementStats, masterEquipmentSet } from '../data/equipment.js';
+import { ADVANCEMENTS, getClass, getCompanion, xpForLevel } from '../data/rpg.js';
+import { enhancementStats, masterEquipmentSet, equipmentSetBonus } from '../data/equipment.js';
 
 export function ensureRpgCharacter(character) {
   character.inventory ??= [];
   character.companions ??= [];
+  character.companionProgress ??= {};
   character.affinity ??= { merchant: 0, guildmaster: 0, innkeeper: 0, blacksmith: 0 };
   character.dialogueHistory ??= {};
   character.hunted ??= {};
@@ -73,10 +74,56 @@ export function equippedItems(character) {
   return [equipment.helmet, equipment.armor, equipment.gloves, equipment.boots, equipment.weapon, equipment.necklace, ...equipment.rings, ...equipment.earrings].filter(Boolean);
 }
 
+// 동료는 모집 후에도 전투마다 유대 경험치를 얻어 성장한다 (5레벨마다 각성으로 위력 강화).
+export function companionBondXpForLevel(level) {
+  return 40 + level * 20;
+}
+
+export function ensureCompanionProgress(character, companionId) {
+  ensureRpgCharacter(character);
+  if (!character.companionProgress[companionId]) {
+    character.companionProgress[companionId] = { level: 1, xp: 0 };
+  }
+  return character.companionProgress[companionId];
+}
+
+export function companionStats(character, companionId) {
+  const base = getCompanion(companionId);
+  if (!base) return null;
+  const progress = ensureCompanionProgress(character, companionId);
+  const bondLevel = progress.level;
+  const awakenings = Math.floor((bondLevel - 1) / 5);
+  return {
+    id: companionId,
+    level: bondLevel,
+    xp: progress.xp,
+    xpToNext: companionBondXpForLevel(bondLevel),
+    attack: base.attack + Math.round((bondLevel - 1) * 2.2),
+    defense: base.defense + Math.round((bondLevel - 1) * 1.4),
+    hp: base.hp + Math.round((bondLevel - 1) * 8),
+    heal: base.heal ? base.heal + Math.round((bondLevel - 1) * 1.2) : undefined,
+    abilityMultiplier: 1 + awakenings * 0.15,
+    awakenings,
+  };
+}
+
+export function grantCompanionXp(character, companionId, amount) {
+  const progress = ensureCompanionProgress(character, companionId);
+  const levels = [];
+  progress.xp += Math.max(0, amount);
+  while (progress.level < 60 && progress.xp >= companionBondXpForLevel(progress.level)) {
+    progress.xp -= companionBondXpForLevel(progress.level);
+    progress.level += 1;
+    levels.push(progress.level);
+  }
+  return levels;
+}
+
 export function combatStats(character) {
   ensureRpgCharacter(character);
   const totals = { attack: character.attack, defense: character.defense, agility: character.agility ?? 10, maxHp: character.maxHp, maxMp: character.maxMp };
-  for (const item of equippedItems(character)) {
+  const items = equippedItems(character);
+  for (const item of items) {
     const stats = enhancementStats(item);
     totals.attack += stats.attack ?? 0;
     totals.defense += stats.defense ?? 0;
@@ -84,6 +131,15 @@ export function combatStats(character) {
     totals.maxMp += stats.mp ?? 0;
     totals.agility += stats.agility ?? 0;
   }
+  const setBonus = equipmentSetBonus(items);
+  if (setBonus.multiplier > 0) {
+    const boost = 1 + setBonus.multiplier;
+    totals.attack = Math.round(totals.attack * boost);
+    totals.defense = Math.round(totals.defense * boost);
+    totals.maxHp = Math.round(totals.maxHp * boost);
+    totals.maxMp = Math.round(totals.maxMp * boost);
+  }
+  totals.setBonus = setBonus;
   return totals;
 }
 
