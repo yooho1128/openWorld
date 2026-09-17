@@ -220,6 +220,14 @@
       .rank-top.rank-3 { background: linear-gradient(105deg, #e8c5a6, #cf9a6f); border-color: #a9713f; }
       .rank-top .rank-num { font-size: 15px; }
       .rank-mine { outline: 2px solid #4a7fd1; }
+      .mail-panel { width: min(430px, 100%) !important; }
+      .mail-list { display: flex; flex-direction: column; gap: 7px; margin: 8px 0; max-height: 55vh; overflow-y: auto; }
+      .mail-row { display: flex; align-items: center; gap: 9px; padding: 8px; background: #ead8b1; border: 1px solid #a78955; border-radius: 5px; font-family: 'Malgun Gothic', sans-serif; }
+      .mail-copy { flex: 1; min-width: 0; }
+      .mail-copy small { display: block; color: #6c573b; font-size: 10px; margin-top: 2px; }
+      .mail-attach { color: #8b5c1e !important; font-weight: 700; }
+      #overlay .mail-row button { width: auto; margin: 0; padding: 7px 9px; flex: 0 0 auto; font-size: 11px; }
+      #overlay button#claim-all { background: linear-gradient(#4d725f, #29483a); border-color: #8fc29f; }
     </style>
   </head>
   <body>
