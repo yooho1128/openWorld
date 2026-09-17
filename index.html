@@ -118,7 +118,6 @@
       }
       #overlay button:hover { filter: brightness(1.14); transform: translateY(-1px); }
       #overlay button:active { transform: translateY(2px); box-shadow: 0 1px 0 #24130e; }
-      }
       #overlay button.secondary {
         background: linear-gradient(#536052, #313b32);
         margin-top: 8px;
@@ -149,6 +148,23 @@
         border-color: #748451;
         align-self: flex-end;
       }
+      .relationship { margin: 0 0 10px; padding: 6px 9px; border-radius: 4px; font: 700 12px 'Malgun Gothic', sans-serif; text-align: center; }
+      .relationship.friendly { background: #b7c99c; color: #30401f; border: 1px solid #72814f; }
+      .relationship.hostile { background: #d6a49a; color: #671f1c; border: 1px solid #9c554c; }
+      .gold-line { font-size: 13px; text-align: center; color: #5d452b; }
+      .trade-message { background: #fff0c6; border: 1px solid #a9874f; padding: 7px; border-radius: 4px; font-size: 12px; }
+      .inventory-list, .companion-list { display: flex; flex-direction: column; gap: 7px; margin: 10px 0; }
+      .inventory-row, .companion-card { display: flex; align-items: center; gap: 9px; padding: 8px; background: #ead8b1; border: 1px solid #a78955; border-radius: 5px; font-family: 'Malgun Gothic', sans-serif; }
+      .inventory-row > div, .companion-copy { flex: 1; min-width: 0; }
+      .inventory-row small, .companion-copy small { display: block; color: #6c573b; font-size: 10px; margin-top: 2px; }
+      #overlay .inventory-row button, #overlay .companion-card button { width: auto; margin: 0; padding: 7px 9px; flex: 0 0 auto; font-size: 11px; }
+      .companion-card.active { background: #c8d2ab; border-color: #718150; }
+      .companion-avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: #fff0c6; font-weight: bold; border: 2px solid #5c4127; flex: 0 0 auto; }
+      .npc-reply { margin: 12px 0; padding: 13px; background: #f4e6c5; border-left: 4px solid #886138; font: 14px/1.6 'Malgun Gothic', sans-serif; color: #34251a; }
+      .choice-label, .thinking { font-size: 12px; color: #6b5134; text-align: center; }
+      #overlay button.dialogue-choice { margin-top: 7px; text-align: left; background: linear-gradient(#5e4936, #3e2d22); }
+      .conversation-count { display: block; margin-top: 10px; color: #826c4c; text-align: center; font-size: 10px; }
+      .empty-state { text-align: center; color: #786447; font-size: 12px; padding: 18px 4px; }
     </style>
   </head>
   <body>

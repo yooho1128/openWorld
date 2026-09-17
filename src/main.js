@@ -2,14 +2,14 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene.js';
 import { LoginScene } from './scenes/LoginScene.js';
 import { CreateScene } from './scenes/CreateScene.js';
-import { BirthScene } from './scenes/BirthScene.js';
-import { CareerScene } from './scenes/CareerScene.js';
 import { TownScene } from './scenes/TownScene.js';
-import { IndoorScene } from './scenes/IndoorScene.js';
-import { LocationScene } from './scenes/LocationScene.js';
-import { LotteryScene } from './scenes/LotteryScene.js';
-import { EndingScene } from './scenes/EndingScene.js';
 import { MonsterDexScene } from './scenes/MonsterDexScene.js';
+import { ClassScene } from './scenes/ClassScene.js';
+import { HuntScene } from './scenes/HuntScene.js';
+import { BattleScene } from './scenes/BattleScene.js';
+import { InventoryScene } from './scenes/InventoryScene.js';
+import { TavernScene } from './scenes/TavernScene.js';
+import { NPCScene } from './scenes/NPCScene.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -25,7 +25,7 @@ const config = {
     // 2 so a thumb can hold a d-pad direction while the other taps interact.
     activePointers: 2,
   },
-  scene: [BootScene, LoginScene, CreateScene, BirthScene, CareerScene, TownScene, IndoorScene, LocationScene, LotteryScene, EndingScene, MonsterDexScene],
+  scene: [BootScene, LoginScene, CreateScene, ClassScene, TownScene, HuntScene, BattleScene, InventoryScene, TavernScene, NPCScene, MonsterDexScene],
 };
 
 new Phaser.Game(config);
