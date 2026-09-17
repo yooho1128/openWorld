@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { getJobInfo, computeLifeScore } from '../state/character.js';
 import { STATS } from '../data/stats.js';
+import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
 export class EndingScene extends Phaser.Scene {
   constructor() {
@@ -15,9 +16,10 @@ export class EndingScene extends Phaser.Scene {
       return;
     }
 
-    this.add.tileSprite(0, 0, 480, 800, 'ground').setOrigin(0, 0);
-    this.add.text(240, 120, '🕊️', { fontSize: '40px' }).setOrigin(0.5);
-    this.add.text(240, 180, `${this.character.name}의 생애`, { fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
+    addFantasyBackdrop(this, { dark: true });
+    addSceneTitle(this, '마지막 연대기', `${this.character.name}의 모험은 별이 되어 남았습니다`);
+    const spirit = this.add.sprite(240, 220, 'player').setScale(1.8).setAlpha(0.5).setTint(0xcfe8ff);
+    this.tweens.add({ targets: spirit, y: 200, alpha: 0.25, duration: 1800, yoyo: true, repeat: -1 });
 
     this.job = getJobInfo(this.character);
     this.dreamAchieved = !!this.job
@@ -67,8 +69,8 @@ export class EndingScene extends Phaser.Scene {
         ${historyRows || '<div>...</div>'}
         <p><strong>생애 심판</strong></p>
         ${judgmentHtml}
-        <button id="ending-leaderboard" class="secondary">명예의 전당 보기</button>
-        <button id="ending-restart">새로운 인생 시작하기</button>
+        <button id="ending-leaderboard" class="secondary">영웅의 전당 보기</button>
+        <button id="ending-restart">새로운 전설 시작하기</button>
       </div>
     `);
 
@@ -84,7 +86,7 @@ export class EndingScene extends Phaser.Scene {
   async showLeaderboard() {
     openPanel(`
       <div class="panel">
-        <h2>명예의 전당</h2>
+        <h2>영웅의 전당</h2>
         <p><em>불러오는 중...</em></p>
       </div>
     `);
@@ -104,7 +106,7 @@ export class EndingScene extends Phaser.Scene {
 
     openPanel(`
       <div class="panel">
-        <h2>명예의 전당</h2>
+        <h2>영웅의 전당</h2>
         ${rowsHtml}
         <button id="leaderboard-back">돌아가기</button>
       </div>

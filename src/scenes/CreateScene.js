@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { WEALTH_TIERS } from '../data/wealth.js';
 import { createCharacter } from '../state/character.js';
+import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
 // Hidden dev-only override: entering this key sequence on the creation
 // screen reveals a manual "부모님 재산" select so the developer can force a
@@ -19,12 +20,13 @@ export class CreateScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.text(240, 120, '새 캐릭터 만들기', { fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
+    addFantasyBackdrop(this);
+    addSceneTitle(this, '새로운 모험가', '운명의 두루마리에 이름을 새기세요');
 
     openPanel(`
       <div class="panel">
-        <h2>캐릭터 정보</h2>
-        <label for="char-name">이름</label>
+        <h2>모험가의 서약</h2>
+        <label for="char-name">모험가 이름</label>
         <input id="char-name" type="text" maxlength="10" placeholder="이름을 입력하세요" autocomplete="off" />
 
         <label for="char-gender">성별</label>
@@ -32,7 +34,7 @@ export class CreateScene extends Phaser.Scene {
           <option value="male">남성</option>
           <option value="female">여성</option>
         </select>
-        <p style="font-size:12px;color:#999;">직업은 학창시절을 보내며 나중에 정하게 됩니다.</p>
+        <p style="font-size:12px;color:#6b5134;">성장하며 능력을 쌓은 뒤, 성인이 되면 당신만의 길을 선택합니다.</p>
 
         <div id="wealth-override-field" style="display:none;">
           <label for="wealth-override">부모님 재산 (직접 지정)</label>
@@ -43,7 +45,7 @@ export class CreateScene extends Phaser.Scene {
         </div>
 
         <div class="error" id="create-error"></div>
-        <button id="create-submit">태어나기</button>
+        <button id="create-submit">전설 시작하기</button>
       </div>
     `);
 

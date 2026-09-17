@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
+import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
 export class LoginScene extends Phaser.Scene {
   constructor() {
@@ -7,11 +8,14 @@ export class LoginScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.text(240, 200, '인생네컷: 오픈월드', { fontSize: '22px', color: '#ffffff' }).setOrigin(0.5);
-    this.add.text(240, 240, '닉네임으로 이전 캐릭터를 이어하거나\n새 캐릭터를 시작하세요.', {
-      fontSize: '13px',
-      color: '#cccccc',
-      align: 'center',
+    addFantasyBackdrop(this, { dark: true });
+    addSceneTitle(this, '에버글렌 연대기', '당신의 운명이 전설이 되는 곳');
+    const hero = this.add.sprite(240, 238, 'player').setScale(2.4);
+    this.tweens.add({ targets: hero, y: 230, duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.add.sprite(145, 276, 'goblin').setScale(1.25).setAlpha(0.8);
+    this.add.sprite(335, 282, 'slime').setScale(1.35).setAlpha(0.8);
+    this.add.text(240, 330, '모험가의 이름으로 여정을 이어가거나\n새로운 운명을 시작하세요.', {
+      fontSize: '13px', color: '#ddcfad', align: 'center', lineSpacing: 7,
     }).setOrigin(0.5);
 
     this.renderLoginForm();
@@ -20,12 +24,12 @@ export class LoginScene extends Phaser.Scene {
   renderLoginForm() {
     openPanel(`
       <div class="panel">
-        <h2>닉네임 입력</h2>
-        <label for="nickname">닉네임</label>
-        <input id="nickname" type="text" maxlength="20" placeholder="예: 홍길동" autocomplete="off" />
+        <h2>모험가 등록</h2>
+        <label for="nickname">모험가 별명</label>
+        <input id="nickname" type="text" maxlength="20" placeholder="예: 은빛여우" autocomplete="off" />
         <div class="error" id="login-error"></div>
-        <button id="login-submit">이어하기 / 새로 시작</button>
-        <button id="login-leaderboard" class="secondary">명예의 전당 보기</button>
+        <button id="login-submit">운명의 문 열기</button>
+        <button id="login-leaderboard" class="secondary">영웅의 전당</button>
       </div>
     `);
 
@@ -41,7 +45,7 @@ export class LoginScene extends Phaser.Scene {
   async showLeaderboard() {
     openPanel(`
       <div class="panel">
-        <h2>명예의 전당</h2>
+        <h2>영웅의 전당</h2>
         <p><em>불러오는 중...</em></p>
       </div>
     `);
@@ -61,7 +65,7 @@ export class LoginScene extends Phaser.Scene {
 
     openPanel(`
       <div class="panel">
-        <h2>명예의 전당</h2>
+        <h2>영웅의 전당</h2>
         ${rowsHtml}
         <button id="leaderboard-back">돌아가기</button>
       </div>

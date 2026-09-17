@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { getWealthTier } from '../data/wealth.js';
+import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
 // A short click-through intro shown once, right after character creation:
 // parents head to the hospital, the birth happens, and the home the family
@@ -18,7 +19,8 @@ export class BirthScene extends Phaser.Scene {
       return;
     }
 
-    this.add.tileSprite(0, 0, 480, 800, 'ground').setOrigin(0, 0);
+    addFantasyBackdrop(this);
+    addSceneTitle(this, '운명의 첫 장');
     const tier = getWealthTier(this.character.wealthTier);
 
     this.steps = [
