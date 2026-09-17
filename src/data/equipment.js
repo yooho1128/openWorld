@@ -112,6 +112,21 @@ export function equipmentForMonster(monster, classId, level = 1) {
   return item;
 }
 
+// 우두머리(보스) 몬스터를 처치하면 등급과 무관하게 항상 유니크 이상 장비를 확정 지급한다.
+export function guaranteedBossEquipment(monster, classId, level = 1) {
+  const roll = Math.random();
+  const rarity = roll < 0.02 ? 'mythic' : roll < 0.15 ? 'legendary' : 'unique';
+  const pool = EQUIPMENT_CATALOG.filter((item) => item.rarity === rarity && (!item.classId || item.classId === classId));
+  const eligible = pool.filter((item) => item.biome === monster.biome);
+  const base = (eligible.length ? eligible : pool)[Math.floor(Math.random() * (eligible.length ? eligible.length : pool.length))];
+  if (!base) return null;
+  const item = cloneItem(base);
+  item.level = Math.max(1, level);
+  item.name = `${monster.name}의 유산 · ${base.name}`;
+  item.source = `boss-${monster.id}`;
+  return item;
+}
+
 export function shopEquipment(classId, level = 1) {
   const pool = EQUIPMENT_CATALOG.filter((item) => ['normal', 'rare'].includes(item.rarity) && (!item.classId || item.classId === classId));
   const seed = Math.floor(Date.now() / 3600000) + level * 17;
