@@ -112,21 +112,83 @@ export function equipmentForMonster(monster, classId, level = 1) {
   return item;
 }
 
+// 우두머리(보스) 몬스터를 처치하면 등급과 무관하게 항상 유니크 이상 장비를 확정 지급한다.
+export function guaranteedBossEquipment(monster, classId, level = 1) {
+  const roll = Math.random();
+  const rarity = roll < 0.02 ? 'mythic' : roll < 0.15 ? 'legendary' : 'unique';
+  const pool = EQUIPMENT_CATALOG.filter((item) => item.rarity === rarity && (!item.classId || item.classId === classId));
+  const eligible = pool.filter((item) => item.biome === monster.biome);
+  const base = (eligible.length ? eligible : pool)[Math.floor(Math.random() * (eligible.length ? eligible.length : pool.length))];
+  if (!base) return null;
+  const item = cloneItem(base);
+  item.level = Math.max(1, level);
+  item.name = `${monster.name}의 유산 · ${base.name}`;
+  item.source = `boss-${monster.id}`;
+  return item;
+}
+
+// 장비 랜덤 뽑기권: 부위 전체 랜덤, 등급은 노멀 50%/레어 25%/유니크 15%/레전더리 8%/신화 2%.
+const GACHA_RARITY_TABLE = [
+  ['normal', 0.5],
+  ['rare', 0.25],
+  ['unique', 0.15],
+  ['legendary', 0.08],
+  ['mythic', 0.02],
+];
+
+export function rollGachaRarity() {
+  const roll = Math.random();
+  let acc = 0;
+  for (const [rarity, weight] of GACHA_RARITY_TABLE) {
+    acc += weight;
+    if (roll < acc) return rarity;
+  }
+  return GACHA_RARITY_TABLE[0][0];
+}
+
+export function rollGachaEquipment(classId, level = 1) {
+  const rarity = rollGachaRarity();
+  const slot = EQUIPMENT_SLOTS[Math.floor(Math.random() * EQUIPMENT_SLOTS.length)].id;
+  const pool = EQUIPMENT_CATALOG.filter((item) => item.slot === slot && item.rarity === rarity && (!item.classId || item.classId === classId));
+  const base = pool[Math.floor(Math.random() * pool.length)];
+  if (!base) return null;
+  const item = cloneItem(base, '-gacha');
+  item.level = Math.max(1, level);
+  item.source = 'gacha-ticket';
+  return item;
+}
+
 export function shopEquipment(classId, level = 1) {
   const pool = EQUIPMENT_CATALOG.filter((item) => ['normal', 'rare'].includes(item.rarity) && (!item.classId || item.classId === classId));
   const seed = Math.floor(Date.now() / 3600000) + level * 17;
-  return Array.from({ length: 8 }, (_, index) => cloneItem(pool[(seed * (index + 3) * 97) % pool.length], `-shop-${index}`));
+  return Array.from({ length: 8 }, (_, index) => {
+    const item = cloneItem(pool[(seed * (index + 3) * 97) % pool.length], `-shop-${index}`);
+    item.level = Math.max(1, level);
+    return item;
+  });
 }
 
-export function classCouponWeapon(classId) {
+export function classCouponWeapon(classId, level = 1) {
   const base = EQUIPMENT_CATALOG.find((item) => item.source === 'class-relic' && item.classId === classId);
-  return cloneItem(base, '-coupon');
+  const item = cloneItem(base, '-coupon');
+  item.level = Math.max(1, level);
+  return item;
 }
 
-export function enhancementStats(item) {
+// 캐릭터 레벨이 장비 레벨보다 20 이상 높아지면 서서히 성능이 떨어진다
+// (초과분 1레벨당 1%씩, 최대 80% 감소 - 완전히 못 쓰게 되진 않는다).
+// 저레벨 사냥터에서 얻은 장비를 고레벨에서 계속 우려먹지 못하게 하기 위함.
+export function levelEffectiveness(itemLevel, characterLevel) {
+  const gap = (characterLevel ?? 1) - (itemLevel ?? 1);
+  if (gap <= 20) return 1;
+  return 1 - Math.min(0.8, (gap - 20) * 0.01);
+}
+
+export function enhancementStats(item, characterLevel = null) {
   const multiplier = 1 + (item.enhancement ?? 0) * 0.11 + Math.max(0, (item.enhancement ?? 0) - 10) * 0.025;
   const durability = durabilityMultiplier(item);
-  return Object.fromEntries(Object.entries(item.stats).map(([key, value]) => [key, Math.round(value * multiplier * durability)]));
+  const levelFactor = characterLevel != null ? levelEffectiveness(item.level ?? 1, characterLevel) : 1;
+  return Object.fromEntries(Object.entries(item.stats).map(([key, value]) => [key, Math.round(value * multiplier * durability * levelFactor)]));
 }
 
 export function durabilityMultiplier(item) {
@@ -146,8 +208,36 @@ export function masterEquipmentSet(classId) {
     const index = usage[slot] ?? 0;
     usage[slot] = index + 1;
     const item = cloneItem(candidates[index % candidates.length], '-master');
-    return { ...item, enhancement: 20, durability: 100, maxDurability: 100, source: 'master-account' };
+    return { ...item, level: 999, enhancement: 20, durability: 100, maxDurability: 100, source: 'master-account' };
   });
+}
+
+// 같은 지역(biome) 장비를 여러 개 착용하면 전체 스탯에 보너스를 준다.
+export const SET_BONUS_TIERS = [
+  { count: 3, statMultiplier: 0.06 },
+  { count: 5, statMultiplier: 0.14 },
+  { count: 8, statMultiplier: 0.25 },
+];
+
+export function equipmentSetBonus(items) {
+  const counts = {};
+  for (const item of items) {
+    if (!item?.biome) continue;
+    counts[item.biome] = (counts[item.biome] ?? 0) + 1;
+  }
+  let bestBiome = null;
+  let bestCount = 0;
+  for (const [biome, count] of Object.entries(counts)) {
+    if (count > bestCount) {
+      bestCount = count;
+      bestBiome = biome;
+    }
+  }
+  let tier = null;
+  for (const candidate of SET_BONUS_TIERS) {
+    if (bestCount >= candidate.count) tier = candidate;
+  }
+  return { biome: bestBiome, count: bestCount, tier, multiplier: tier?.statMultiplier ?? 0 };
 }
 
 export function equipmentDisplayName(item) {

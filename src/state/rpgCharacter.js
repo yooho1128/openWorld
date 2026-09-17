@@ -1,9 +1,10 @@
-import { ADVANCEMENTS, getClass, xpForLevel } from '../data/rpg.js';
-import { enhancementStats, masterEquipmentSet } from '../data/equipment.js';
+import { ADVANCEMENTS, getClass, getCompanion, xpForLevel } from '../data/rpg.js';
+import { enhancementStats, masterEquipmentSet, equipmentSetBonus, rollGachaEquipment } from '../data/equipment.js';
 
 export function ensureRpgCharacter(character) {
   character.inventory ??= [];
   character.companions ??= [];
+  character.companionProgress ??= {};
   character.affinity ??= { merchant: 0, guildmaster: 0, innkeeper: 0, blacksmith: 0 };
   character.dialogueHistory ??= {};
   character.hunted ??= {};
@@ -13,10 +14,63 @@ export function ensureRpgCharacter(character) {
   character.redeemedCoupons ??= [];
   character.advancementId ??= null;
   character.agility ??= getClass(character.classId)?.agility ?? 10;
+  character.mailbox ??= [];
+  if (!character.mailboxWelcomeGranted) {
+    character.mailboxWelcomeGranted = true;
+    for (let i = 0; i < 10; i += 1) {
+      character.mailbox.push({
+        id: `mail-welcome-${i}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+        title: '길드의 환영 선물',
+        body: '모험을 시작한 것을 축하하며, 무작위 장비를 보냅니다.',
+        gachaEquipment: true,
+        createdAt: Date.now(),
+      });
+    }
+    character.mailbox.push({
+      id: `mail-welcome-gold-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+      title: '길드의 후원금',
+      body: '모험 자금에 보태 쓰라며 길드에서 골드를 보냈습니다.',
+      gold: 50000,
+      createdAt: Date.now(),
+    });
+  }
   const equipment = character.equipment;
   const allItems = [...character.inventory, equipment.helmet, equipment.armor, equipment.gloves, equipment.boots, equipment.weapon, equipment.necklace, ...equipment.rings, ...equipment.earrings].filter((item) => item?.type === 'equipment');
   allItems.forEach((item) => { item.maxDurability ??= 100; item.durability ??= item.maxDurability; });
   return character;
+}
+
+// 우편을 실제로 지급한다. gachaEquipment 우편은 미리 정해둔 아이템이 없고,
+// 수령하는 바로 그 시점의 직업/레벨 기준으로 그 자리에서 장비를 뽑는다.
+function grantMail(character, mail) {
+  let grantedItem = null;
+  if (mail.gold) {
+    character.gold += mail.gold;
+    character.goldEarnedTotal = (character.goldEarnedTotal ?? 0) + mail.gold;
+  }
+  if (mail.gachaEquipment) {
+    grantedItem = rollGachaEquipment(character.classId, character.level);
+    if (grantedItem) addLoot(character, grantedItem);
+  } else if (mail.item) {
+    grantedItem = mail.item;
+    addLoot(character, mail.item);
+  }
+  return grantedItem;
+}
+
+export function claimMail(character, mailId) {
+  ensureRpgCharacter(character);
+  const index = character.mailbox.findIndex((mail) => mail.id === mailId);
+  if (index < 0) return null;
+  const [mail] = character.mailbox.splice(index, 1);
+  return { gold: mail.gold ?? 0, item: grantMail(character, mail) };
+}
+
+export function claimAllMail(character) {
+  ensureRpgCharacter(character);
+  const claimed = character.mailbox.splice(0, character.mailbox.length);
+  const results = claimed.map((mail) => ({ gold: mail.gold ?? 0, item: grantMail(character, mail) }));
+  return results;
 }
 
 export function createRpgCharacter({ nickname, name, gender }) {
@@ -53,9 +107,15 @@ export function addXp(character, amount) {
     character.maxMp += 5;
     character.attack += 3;
     character.defense += 2;
-    character.hp = character.maxHp;
-    character.mp = character.maxMp;
     levels.push(character.level);
+  }
+  if (levels.length) {
+    // character.maxHp/maxMp are base-only; heal to the equipment-inclusive
+    // max (combatStats) instead, or a geared character's HP bar looks like
+    // it barely filled after "leveling up to full HP".
+    const stats = combatStats(character);
+    character.hp = stats.maxHp;
+    character.mp = stats.maxMp;
   }
   return levels;
 }
@@ -73,17 +133,72 @@ export function equippedItems(character) {
   return [equipment.helmet, equipment.armor, equipment.gloves, equipment.boots, equipment.weapon, equipment.necklace, ...equipment.rings, ...equipment.earrings].filter(Boolean);
 }
 
+// 동료는 모집 후에도 전투마다 유대 경험치를 얻어 성장한다 (5레벨마다 각성으로 위력 강화).
+export function companionBondXpForLevel(level) {
+  return 40 + level * 20;
+}
+
+export function ensureCompanionProgress(character, companionId) {
+  ensureRpgCharacter(character);
+  if (!character.companionProgress[companionId]) {
+    character.companionProgress[companionId] = { level: 1, xp: 0 };
+  }
+  return character.companionProgress[companionId];
+}
+
+export function companionStats(character, companionId) {
+  const base = getCompanion(companionId);
+  if (!base) return null;
+  const progress = ensureCompanionProgress(character, companionId);
+  const bondLevel = progress.level;
+  const awakenings = Math.floor((bondLevel - 1) / 5);
+  return {
+    id: companionId,
+    level: bondLevel,
+    xp: progress.xp,
+    xpToNext: companionBondXpForLevel(bondLevel),
+    attack: base.attack + Math.round((bondLevel - 1) * 2.2),
+    defense: base.defense + Math.round((bondLevel - 1) * 1.4),
+    hp: base.hp + Math.round((bondLevel - 1) * 8),
+    heal: base.heal ? base.heal + Math.round((bondLevel - 1) * 1.2) : undefined,
+    abilityMultiplier: 1 + awakenings * 0.15,
+    awakenings,
+  };
+}
+
+export function grantCompanionXp(character, companionId, amount) {
+  const progress = ensureCompanionProgress(character, companionId);
+  const levels = [];
+  progress.xp += Math.max(0, amount);
+  while (progress.level < 60 && progress.xp >= companionBondXpForLevel(progress.level)) {
+    progress.xp -= companionBondXpForLevel(progress.level);
+    progress.level += 1;
+    levels.push(progress.level);
+  }
+  return levels;
+}
+
 export function combatStats(character) {
   ensureRpgCharacter(character);
   const totals = { attack: character.attack, defense: character.defense, agility: character.agility ?? 10, maxHp: character.maxHp, maxMp: character.maxMp };
-  for (const item of equippedItems(character)) {
-    const stats = enhancementStats(item);
+  const items = equippedItems(character);
+  for (const item of items) {
+    const stats = enhancementStats(item, character.level);
     totals.attack += stats.attack ?? 0;
     totals.defense += stats.defense ?? 0;
     totals.maxHp += stats.hp ?? 0;
     totals.maxMp += stats.mp ?? 0;
     totals.agility += stats.agility ?? 0;
   }
+  const setBonus = equipmentSetBonus(items);
+  if (setBonus.multiplier > 0) {
+    const boost = 1 + setBonus.multiplier;
+    totals.attack = Math.round(totals.attack * boost);
+    totals.defense = Math.round(totals.defense * boost);
+    totals.maxHp = Math.round(totals.maxHp * boost);
+    totals.maxMp = Math.round(totals.maxMp * boost);
+  }
+  totals.setBonus = setBonus;
   return totals;
 }
 
@@ -155,8 +270,9 @@ export function chooseAdvancement(character, advancementId) {
   character.defense += 5;
   character.maxHp += 35;
   character.maxMp += 25;
-  character.hp = character.maxHp;
-  character.mp = character.maxMp;
+  const stats = combatStats(character);
+  character.hp = stats.maxHp;
+  character.mp = stats.maxMp;
   return true;
 }
 

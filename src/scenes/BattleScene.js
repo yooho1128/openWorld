@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import { MONSTERS } from '../data/monsters.js';
 import { REGIONS, getClass, getCompanion, getAdvancement } from '../data/rpg.js';
-import { equipmentForMonster, equipmentDisplayName, getRarity } from '../data/equipment.js';
-import { addLoot, addXp, combatStats, ensureRpgCharacter, equippedItems, saveCharacter } from '../state/rpgCharacter.js';
+import { equipmentForMonster, guaranteedBossEquipment, equipmentDisplayName, getRarity } from '../data/equipment.js';
+import { addLoot, addXp, combatStats, companionStats, ensureRpgCharacter, equippedItems, grantCompanionXp, saveCharacter } from '../state/rpgCharacter.js';
+import { advanceDailyQuests } from '../state/quests.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { addBattlefield, addFantasyBackdrop, addOrnatePanel } from '../ui/fantasyTheme.js';
 
@@ -25,6 +26,7 @@ export class BattleScene extends Phaser.Scene {
     this.advancement = getAdvancement(this.character.advancementId);
     this.playerStats = combatStats(this.character);
     this.companion = getCompanion(this.character.activeCompanionId);
+    this.companionCombat = this.companion ? companionStats(this.character, this.companion.id) : null;
     const power = RANK_POWER[this.monsterData.rank] ?? 1;
     const regionIndex = REGIONS.findIndex((region) => region.id === this.region.id);
     const regionMaxLevel = Math.min(999, (REGIONS[regionIndex + 1]?.minLevel ?? 1000) - 1);
@@ -57,6 +59,7 @@ export class BattleScene extends Phaser.Scene {
     if (this.companion) {
       this.add.circle(205, 438, 27, this.companion.color, 0.85);
       this.add.text(205, 438, this.companion.name[0], { fontSize: '19px', fontStyle: 'bold', color: '#fff0c4' }).setOrigin(0.5);
+      this.add.text(205, 460, `Lv.${this.companionCombat.level}`, { fontSize: '9px', fontStyle: 'bold', color: '#ffe6a1' }).setOrigin(0.5);
     }
     this.statusGraphics = this.add.graphics();
     this.playerText = this.add.text(24, 485, '', { fontSize: '11px', color: '#e9dcb9' });
@@ -167,11 +170,14 @@ export class BattleScene extends Phaser.Scene {
     if (this.enemy.hp <= 0) return this.victory();
     await this.checkBossPhase();
     if (this.companion && type !== 'escape') {
-      if (this.companion.heal && this.character.hp < this.playerStats.maxHp * 0.45) {
-        this.character.hp = Math.min(this.playerStats.maxHp, this.character.hp + this.companion.heal);
-        this.logText.setText(`${this.companion.name}의 ${this.companion.ability}! HP ${this.companion.heal} 회복.`);
+      const cc = this.companionCombat;
+      if (cc.heal && this.character.hp < this.playerStats.maxHp * 0.45) {
+        const healed = Math.round(cc.heal * cc.abilityMultiplier);
+        this.character.hp = Math.min(this.playerStats.maxHp, this.character.hp + healed);
+        this.logText.setText(`${this.companion.name}의 ${this.companion.ability}! HP ${healed} 회복.`);
       } else {
-        const damage = this.mitigateEnemyDamage(this.damage(this.companion.attack + this.companion.level, this.enemy.defense));
+        const power = Math.round((cc.attack + cc.level) * cc.abilityMultiplier);
+        const damage = this.mitigateEnemyDamage(this.damage(power, this.enemy.defense));
         this.enemy.hp -= damage;
         this.logText.setText(`${this.companion.name}의 ${this.companion.ability}! ${damage} 피해.`);
       }
@@ -447,14 +453,18 @@ export class BattleScene extends Phaser.Scene {
     const xp = Math.round((25 + power * 15 + this.enemy.level * 12) * rewardMultiplier);
     const gold = Math.round((30 + power * 22 + this.enemy.level * 1.8 + Phaser.Math.Between(0, 25)) * rewardMultiplier);
     const loot = { id: `loot-${this.monsterData.id}`, name: `${this.monsterData.name} 전리품`, value: 18 + power * 17, quantity: 1, rarity: this.monsterData.rank };
-    const equipment = equipmentForMonster(this.monsterData, this.character.classId, this.enemy.level)
-      ?? (this.isBoss ? equipmentForMonster(this.monsterData, this.character.classId, this.enemy.level) : null);
+    const equipment = this.isBoss
+      ? guaranteedBossEquipment(this.monsterData, this.character.classId, this.enemy.level)
+      : equipmentForMonster(this.monsterData, this.character.classId, this.enemy.level);
     this.character.gold += gold;
+    this.character.goldEarnedTotal = (this.character.goldEarnedTotal ?? 0) + gold;
     this.character.victories += 1;
     this.character.hunted[this.monsterData.id] = (this.character.hunted[this.monsterData.id] ?? 0) + 1;
     addLoot(this.character, loot);
     if (equipment) addLoot(this.character, equipment);
     const levels = addXp(this.character, xp);
+    const companionLevels = this.companion ? grantCompanionXp(this.character, this.companion.id, Math.round(xp * 0.4)) : [];
+    advanceDailyQuests(this.character, { biome: this.monsterData.biome, isBoss: this.isBoss, goldEarned: gold });
     saveCharacter(this);
     if (this.eventType === 'reinforcement' && this.reinforcementId) {
       this.busy = true;
@@ -465,7 +475,8 @@ export class BattleScene extends Phaser.Scene {
       return;
     }
     const gearLine = equipment ? `\n${getRarity(equipment.rarity).name} 장비 획득!\n${equipmentDisplayName(equipment)}` : '';
-    this.finish(`승리!\n${xp} XP · ${gold} 골드\n${loot.name} 획득${gearLine}${levels.length ? `\n레벨 ${levels.at(-1)} 달성!` : ''}`, equipment ? getRarity(equipment.rarity).color : 0x4f8557);
+    const companionLine = companionLevels.length ? `\n${this.companion.name} 유대 Lv.${companionLevels.at(-1)} 달성!` : '';
+    this.finish(`승리!\n${xp} XP · ${gold} 골드\n${loot.name} 획득${gearLine}${levels.length ? `\n레벨 ${levels.at(-1)} 달성!` : ''}${companionLine}`, equipment ? getRarity(equipment.rarity).color : 0x4f8557);
   }
 
   defeat() {

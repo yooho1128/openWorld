@@ -37,14 +37,22 @@ export class SettingsScene extends Phaser.Scene {
 
   redeem() {
     const code = qs('coupon-code').value.trim();
-    if (!['최유호는 너무 멋져', '최유호는 아쿠마다'].includes(code)) return this.render('존재하지 않는 쿠폰입니다.');
+    const VALID_CODES = ['최유호는 너무 멋져', '최유호는 아쿠마다', '황금폭풍'];
+    if (!VALID_CODES.includes(code)) return this.render('존재하지 않는 쿠폰입니다.');
     if (this.character.redeemedCoupons.includes(code)) return this.render('이미 사용한 쿠폰입니다.');
     this.character.redeemedCoupons.push(code);
     if (code === '최유호는 너무 멋져') {
-      const weapon = classCouponWeapon(this.character.classId);
+      const weapon = classCouponWeapon(this.character.classId, this.character.level);
       addLoot(this.character, weapon);
       saveCharacter(this);
       return this.render(`유니크 직업 무기 「${equipmentDisplayName(weapon)}」을 획득했습니다!`);
+    }
+    if (code === '황금폭풍') {
+      const amount = 30000;
+      this.character.gold += amount;
+      this.character.goldEarnedTotal = (this.character.goldEarnedTotal ?? 0) + amount;
+      saveCharacter(this);
+      return this.render(`쿠폰의 힘으로 골드 ${amount.toLocaleString()}이 쏟아졌습니다!`);
     }
     this.character.gold = 0;
     saveCharacter(this);

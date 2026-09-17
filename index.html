@@ -193,6 +193,41 @@
       .rarity-legendary { border-color: #e78727 !important; background: linear-gradient(105deg, #ebd5a7, #edbf87) !important; box-shadow: inset 3px 0 #f09a38, 0 0 11px #e8792877; animation: rarityPulse 1.8s infinite alternate; }
       .rarity-mythic { border-color: #e8324a !important; background: linear-gradient(115deg, #ecc29b, #e9a9b2, #d9b9ea) !important; box-shadow: inset 3px 0 #ff4f5e, 0 0 14px #ff405e99; animation: rarityPulse 1s infinite alternate; }
       @keyframes rarityPulse { from { filter: brightness(.96); } to { filter: brightness(1.12); } }
+      .quest-panel { width: min(430px, 100%) !important; }
+      .quest-list, .milestone-list { display: flex; flex-direction: column; gap: 7px; margin: 8px 0; }
+      .quest-card, .milestone-card { padding: 8px; border: 1px solid #9d835c; border-radius: 5px; background: #ead8b1; font-family: 'Malgun Gothic', sans-serif; }
+      .quest-card strong, .milestone-card strong { display: block; font-size: 12px; margin-bottom: 3px; }
+      .quest-card small, .milestone-card small { display: block; color: #6d5a41; font-size: 9px; }
+      .quest-progress-track { position: relative; height: 12px; background: #c7ac7c; border: 1px solid #8a6d43; border-radius: 6px; margin: 5px 0; overflow: hidden; }
+      .quest-progress-fill { position: absolute; inset: 0; width: 0%; background: linear-gradient(#7fae5a, #4f7f39); }
+      .quest-progress-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #241d12; font-weight: 700; }
+      .quest-card.done, .milestone-card.done { background: #c8d2ab; border-color: #718150; }
+      .milestone-card.locked { opacity: .68; }
+      #overlay .quest-card button, #overlay .milestone-card button { width: 100%; margin-top: 5px; }
+      .quest-tabs { display: flex; gap: 6px; margin: 10px 0 4px; }
+      .quest-tabs button { flex: 1; margin: 0 !important; }
+      .quest-tabs button.inactive { background: linear-gradient(#4a3a2c, #2c2119) !important; opacity: .75; }
+      .ranking-panel { width: min(430px, 100%) !important; }
+      .rank-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; max-height: 55vh; overflow-y: auto; }
+      .rank-row { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #9d835c; border-radius: 5px; background: #ead8b1; font-family: 'Malgun Gothic', sans-serif; }
+      .rank-num { flex: 0 0 24px; text-align: center; font-weight: 700; font-size: 13px; color: #5a432b; }
+      .rank-name { flex: 1; min-width: 0; }
+      .rank-name strong { display: block; font-size: 12px; }
+      .rank-name small { display: block; color: #6d5a41; font-size: 9px; margin-top: 1px; }
+      .rank-value { flex: 0 0 auto; font-size: 11px; font-weight: 700; color: #4c3420; }
+      .rank-top.rank-1 { background: linear-gradient(105deg, #f5dfa0, #eec161); border-color: #d19a2e; box-shadow: 0 0 10px #e8b53f66; }
+      .rank-top.rank-2 { background: linear-gradient(105deg, #e6e6ea, #c7c9d1); border-color: #9a9ca6; }
+      .rank-top.rank-3 { background: linear-gradient(105deg, #e8c5a6, #cf9a6f); border-color: #a9713f; }
+      .rank-top .rank-num { font-size: 15px; }
+      .rank-mine { outline: 2px solid #4a7fd1; }
+      .mail-panel { width: min(430px, 100%) !important; }
+      .mail-list { display: flex; flex-direction: column; gap: 7px; margin: 8px 0; max-height: 55vh; overflow-y: auto; }
+      .mail-row { display: flex; align-items: center; gap: 9px; padding: 8px; background: #ead8b1; border: 1px solid #a78955; border-radius: 5px; font-family: 'Malgun Gothic', sans-serif; }
+      .mail-copy { flex: 1; min-width: 0; }
+      .mail-copy small { display: block; color: #6c573b; font-size: 10px; margin-top: 2px; }
+      .mail-attach { color: #8b5c1e !important; font-weight: 700; }
+      #overlay .mail-row button { width: auto; margin: 0; padding: 7px 9px; flex: 0 0 auto; font-size: 11px; }
+      #overlay button#claim-all { background: linear-gradient(#4d725f, #29483a); border-color: #8fc29f; }
     </style>
   </head>
   <body>
