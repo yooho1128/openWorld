@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { affinityPriceMultiplier } from '../data/rpg.js';
 import { EQUIPMENT_SLOTS, equipmentDisplayName, getRarity, getSlot, shopEquipment } from '../data/equipment.js';
-import { addLoot, ensureRpgCharacter, saveCharacter } from '../state/rpgCharacter.js';
+import { getPotion, POTIONS, potionDescription } from '../data/potions.js';
+import { addLoot, addPotion, ensureRpgCharacter, saveCharacter, totalPotionCount } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
@@ -56,7 +57,6 @@ export class InventoryScene extends Phaser.Scene {
     const c = this.character;
     const affinity = c.affinity.merchant ?? 0;
     const multiplier = affinityPriceMultiplier(affinity);
-    const buyPrice = Math.round(90 * multiplier);
     const sellBonus = Math.max(0.7, Math.min(1.3, 1 + affinity * 0.006));
 
     const bagEntries = c.inventory.map((item, index) => ({ item, index })).filter(({ item }) => itemCategory(item) === this.bagTab);
@@ -67,7 +67,12 @@ export class InventoryScene extends Phaser.Scene {
       const detail = item.type === 'equipment' ? `${rarity} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}` : `${rarity} · ${item.quantity}개`;
       return `<div class="inventory-row ${item.type === 'equipment' ? `rarity-${item.rarity}` : ''}"><div><strong>${item.type === 'equipment' ? equipmentDisplayName(item) : item.name}</strong><small>${detail}</small></div><button id="sell-${index}">${price}G에 판매</button></div>`;
     }).join('');
-    const bagPotionHtml = this.bagTab === 'consumable' ? `<div class="inventory-row"><div><strong>회복 물약</strong><small>전투 중 사용해 HP를 회복합니다</small></div><span class="item-count">${c.potions}개</span></div>` : '';
+    const ownedPotions = Object.entries(c.potions ?? {}).filter(([, qty]) => qty > 0);
+    const bagPotionHtml = this.bagTab === 'consumable' ? ownedPotions.map(([id, qty]) => {
+      const potion = getPotion(id);
+      if (!potion) return '';
+      return `<div class="inventory-row"><div><strong>${potion.name}</strong><small>${potionDescription(potion)} · 전투 중 사용</small></div><span class="item-count">${qty}개</span></div>`;
+    }).join('') : '';
     const bagHtml = bagCardsHtml || bagPotionHtml || `<p class="empty-state">보유한 ${CATEGORY_LABELS[this.bagTab]} 아이템이 없습니다.</p>`;
 
     this.shopItems = shopEquipment(c.classId, c.level);
@@ -78,14 +83,17 @@ export class InventoryScene extends Phaser.Scene {
       const stats = Object.entries(item.stats).filter(([, value]) => value).map(([key, value]) => `${key.toUpperCase()} +${value}`).join(' · ');
       return `<div class="gear-card rarity-${item.rarity}"><div><strong>${item.name}</strong><small>${getRarity(item.rarity).name} · ${getSlot(item.slot).name}</small><small>${stats}</small></div><button id="buy-gear-${index}">${price.toLocaleString()}G</button></div>`;
     }).join('');
-    const shopPotionHtml = this.shopTab === 'consumable' ? `<div class="gear-card"><div><strong>회복 물약</strong><small>전투 중 HP를 회복합니다</small></div><button id="buy-potion">${buyPrice}G</button></div>` : '';
+    const shopPotionHtml = this.shopTab === 'consumable' ? POTIONS.map((potion) => {
+      const price = Math.round(potion.price * multiplier);
+      return `<div class="gear-card"><div><strong>${potion.name}</strong><small>${potionDescription(potion)}</small></div><button id="buy-potion-${potion.id}">${price.toLocaleString()}G</button></div>`;
+    }).join('') : '';
     const shopHtml = shopCardsHtml || shopPotionHtml || `<p class="empty-state">오늘 판매 중인 ${CATEGORY_LABELS[this.shopTab]} 아이템이 없습니다.</p>`;
 
     openPanel(`
       <div class="panel inventory-panel">
         <h2>전리품 가방</h2>
         <div class="relationship ${affinity >= 0 ? 'friendly' : 'hostile'}">리아 우호도 ${affinity >= 0 ? '+' : ''}${affinity} · 가격 ${Math.round(multiplier * 100)}%</div>
-        <p class="gold-line">보유 골드 <strong>${c.gold.toLocaleString()}G</strong> · 물약 ${c.potions}개</p>
+        <p class="gold-line">보유 골드 <strong>${c.gold.toLocaleString()}G</strong> · 물약 ${totalPotionCount(c)}개</p>
         ${message ? `<p class="trade-message">${message}</p>` : ''}
         <h3>내 가방</h3>
         ${tabsHtml('bag', this.bagTab)}
@@ -106,7 +114,7 @@ export class InventoryScene extends Phaser.Scene {
     qs('shop-sort')?.addEventListener('change', (event) => { this.shopSort = event.target.value; this.render(); });
     bagSorted.forEach(({ index }) => qs(`sell-${index}`)?.addEventListener('click', () => this.sell(index, sellBonus)));
     shopSorted.forEach(({ index }) => qs(`buy-gear-${index}`)?.addEventListener('click', () => this.buyGear(index, multiplier)));
-    qs('buy-potion')?.addEventListener('click', () => this.buyPotion(buyPrice));
+    POTIONS.forEach((potion) => qs(`buy-potion-${potion.id}`)?.addEventListener('click', () => this.buyPotion(potion.id, Math.round(potion.price * multiplier))));
     qs('inventory-back').addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Town'); });
   }
 
@@ -121,12 +129,12 @@ export class InventoryScene extends Phaser.Scene {
     this.render(`${item.name}을(를) ${price}G에 판매했습니다.`);
   }
 
-  buyPotion(price) {
+  buyPotion(potionId, price) {
     if (this.character.gold < price) return this.render('골드가 부족합니다.');
     this.character.gold -= price;
-    this.character.potions += 1;
+    addPotion(this.character, potionId, 1);
     saveCharacter(this);
-    this.render(`회복 물약을 ${price}G에 구매했습니다.`);
+    this.render(`${getPotion(potionId).name}을(를) ${price.toLocaleString()}G에 구매했습니다.`);
   }
 
   buyGear(index, multiplier) {

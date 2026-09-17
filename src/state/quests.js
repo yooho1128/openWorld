@@ -1,6 +1,7 @@
 import { DAILY_QUEST_POOL, MILESTONE_QUESTS, BIOME_IDS } from '../data/quests.js';
 import { BIOME_LABELS } from '../data/monsters.js';
-import { addXp } from './rpgCharacter.js';
+import { DEFAULT_POTION_ID } from '../data/potions.js';
+import { addPotion, addXp } from './rpgCharacter.js';
 
 function todayKey() {
   const d = new Date();
@@ -69,7 +70,7 @@ export function claimDailyQuest(character, questId) {
   quest.claimed = true;
   character.gold += quest.rewardGold;
   character.goldEarnedTotal = (character.goldEarnedTotal ?? 0) + quest.rewardGold;
-  character.potions += quest.rewardPotions ?? 0;
+  addPotion(character, DEFAULT_POTION_ID, quest.rewardPotions ?? 0);
   const levels = addXp(character, quest.rewardXp);
   return { quest, levels };
 }
@@ -98,7 +99,7 @@ export function claimMilestone(character, id) {
   quests.milestoneClaims.push(id);
   character.gold += entry.rewardGold ?? 0;
   character.goldEarnedTotal = (character.goldEarnedTotal ?? 0) + (entry.rewardGold ?? 0);
-  character.potions += entry.rewardPotions ?? 0;
+  addPotion(character, DEFAULT_POTION_ID, entry.rewardPotions ?? 0);
   const levels = addXp(character, entry.rewardXp ?? 0);
   return { entry, levels };
 }

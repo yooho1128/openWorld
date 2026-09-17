@@ -6,6 +6,7 @@ const sql = connectionString ? neon(connectionString) : null;
 
 const CLASS_IDS = ['warrior', 'mage', 'ranger', 'cleric', 'rogue'];
 const BASE_ADVANCEMENT_IDS = ['berserker', 'guardian', 'archmage', 'frostweaver', 'sniper', 'beastmaster', 'paladin', 'oracle', 'assassin', 'trickster'];
+const POTION_IDS = ['potion-hp-small', 'potion-hp-medium', 'potion-hp-large', 'potion-hp-superior', 'potion-mp-small', 'potion-mp-large', 'potion-elixir'];
 
 async function ensureTable() {
   await sql`
@@ -46,6 +47,20 @@ function asArray(value, maxLength) {
 function isAdvancementId(value) {
   if (BASE_ADVANCEMENT_IDS.includes(value)) return true;
   return BASE_ADVANCEMENT_IDS.some((baseId) => new RegExp(`^${baseId}-t[2-5]-[ab]$`).test(value));
+}
+
+// Potions used to be a single flat counter; a legacy client could still POST
+// that shape mid-rollout, so anything that isn't a per-type object just
+// yields an empty stash instead of crashing the save.
+function sanitizePotions(value, isMaster) {
+  const src = asPlainObject(value);
+  const cap = isMaster ? 999 : 9999;
+  const out = {};
+  for (const id of POTION_IDS) {
+    const n = clampInt(src[id], 0, cap, 0);
+    if (n > 0) out[id] = n;
+  }
+  return out;
 }
 
 // rings/earrings are spread (...equipment.rings) by the client, so they must
@@ -96,7 +111,7 @@ function sanitizeCharacter(input, nickname) {
     attack: clampNumber(c.attack, 0, 1_000_000, 0),
     defense: clampNumber(c.defense, 0, 1_000_000, 0),
     agility: clampNumber(c.agility, 0, 1_000_000, 10),
-    potions: clampInt(c.potions, 0, isMaster ? 999 : 9999, 0),
+    potions: sanitizePotions(c.potions, isMaster),
     victories: clampInt(c.victories, 0, 10_000_000, 0),
     defeats: clampInt(c.defeats, 0, 10_000_000, 0),
     inventory: asArray(c.inventory, 3000),

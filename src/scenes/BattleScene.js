@@ -2,11 +2,13 @@ import Phaser from 'phaser';
 import { MONSTERS } from '../data/monsters.js';
 import { REGIONS, getClass, getCompanion, getAdvancement } from '../data/rpg.js';
 import { equipmentForMonster, guaranteedBossEquipment, equipmentDisplayName, getRarity } from '../data/equipment.js';
-import { addLoot, addXp, combatStats, companionStats, ensureRpgCharacter, equippedItems, grantCompanionXp, saveCharacter } from '../state/rpgCharacter.js';
+import { getPotion, potionHealValues } from '../data/potions.js';
+import { addLoot, addXp, combatStats, companionStats, ensureRpgCharacter, equippedItems, grantCompanionXp, potionCount, saveCharacter, totalPotionCount, usePotion } from '../state/rpgCharacter.js';
 import { advanceDailyQuests } from '../state/quests.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { addBattlefield, addFantasyBackdrop, addOrnatePanel } from '../ui/fantasyTheme.js';
 import { rollHuntEncounter } from '../state/hunting.js';
+import { openPanel, closePanel, qs } from '../ui/domForms.js';
 
 const RANK_POWER = { F: 1, E: 2, D: 3, C: 4, B: 5, A: 6, S: 8 };
 
@@ -78,7 +80,7 @@ export class BattleScene extends Phaser.Scene {
       [`${baseSkill.name} · ${baseSkill.cost}MP`, () => this.playerAction('skill', baseSkill), this.job.color],
       ...(this.advancement?.skills ?? []).map((skill) => [`${skill.name} · ${skill.cost}MP`, () => this.playerAction('skill', skill), this.advancement.color]),
       ['방어', () => this.playerAction('guard'), 0x4f667e],
-      [`회복 물약 (${this.character.potions})`, () => this.playerAction('potion'), 0x4f825b],
+      [`물약 (${totalPotionCount(this.character)})`, () => this.openPotionMenu(), 0x4f825b],
       [`탈주 · ${this.escapeChance()}%`, () => this.playerAction('escape'), 0x6c6255],
     ];
     const rows = Math.ceil(commands.length / 2);
@@ -120,10 +122,37 @@ export class BattleScene extends Phaser.Scene {
     this.statusGraphics.fillStyle(color, 1).fillRoundedRect(x + 2, y + 2, Math.max(0, (width - 4) * ratio), height - 4, 3);
   }
 
-  async playerAction(type, skill = null) {
+  openPotionMenu() {
     if (this.busy) return;
-    if (type === 'skill' && this.character.mp < skill.cost) { this.logText.setText('마력이 부족하다!'); return; }
-    if (type === 'potion' && this.character.potions <= 0) { this.logText.setText('회복 물약이 없다!'); return; }
+    const owned = Object.entries(this.character.potions ?? {})
+      .filter(([, qty]) => qty > 0)
+      .map(([id, qty]) => ({ potion: getPotion(id), qty }))
+      .filter((entry) => entry.potion)
+      .sort((a, b) => a.potion.tier - b.potion.tier);
+    if (!owned.length) { this.logText.setText('보유한 물약이 없다!'); return; }
+    const rows = owned.map(({ potion, qty }) => {
+      const { hpHeal, mpHeal } = potionHealValues(potion, this.playerStats);
+      const healText = [hpHeal ? `HP +${hpHeal}` : null, mpHeal ? `MP +${mpHeal}` : null].filter(Boolean).join(' · ');
+      return `<div class="gear-card"><div><strong>${potion.name}</strong><small>${healText}</small><small>보유 ${qty}개</small></div><button id="use-potion-${potion.id}">사용</button></div>`;
+    }).join('');
+    openPanel(`
+      <div class="panel">
+        <h2>물약 사용</h2>
+        <div class="gear-list">${rows}</div>
+        <button id="potion-cancel" class="secondary">닫기</button>
+      </div>
+    `);
+    owned.forEach(({ potion }) => qs(`use-potion-${potion.id}`)?.addEventListener('click', () => {
+      closePanel();
+      this.playerAction('potion', potion);
+    }));
+    qs('potion-cancel').addEventListener('click', () => closePanel());
+  }
+
+  async playerAction(type, payload = null) {
+    if (this.busy) return;
+    if (type === 'skill' && this.character.mp < payload.cost) { this.logText.setText('마력이 부족하다!'); return; }
+    if (type === 'potion' && (!payload || potionCount(this.character, payload.id) <= 0)) { this.logText.setText('물약이 부족하다!'); return; }
     this.busy = true;
     this.guard = type === 'guard';
     this.actionHistory.push(type);
@@ -135,25 +164,29 @@ export class BattleScene extends Phaser.Scene {
       this.enemy.hp -= damage;
       message = `${critical ? '치명타! ' : ''}${this.character.name}의 공격! ${damage} 피해.`;
     } else if (type === 'skill') {
-      this.character.mp -= skill.cost;
-      const damage = this.mitigateEnemyDamage(this.damage(this.playerStats.attack * skill.power, this.enemy.defense * 0.7));
+      this.character.mp -= payload.cost;
+      const damage = this.mitigateEnemyDamage(this.damage(this.playerStats.attack * payload.power, this.enemy.defense * 0.7));
       this.enemy.hp -= damage;
-      message = `${skill.name}! ${damage} 피해.`;
-      if (skill.heal) {
-        const healing = Math.round(skill.heal + this.playerStats.maxHp * 0.12);
+      message = `${payload.name}! ${damage} 피해.`;
+      if (payload.heal) {
+        const healing = Math.round(payload.heal + this.playerStats.maxHp * 0.12);
         this.character.hp = Math.min(this.playerStats.maxHp, this.character.hp + healing);
         message += ` HP ${healing} 회복.`;
       }
       this.logText.setText(message);
       this.refreshStatus();
-      await this.playSkillEffect(skill.effect, this.advancement?.color ?? this.job.color);
+      await this.playSkillEffect(payload.effect, this.advancement?.color ?? this.job.color);
     } else if (type === 'guard') {
       message = `${this.character.name}(은)는 방어 태세를 취했다.`;
     } else if (type === 'potion') {
-      this.character.potions -= 1;
-      const healed = Math.min(55, this.playerStats.maxHp - this.character.hp);
-      this.character.hp += healed;
-      message = `회복 물약으로 HP를 ${healed} 회복했다.`;
+      usePotion(this.character, payload.id);
+      const { hpHeal, mpHeal } = potionHealValues(payload, this.playerStats);
+      const healedHp = Math.max(0, Math.min(hpHeal, this.playerStats.maxHp - this.character.hp));
+      const healedMp = Math.max(0, Math.min(mpHeal, this.playerStats.maxMp - this.character.mp));
+      this.character.hp = Math.min(this.playerStats.maxHp, this.character.hp + hpHeal);
+      this.character.mp = Math.min(this.playerStats.maxMp, this.character.mp + mpHeal);
+      const healedParts = [healedHp ? `HP ${healedHp}` : null, healedMp ? `MP ${healedMp}` : null].filter(Boolean).join(' · ');
+      message = `${payload.name} 사용! ${healedParts || '변화 없음'} 회복.`;
     } else {
       const chance = this.escapeChance();
       if (Math.random() * 100 < chance) {

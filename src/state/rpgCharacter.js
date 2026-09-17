@@ -1,8 +1,15 @@
 import { ADVANCEMENTS, advancementStageForLevel, getAdvancement, getAdvancementOptions, getClass, getCompanion, xpForLevel } from '../data/rpg.js';
 import { enhancementStats, masterEquipmentSet, equipmentSetBonus, level200MythicWeapon, rollGachaEquipment } from '../data/equipment.js';
+import { DEFAULT_POTION_ID, getPotion } from '../data/potions.js';
 
 export function ensureRpgCharacter(character) {
   character.inventory ??= [];
+  // Older saves stored a single flat potion counter; fold it into the new
+  // per-type stash instead of discarding it.
+  if (typeof character.potions === 'number') {
+    character.potions = character.potions > 0 ? { [DEFAULT_POTION_ID]: character.potions } : {};
+  }
+  if (!character.potions || typeof character.potions !== 'object' || Array.isArray(character.potions)) character.potions = {};
   character.companions ??= [];
   character.companionProgress ??= {};
   character.affinity ??= { merchant: 0, guildmaster: 0, innkeeper: 0, blacksmith: 0 };
@@ -159,6 +166,30 @@ export function equippedItems(character) {
   ensureRpgCharacter(character);
   const equipment = character.equipment;
   return [equipment.helmet, equipment.armor, equipment.gloves, equipment.boots, equipment.weapon, equipment.necklace, ...equipment.rings, ...equipment.earrings].filter(Boolean);
+}
+
+export function potionCount(character, potionId) {
+  return character.potions?.[potionId] ?? 0;
+}
+
+export function totalPotionCount(character) {
+  return Object.values(character.potions ?? {}).reduce((sum, qty) => sum + qty, 0);
+}
+
+export function addPotion(character, potionId, amount = 1) {
+  ensureRpgCharacter(character);
+  if (amount <= 0) return;
+  character.potions[potionId] = (character.potions[potionId] ?? 0) + amount;
+}
+
+export function usePotion(character, potionId) {
+  ensureRpgCharacter(character);
+  if ((character.potions[potionId] ?? 0) <= 0) return null;
+  const potion = getPotion(potionId);
+  if (!potion) return null;
+  character.potions[potionId] -= 1;
+  if (character.potions[potionId] <= 0) delete character.potions[potionId];
+  return potion;
 }
 
 // 동료는 모집 후에도 전투마다 유대 경험치를 얻어 성장한다 (5레벨마다 각성으로 위력 강화).
