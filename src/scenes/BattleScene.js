@@ -6,7 +6,8 @@ import { getPotion, potionHealValues } from '../data/potions.js';
 import { addLoot, addXp, combatStats, companionStats, ensureRpgCharacter, equippedItems, grantCompanionXp, potionCount, saveCharacter, totalPotionCount, usePotion } from '../state/rpgCharacter.js';
 import { advanceDailyQuests } from '../state/quests.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
-import { addBattlefield, addFantasyBackdrop, addOrnatePanel } from '../ui/fantasyTheme.js';
+import { addFantasyBackdrop, addOrnatePanel } from '../ui/fantasyTheme.js';
+import { addRegionBattlefield } from '../ui/regionVisuals.js';
 import { rollHuntEncounter } from '../state/hunting.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 
@@ -52,7 +53,7 @@ export class BattleScene extends Phaser.Scene {
     this.turn = 1;
     this.actionHistory = [];
     addFantasyBackdrop(this, { dark: true, accent: this.region.color });
-    addBattlefield(this, this.region.color, true);
+    addRegionBattlefield(this, this.region, { isBoss: this.isBoss });
     this.add.text(240, 35, `${this.region.name} · 전투`, { fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '21px', fontStyle: 'bold', color: '#f4dc9c' }).setOrigin(0.5);
     this.add.ellipse(342, 281, this.isBoss ? 145 : 120, 30, 0x0a100d, 0.38);
     this.enemySprite = this.add.sprite(342, 225, this.monsterData.texture).setScale(this.isBoss ? 2.85 : 2.35);

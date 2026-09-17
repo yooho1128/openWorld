@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { REGIONS } from '../data/rpg.js';
 import { addFantasyBackdrop, addOrnatePanel, addSceneTitle } from '../ui/fantasyTheme.js';
+import { addRegionCardEmblem, getRegionVisual } from '../ui/regionVisuals.js';
 import { combatPower, ensureRpgCharacter } from '../state/rpgCharacter.js';
 import { rollHuntEncounter } from '../state/hunting.js';
 
@@ -32,18 +33,18 @@ export class HuntScene extends Phaser.Scene {
 
   addRegion(region, index) {
     const locked = this.power < region.requiredPower;
+    const visual = getRegionVisual(region);
     const y = 166 + index * 86;
     const card = addOrnatePanel(this, 240, y, 420, 70, {
-      color: locked ? 0x232b27 : 0x203129, border: locked ? 0x59615d : region.color, alpha: 0.96,
+      color: locked ? 0x232b27 : visual.panel, border: locked ? 0x59615d : visual.accent, alpha: 0.96,
     });
     const bg = this.add.rectangle(240, y, 420, 70, 0xffffff, 0.001);
     if (!locked) bg.setInteractive({ useHandCursor: true });
-    const icon = this.add.circle(72, y, 23, locked ? 0x4a4a4a : region.color, 0.8);
-    const iconText = this.add.text(72, y, locked ? '🔒' : '⚔', { fontSize: '17px' }).setOrigin(0.5);
+    const emblem = addRegionCardEmblem(this, 72, y, region, locked);
     const name = this.add.text(112, y - 18, region.name, { fontSize: '15px', fontStyle: 'bold', color: locked ? '#777' : '#ffe8ad' });
     const subtitle = this.add.text(112, y + 7, `${region.subtitle} · 필요 전투력 ${region.requiredPower.toLocaleString()}`, { fontSize: '10px', color: locked ? '#666' : '#b9aa8d' });
     const danger = this.add.text(402, y, `위험 ${region.danger}`, { fontSize: '9px', color: locked ? '#666' : '#e28a69' }).setOrigin(1, 0.5);
-    this.pageLayer.add([card.shadow, card.panel, bg, icon, iconText, name, subtitle, danger]);
+    this.pageLayer.add([card.shadow, card.panel, bg, emblem.graphics, emblem.text, name, subtitle, danger]);
     if (!locked) {
       bg.on('pointerdown', () => this.startHunt(region));
       bg.on('pointerover', () => { card.panel.setAlpha(0.82); bg.setScale(1.01); });

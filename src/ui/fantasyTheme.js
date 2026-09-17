@@ -88,20 +88,6 @@ export function addSceneTitle(scene, title, subtitle = '') {
   scene.tweens.add({ targets: crest, scale: 1.08, duration: 1350, ease: 'Sine.easeInOut', yoyo: true, repeat: -1 });
 }
 
-export function addBattlefield(scene, color = 0x4c8b4b, dark = true) {
-  const g = scene.add.graphics();
-  g.fillStyle(color, dark ? 0.13 : 0.2).fillEllipse(240, 316, 560, 330);
-  g.fillStyle(dark ? 0x17251e : 0x496b4b, 0.95).fillEllipse(240, 350, 580, 225);
-  g.fillStyle(dark ? 0x2c4135 : 0x718b63, 0.95).fillEllipse(240, 333, 500, 175);
-  g.fillStyle(dark ? 0x3d5140 : 0x90a876, 0.45).fillEllipse(240, 315, 390, 118);
-  g.lineStyle(2, 0xf2dda2, 0.1).strokeEllipse(240, 328, 370, 106);
-  for (let i = 0; i < 10; i += 1) {
-    const x = 22 + i * 49;
-    g.fillStyle(i % 2 ? 0x203d2c : 0x2f5238, 0.92).fillTriangle(x - 25, 260, x, 125 + (i % 3) * 28, x + 25, 260);
-  }
-  return g;
-}
-
 export const HUD_STYLE = {
   fontFamily: '"Malgun Gothic", sans-serif', fontSize: '11px', color: '#fff1c9',
   backgroundColor: '#17251fee', padding: { x: 10, y: 8 }, lineSpacing: 3,
