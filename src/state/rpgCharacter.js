@@ -20,6 +20,13 @@ export function ensureRpgCharacter(character) {
     .slice(0, 5);
   if (!character.advancementHistory.length && classAdvancementIds.has(character.advancementId)) {
     character.advancementHistory = [character.advancementId];
+  } else if (character.advancementHistory.length && character.advancementId !== character.advancementHistory.at(-1)) {
+    // advancementId drives which skills show up in battle; advancementHistory
+    // is what actually gets pushed to on each 전직. Keep the former in sync
+    // with the latest entry of the latter so a stage the player already
+    // earned can never fail to show its skills (e.g. after a save that only
+    // persisted one of the two fields).
+    character.advancementId = character.advancementHistory.at(-1);
   }
   character.agility ??= getClass(character.classId)?.agility ?? 10;
   character.mailbox ??= [];
@@ -341,13 +348,34 @@ export function adjustAffinity(character, npcId, delta) {
   return character.affinity[npcId];
 }
 
+// Scenes call this after nearly every action, so several saves can be
+// triggered within the same second (e.g. choosing an advancement right
+// before a battle screen also saves). Firing them all as parallel requests
+// lets an older, slower request land at the server after a newer one and
+// silently overwrite it - which is how a just-picked advancement skill (or
+// any other fresh change) could quietly vanish on reload. Serializing sends
+// - queueing the latest snapshot and only sending the next one once the
+// in-flight request settles - guarantees the DB always ends up with the
+// most recent state instead of whichever request happened to finish last.
+let activeSave = null;
+let queuedSaveBody = null;
+
+function flushSaveQueue() {
+  const body = queuedSaveBody;
+  queuedSaveBody = null;
+  activeSave = fetch('/api/character', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body,
+  }).catch(() => {}).finally(() => {
+    activeSave = null;
+    if (queuedSaveBody) flushSaveQueue();
+  });
+}
+
 export function saveCharacter(scene) {
   const nickname = scene.registry.get('nickname');
   const character = scene.registry.get('character');
   if (!nickname || !character) return;
   ensureRpgCharacter(character);
-  fetch('/api/character', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nickname, character }),
-  }).catch(() => {});
+  queuedSaveBody = JSON.stringify({ nickname, character });
+  if (!activeSave) flushSaveQueue();
 }
