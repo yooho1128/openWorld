@@ -15,7 +15,12 @@ export class AdvancementScene extends Phaser.Scene {
     addFantasyBackdrop(this, { dark: true });
     const base = getClass(this.character.classId);
     addSceneTitle(this, stageInfo.label, `${base.name}의 ${stageInfo.level}레벨 서약을 선택하세요`);
-    availableAdvancements(this.character).forEach((job, index) => {
+    const options = availableAdvancements(this.character);
+    this.errorText = this.add.text(240, 130, '', { fontSize: '12px', fontStyle: 'bold', color: '#ff8a7a', align: 'center', wordWrap: { width: 400 } }).setOrigin(0.5);
+    if (!options.length) {
+      this.errorText.setText('선택 가능한 전직이 없습니다. 길드장에게 문의하세요.\n(전직 기록에 문제가 있을 수 있습니다)');
+    }
+    options.forEach((job, index) => {
       const y = 250 + index * 260;
       const bg = this.add.rectangle(240, y, 414, 218, 0x241b16, 0.96).setStrokeStyle(3, job.color, 0.95).setInteractive({ useHandCursor: true });
       this.add.circle(240, y - 65, 36, job.color, 0.75);
@@ -24,7 +29,10 @@ export class AdvancementScene extends Phaser.Scene {
       this.add.text(240, y + 25, job.skills.map((skill) => `${skill.name} · 위력 ${skill.power} · MP ${skill.cost}`).join('\n'), { fontSize: '12px', color: '#cdbf9e', align: 'center', lineSpacing: 8 }).setOrigin(0.5);
       this.add.text(240, y + 78, '선택하여 전직', { fontSize: '12px', fontStyle: 'bold', color: '#9fc9a7' }).setOrigin(0.5);
       bg.on('pointerdown', () => {
-        if (!chooseAdvancement(this.character, job.id)) return;
+        if (!chooseAdvancement(this.character, job.id)) {
+          this.errorText.setText('전직에 실패했습니다. 다시 시도해주세요.');
+          return;
+        }
         saveCharacter(this);
         if (nextAdvancementStage(this.character)) this.scene.restart();
         else this.scene.start('Town');

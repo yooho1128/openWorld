@@ -10,6 +10,7 @@ const COUPONS = {
   '최유호는 너무 멋져': { effect: 'weapon' },
   '최유호는 아쿠마다': { effect: 'drain' },
   '황금폭풍': { effect: 'gold', amount: 30000 },
+  'EG-KGLA-XKCW-AMSE': { effect: 'gold', amount: 200000 },
 };
 
 function safeNickname(value) {
