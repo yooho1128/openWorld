@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { affinityPriceMultiplier } from '../data/rpg.js';
-import { equipmentDisplayName, getRarity, getSlot, shopEquipment } from '../data/equipment.js';
+import { equipmentDisplayName, getRarity, getSlot, rollGachaEquipment, shopEquipment } from '../data/equipment.js';
 import { addLoot, ensureRpgCharacter, saveCharacter } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
@@ -22,6 +22,9 @@ export class InventoryScene extends Phaser.Scene {
     const buyPrice = Math.round(90 * multiplier);
     const sellBonus = Math.max(0.7, Math.min(1.3, 1 + affinity * 0.006));
     const items = c.inventory.length ? c.inventory.map((item, index) => {
+      if (item.type === 'ticket') {
+        return `<div class="inventory-row"><div><strong>${item.name}</strong><small>사용하면 무작위 부위 · 무작위 등급 장비 1개 획득</small></div><button id="use-${index}">사용하기</button></div>`;
+      }
       const price = Math.max(1, Math.round(item.value * sellBonus));
       const rarity = item.type === 'equipment' ? getRarity(item.rarity).name : `${item.rarity}급`;
       const detail = item.type === 'equipment' ? `${rarity} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}` : `${rarity} · ${item.quantity}개`;
@@ -45,10 +48,24 @@ export class InventoryScene extends Phaser.Scene {
         <button id="inventory-back" class="secondary">길드로 돌아가기</button>
       </div>
     `);
-    c.inventory.forEach((_, index) => qs(`sell-${index}`)?.addEventListener('click', () => this.sell(index, sellBonus)));
+    c.inventory.forEach((item, index) => {
+      if (item.type === 'ticket') qs(`use-${index}`)?.addEventListener('click', () => this.useTicket(index));
+      else qs(`sell-${index}`)?.addEventListener('click', () => this.sell(index, sellBonus));
+    });
     this.shopItems.forEach((item, index) => qs(`buy-gear-${index}`)?.addEventListener('click', () => this.buyGear(index, multiplier)));
     qs('buy-potion').addEventListener('click', () => this.buyPotion(buyPrice));
     qs('inventory-back').addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Town'); });
+  }
+
+  useTicket(index) {
+    const item = this.character.inventory[index];
+    if (!item || item.type !== 'ticket') return;
+    item.quantity -= 1;
+    if (item.quantity <= 0) this.character.inventory.splice(index, 1);
+    const reward = rollGachaEquipment(this.character.classId, this.character.level);
+    if (reward) addLoot(this.character, reward);
+    saveCharacter(this);
+    this.render(reward ? `${getRarity(reward.rarity).name} 등급 「${equipmentDisplayName(reward)}」을(를) 획득했습니다!` : '뽑기에 실패했습니다.');
   }
 
   sell(index, bonus) {

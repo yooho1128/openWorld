@@ -42,7 +42,7 @@ export class SettingsScene extends Phaser.Scene {
     if (this.character.redeemedCoupons.includes(code)) return this.render('이미 사용한 쿠폰입니다.');
     this.character.redeemedCoupons.push(code);
     if (code === '최유호는 너무 멋져') {
-      const weapon = classCouponWeapon(this.character.classId);
+      const weapon = classCouponWeapon(this.character.classId, this.character.level);
       addLoot(this.character, weapon);
       saveCharacter(this);
       return this.render(`유니크 직업 무기 「${equipmentDisplayName(weapon)}」을 획득했습니다!`);

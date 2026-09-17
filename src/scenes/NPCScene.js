@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { getNpc } from '../data/rpg.js';
-import { adjustAffinity, saveCharacter } from '../state/rpgCharacter.js';
+import { adjustAffinity, combatStats, saveCharacter } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
@@ -91,8 +91,9 @@ export class NPCScene extends Phaser.Scene {
   rest() {
     if (this.character.gold < 60) { this.reply = '숙박비가 부족한 것 같은데?'; return this.render(); }
     this.character.gold -= 60;
-    this.character.hp = this.character.maxHp;
-    this.character.mp = this.character.maxMp;
+    const stats = combatStats(this.character);
+    this.character.hp = stats.maxHp;
+    this.character.mp = stats.maxMp;
     adjustAffinity(this.character, 'innkeeper', 1);
     saveCharacter(this);
     this.reply = '푹 쉬었지? 몸도 마음도 말끔해 보이네!';

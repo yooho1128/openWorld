@@ -14,10 +14,54 @@ export function ensureRpgCharacter(character) {
   character.redeemedCoupons ??= [];
   character.advancementId ??= null;
   character.agility ??= getClass(character.classId)?.agility ?? 10;
+  character.mailbox ??= [];
+  if (!character.mailboxWelcomeGranted) {
+    character.mailboxWelcomeGranted = true;
+    for (let i = 0; i < 10; i += 1) {
+      character.mailbox.push({
+        id: `mail-welcome-${i}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+        title: '길드의 환영 선물',
+        body: '모험을 시작한 것을 축하하며, 장비 랜덤 뽑기권을 보냅니다.',
+        item: { id: `ticket-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}-${i}`, type: 'ticket', kind: 'gachaEquipment', name: '장비 랜덤 뽑기권', quantity: 1, value: 50 },
+        createdAt: Date.now(),
+      });
+    }
+    character.mailbox.push({
+      id: `mail-welcome-gold-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+      title: '길드의 후원금',
+      body: '모험 자금에 보태 쓰라며 길드에서 골드를 보냈습니다.',
+      gold: 50000,
+      createdAt: Date.now(),
+    });
+  }
   const equipment = character.equipment;
   const allItems = [...character.inventory, equipment.helmet, equipment.armor, equipment.gloves, equipment.boots, equipment.weapon, equipment.necklace, ...equipment.rings, ...equipment.earrings].filter((item) => item?.type === 'equipment');
   allItems.forEach((item) => { item.maxDurability ??= 100; item.durability ??= item.maxDurability; });
   return character;
+}
+
+function grantMail(character, mail) {
+  if (mail.gold) {
+    character.gold += mail.gold;
+    character.goldEarnedTotal = (character.goldEarnedTotal ?? 0) + mail.gold;
+  }
+  if (mail.item) addLoot(character, mail.item);
+}
+
+export function claimMail(character, mailId) {
+  ensureRpgCharacter(character);
+  const index = character.mailbox.findIndex((mail) => mail.id === mailId);
+  if (index < 0) return false;
+  const [mail] = character.mailbox.splice(index, 1);
+  grantMail(character, mail);
+  return true;
+}
+
+export function claimAllMail(character) {
+  ensureRpgCharacter(character);
+  const claimed = character.mailbox.splice(0, character.mailbox.length);
+  claimed.forEach((mail) => grantMail(character, mail));
+  return claimed.length;
 }
 
 export function createRpgCharacter({ nickname, name, gender }) {
@@ -54,9 +98,15 @@ export function addXp(character, amount) {
     character.maxMp += 5;
     character.attack += 3;
     character.defense += 2;
-    character.hp = character.maxHp;
-    character.mp = character.maxMp;
     levels.push(character.level);
+  }
+  if (levels.length) {
+    // character.maxHp/maxMp are base-only; heal to the equipment-inclusive
+    // max (combatStats) instead, or a geared character's HP bar looks like
+    // it barely filled after "leveling up to full HP".
+    const stats = combatStats(character);
+    character.hp = stats.maxHp;
+    character.mp = stats.maxMp;
   }
   return levels;
 }
@@ -124,7 +174,7 @@ export function combatStats(character) {
   const totals = { attack: character.attack, defense: character.defense, agility: character.agility ?? 10, maxHp: character.maxHp, maxMp: character.maxMp };
   const items = equippedItems(character);
   for (const item of items) {
-    const stats = enhancementStats(item);
+    const stats = enhancementStats(item, character.level);
     totals.attack += stats.attack ?? 0;
     totals.defense += stats.defense ?? 0;
     totals.maxHp += stats.hp ?? 0;
@@ -211,8 +261,9 @@ export function chooseAdvancement(character, advancementId) {
   character.defense += 5;
   character.maxHp += 35;
   character.maxMp += 25;
-  character.hp = character.maxHp;
-  character.mp = character.maxMp;
+  const stats = combatStats(character);
+  character.hp = stats.maxHp;
+  character.mp = stats.maxMp;
   return true;
 }
 

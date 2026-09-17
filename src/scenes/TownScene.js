@@ -8,6 +8,7 @@ import { claimableCount } from '../state/quests.js';
 const HUBS = [
   { label: '사냥 게시판', sub: '지역을 골라 출정', scene: 'Hunt', icon: '⚔', color: 0x9f4738 },
   { label: '의뢰소', sub: '일일 의뢰 · 업적', scene: 'Quest', icon: '⚑', color: 0x5e7a3f, badge: 'quest' },
+  { label: '우편함', sub: '받은 편지 수령', scene: 'Mailbox', icon: '✉', color: 0x3f6a7a, badge: 'mail' },
   { label: '황금 뿔피리', sub: '동료 모집 · 파티', scene: 'Tavern', icon: '♞', color: 0x9b6b3f },
   { label: '상인 리아', sub: '대화 · 거래', scene: 'NPC', data: { npcId: 'merchant' }, icon: '◆', color: 0xb28a43 },
   { label: '길드장 브란', sub: '의뢰 · 대화', scene: 'NPC', data: { npcId: 'guildmaster' }, icon: '♜', color: 0x795042 },
@@ -57,8 +58,8 @@ export class TownScene extends Phaser.Scene {
     this.add.text(x - 69, y, hub.icon, { fontFamily: 'Georgia, serif', fontSize: '22px', color: '#fff0c0' }).setOrigin(0.5);
     this.add.text(x - 31, y - 20, hub.label, { fontSize: '14px', fontStyle: 'bold', color: '#f5dfac' });
     this.add.text(x - 31, y + 8, hub.sub, { fontSize: '10px', color: '#b8aa8d' });
-    if (hub.badge === 'quest') {
-      const count = claimableCount(this.character);
+    if (hub.badge) {
+      const count = hub.badge === 'quest' ? claimableCount(this.character) : hub.badge === 'mail' ? this.character.mailbox.length : 0;
       if (count > 0) {
         this.add.circle(x + 90, y - 34, 12, 0xb43b35, 0.95).setStrokeStyle(1, 0xffe6a1);
         this.add.text(x + 90, y - 34, String(count), { fontSize: '11px', fontStyle: 'bold', color: '#fff0c0' }).setOrigin(0.5);
