@@ -1,11 +1,11 @@
 import { neon } from '@neondatabase/serverless';
+import { hasValidAdminSession, isMasterNickname } from '../lib/adminAuth.js';
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
 
 const CLASS_IDS = ['warrior', 'mage', 'ranger', 'cleric', 'rogue'];
-const ADVANCEMENT_IDS = ['berserker', 'guardian', 'archmage', 'frostweaver', 'sniper', 'beastmaster', 'paladin', 'oracle', 'assassin', 'trickster'];
-const MASTER_NICKNAMES = ['마스터_전사', '마스터_마법사', '마스터_궁수', '마스터_성직자', '마스터_도적'];
+const BASE_ADVANCEMENT_IDS = ['berserker', 'guardian', 'archmage', 'frostweaver', 'sniper', 'beastmaster', 'paladin', 'oracle', 'assassin', 'trickster'];
 
 async function ensureTable() {
   await sql`
@@ -43,6 +43,11 @@ function asArray(value, maxLength) {
   return Array.isArray(value) ? value.slice(0, maxLength) : [];
 }
 
+function isAdvancementId(value) {
+  if (BASE_ADVANCEMENT_IDS.includes(value)) return true;
+  return BASE_ADVANCEMENT_IDS.some((baseId) => new RegExp(`^${baseId}-t[2-5]-[ab]$`).test(value));
+}
+
 // rings/earrings are spread (...equipment.rings) by the client, so they must
 // always be real arrays or a tampered save would crash the game on load.
 function sanitizeEquipment(value) {
@@ -67,7 +72,7 @@ function sanitizeEquipment(value) {
 // the public leaderboard, which stops casual tampering via the network tab.
 function sanitizeCharacter(input, nickname) {
   const c = asPlainObject(input);
-  const isMaster = MASTER_NICKNAMES.includes(nickname);
+  const isMaster = isMasterNickname(nickname);
   const classId = CLASS_IDS.includes(c.classId) ? c.classId : null;
   const level = clampInt(c.level, 1, 999, 1);
 
@@ -77,7 +82,8 @@ function sanitizeCharacter(input, nickname) {
     name: typeof c.name === 'string' ? c.name.trim().slice(0, 12) || nickname : nickname,
     gender: c.gender === 'female' ? 'female' : c.gender === 'master' && isMaster ? 'master' : 'male',
     classId,
-    advancementId: level >= 10 && ADVANCEMENT_IDS.includes(c.advancementId) ? c.advancementId : null,
+    advancementId: level >= 10 && isAdvancementId(c.advancementId) ? c.advancementId : null,
+    advancementHistory: asArray(c.advancementHistory, 5).filter((id) => typeof id === 'string' && isAdvancementId(id)),
     isAdmin: isMaster ? true : false,
     level,
     xp: clampNumber(c.xp, 0, 10_000_000, 0),
@@ -104,11 +110,14 @@ function sanitizeCharacter(input, nickname) {
     quests: asPlainObject(c.quests),
     mailbox: asArray(c.mailbox, 200),
     mailboxWelcomeGranted: c.mailboxWelcomeGranted === true,
+    level200WeaponGranted: c.level200WeaponGranted === true,
     redeemedCoupons: asArray(c.redeemedCoupons, 50).filter((code) => typeof code === 'string'),
     createdAt: Number.isFinite(Number(c.createdAt)) ? Number(c.createdAt) : Date.now(),
   };
-  out.hp = Math.min(out.hp, out.maxHp);
-  out.mp = Math.min(out.mp, out.maxMp);
+  // maxHp/maxMp contain only the character's base values. Equipped gear is
+  // applied on the client, so clamping current vitals here made geared heroes
+  // lose HP/MP whenever a mobile browser reloaded after being backgrounded.
+  // The client clamps these values against its equipment-inclusive combat stats.
   return out;
 }
 
@@ -120,6 +129,9 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     const nickname = safeNickname(req.query.nickname);
     if (!nickname) return res.status(400).json({ error: 'nickname is required' });
+    if (isMasterNickname(nickname) && !hasValidAdminSession(req, nickname)) {
+      return res.status(401).json({ error: 'admin_auth_required' });
+    }
 
     try {
       await ensureTable();
@@ -136,6 +148,9 @@ export default async function handler(req, res) {
     const { nickname: rawNickname, character } = req.body ?? {};
     const nickname = safeNickname(rawNickname);
     if (!nickname) return res.status(400).json({ error: 'nickname is required' });
+    if (isMasterNickname(nickname) && !hasValidAdminSession(req, nickname)) {
+      return res.status(401).json({ error: 'admin_auth_required' });
+    }
     if (!character || typeof character !== 'object') {
       return res.status(400).json({ error: 'character is required' });
     }

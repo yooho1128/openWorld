@@ -175,6 +175,17 @@ export function classCouponWeapon(classId, level = 1) {
   return item;
 }
 
+export function level200MythicWeapon(classId) {
+  const pool = EQUIPMENT_CATALOG.filter((item) => item.slot === 'weapon' && item.rarity === 'mythic' && item.classId === classId);
+  const base = pool.find((item) => item.biome === 'celestial') ?? pool[0];
+  if (!base) return null;
+  const item = cloneItem(base, '-level-200');
+  item.level = 200;
+  item.name = `영웅의 서약 · ${CLASS_WEAPONS[classId]}`;
+  item.source = 'level-200-mythic';
+  return item;
+}
+
 // 캐릭터 레벨이 장비 레벨보다 20 이상 높아지면 서서히 성능이 떨어진다
 // (초과분 1레벨당 1%씩, 최대 80% 감소 - 완전히 못 쓰게 되진 않는다).
 // 저레벨 사냥터에서 얻은 장비를 고레벨에서 계속 우려먹지 못하게 하기 위함.

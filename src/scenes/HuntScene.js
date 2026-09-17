@@ -1,16 +1,19 @@
 import Phaser from 'phaser';
 import { REGIONS } from '../data/rpg.js';
-import { MONSTERS } from '../data/monsters.js';
 import { addFantasyBackdrop, addOrnatePanel, addSceneTitle } from '../ui/fantasyTheme.js';
+import { combatPower, ensureRpgCharacter } from '../state/rpgCharacter.js';
+import { rollHuntEncounter } from '../state/hunting.js';
 
 export class HuntScene extends Phaser.Scene {
   constructor() { super('Hunt'); }
   init(data) { this.page = data?.page ?? 0; }
   create() {
-    this.character = this.registry.get('character');
-    if (!this.character) return this.scene.start('Login');
+    const character = this.registry.get('character');
+    if (!character) return this.scene.start('Login');
+    this.character = ensureRpgCharacter(character);
+    this.power = combatPower(this.character);
     addFantasyBackdrop(this, { dark: true, accent: 0x6d7f65 });
-    addSceneTitle(this, '왕국 사냥 지도', '보스·난입·도주 등 돌발 상황이 발생할 수 있습니다');
+    addSceneTitle(this, '왕국 사냥 지도', `현재 전투력 ${this.power.toLocaleString()} · 장비를 강화하면 더 높은 지역이 열립니다`);
     this.renderPage();
     this.addButton(240, 758, 180, 42, '길드로 돌아가기', () => this.scene.start('Town'), 0x4d4237);
   }
@@ -28,7 +31,7 @@ export class HuntScene extends Phaser.Scene {
   }
 
   addRegion(region, index) {
-    const locked = this.character.level < region.minLevel;
+    const locked = this.power < region.requiredPower;
     const y = 166 + index * 86;
     const card = addOrnatePanel(this, 240, y, 420, 70, {
       color: locked ? 0x232b27 : 0x203129, border: locked ? 0x59615d : region.color, alpha: 0.96,
@@ -38,7 +41,7 @@ export class HuntScene extends Phaser.Scene {
     const icon = this.add.circle(72, y, 23, locked ? 0x4a4a4a : region.color, 0.8);
     const iconText = this.add.text(72, y, locked ? '🔒' : '⚔', { fontSize: '17px' }).setOrigin(0.5);
     const name = this.add.text(112, y - 18, region.name, { fontSize: '15px', fontStyle: 'bold', color: locked ? '#777' : '#ffe8ad' });
-    const subtitle = this.add.text(112, y + 7, `${region.subtitle} · 권장 Lv.${region.minLevel}`, { fontSize: '10px', color: locked ? '#666' : '#b9aa8d' });
+    const subtitle = this.add.text(112, y + 7, `${region.subtitle} · 필요 전투력 ${region.requiredPower.toLocaleString()}`, { fontSize: '10px', color: locked ? '#666' : '#b9aa8d' });
     const danger = this.add.text(402, y, `위험 ${region.danger}`, { fontSize: '9px', color: locked ? '#666' : '#e28a69' }).setOrigin(1, 0.5);
     this.pageLayer.add([card.shadow, card.panel, bg, icon, iconText, name, subtitle, danger]);
     if (!locked) {
@@ -49,20 +52,7 @@ export class HuntScene extends Phaser.Scene {
   }
 
   startHunt(region) {
-    const rankPower = { F: 1, E: 2, D: 3, C: 4, B: 5, A: 6, S: 8 };
-    const maxPower = region.minLevel < 5 ? 3 : region.minLevel < 20 ? 4 : region.minLevel < 60 ? 5 : region.minLevel < 150 ? 6 : 8;
-    const pool = MONSTERS.filter((monster) => monster.biome === region.biome && rankPower[monster.rank] <= maxPower);
-    const eventRoll = Math.random();
-    const bossChance = 0.04 + region.danger * 0.005;
-    const eventType = eventRoll < bossChance ? 'boss' : eventRoll < bossChance + 0.12 ? 'reinforcement' : 'normal';
-    const sorted = [...pool].sort((a, b) => rankPower[b.rank] - rankPower[a.rank]);
-    const monster = eventType === 'boss' ? sorted[Phaser.Math.Between(0, Math.min(3, sorted.length - 1))] : pool[Phaser.Math.Between(0, pool.length - 1)];
-    let reinforcementId = null;
-    if (eventType === 'reinforcement') {
-      const reinforcement = pool.filter((entry) => entry.id !== monster.id);
-      reinforcementId = reinforcement[Phaser.Math.Between(0, reinforcement.length - 1)]?.id ?? monster.id;
-    }
-    this.scene.start('Battle', { regionId: region.id, monsterId: monster.id, eventType, reinforcementId });
+    this.scene.start('Battle', rollHuntEncounter(region));
   }
 
   addPageButton(x, label, delta) {

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { getClass, getCompanion, xpForLevel } from '../data/rpg.js';
+import { getAdvancement, getClass, getCompanion, xpForLevel } from '../data/rpg.js';
 import { addFantasyBackdrop, addOrnatePanel, addSceneTitle } from '../ui/fantasyTheme.js';
-import { combatStats, ensureRpgCharacter } from '../state/rpgCharacter.js';
+import { combatPower, combatStats, ensureRpgCharacter, nextAdvancementStage } from '../state/rpgCharacter.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { claimableCount } from '../state/quests.js';
 
@@ -23,7 +23,7 @@ export class TownScene extends Phaser.Scene {
   create() {
     this.character = ensureRpgCharacter(this.registry.get('character'));
     if (!this.character?.classId) return this.scene.start('Login');
-    if (this.character.level >= 10 && !this.character.advancementId) return this.scene.start('Advancement');
+    if (nextAdvancementStage(this.character)) return this.scene.start('Advancement');
     addFantasyBackdrop(this, { accent: 0x85a873 });
     addSceneTitle(this, '에버글렌 모험가 길드', '사냥을 준비하고 왕국의 인연을 쌓으세요');
     this.renderHeroCard();
@@ -36,13 +36,15 @@ export class TownScene extends Phaser.Scene {
   renderHeroCard() {
     const c = this.character;
     const job = getClass(c.classId);
+    const advancement = getAdvancement(c.advancementId);
     const stats = combatStats(c);
     const companion = getCompanion(c.activeCompanionId);
     addOrnatePanel(this, 240, 186, 432, 112, { color: 0x1b2d25, border: job.color, alpha: 0.96 });
     createEquippedHero(this, c, 74, 184, 1.35);
-    this.add.text(116, 145, `${c.name}  Lv.${c.level}  ${job.name}`, { fontSize: '15px', fontStyle: 'bold', color: '#ffe6a7' });
+    this.add.text(116, 145, `${c.name}  Lv.${c.level}  ${advancement?.name ?? job.name}  · 전투력 ${combatPower(c).toLocaleString()}`, { fontSize: '13px', fontStyle: 'bold', color: '#ffe6a7' });
     this.add.text(116, 174, `HP ${c.hp}/${stats.maxHp}   MP ${c.mp}/${stats.maxMp}   골드 ${c.gold.toLocaleString()}`, { fontSize: '11px', color: '#d9c9a6' });
-    this.add.text(116, 198, `공격 ${stats.attack} · 방어 ${stats.defense} · 민첩 ${stats.agility}   경험치 ${c.xp}/${xpForLevel(c.level)}`, { fontSize: '9px', color: '#9fc7a4' });
+    const xpText = c.level >= 999 ? 'MAX' : `${c.xp}/${xpForLevel(c.level)}`;
+    this.add.text(116, 198, `공격 ${stats.attack} · 방어 ${stats.defense} · 민첩 ${stats.agility}   경험치 ${xpText}`, { fontSize: '9px', color: '#9fc7a4' });
     this.add.text(116, 219, companion ? `동료: ${companion.name} · ${companion.className}` : '동료: 아직 없음 — 여관에서 모집 가능', { fontSize: '10px', color: companion ? '#b8b0e5' : '#a99d89' });
   }
 

@@ -6,7 +6,7 @@ export const CLASSES = [
   { id: 'rogue', name: '그림자 도적', icon: '◆', color: 0x4f596b, hp: 104, mp: 50, attack: 23, defense: 8, agility: 23, skill: '급소 찌르기', skillPower: 2.1, description: '치명타와 전리품 획득에 유리하다.' },
 ];
 
-export const ADVANCEMENTS = {
+const BASE_ADVANCEMENTS = {
   warrior: [
     { id: 'berserker', name: '광전사', color: 0xc9473c, skills: [{ name: '피의 폭주', power: 2.8, cost: 18, effect: 'rage' }, { name: '대지 가르기', power: 2.2, cost: 14, effect: 'quake' }] },
     { id: 'guardian', name: '성벽 기사', color: 0x6485a8, skills: [{ name: '철벽 반격', power: 1.7, cost: 12, effect: 'shield' }, { name: '왕국의 방패', power: 1.2, cost: 16, effect: 'barrier' }] },
@@ -29,6 +29,58 @@ export const ADVANCEMENTS = {
   ],
 };
 
+export const ADVANCEMENT_STAGES = [
+  { stage: 1, level: 10, label: '2차 전직' },
+  { stage: 2, level: 100, label: '3차 전직' },
+  { stage: 3, level: 300, label: '4차 전직' },
+  { stage: 4, level: 600, label: '5차 전직' },
+  { stage: 5, level: 900, label: '6차 전직' },
+];
+
+// 2차 전직에서 선택한 계열을 끝까지 유지하되, 각 구간마다 두 가지 상위 직업 중 하나를 선택한다.
+const ADVANCEMENT_BRANCH_NAMES = {
+  berserker: [['폭풍 투사', '혈검 군주'], ['거신 파괴자', '적월 전쟁왕'], ['천붕 패왕', '불멸의 학살자'], ['종말의 무신', '피의 전쟁신']],
+  guardian: [['왕국 수호자', '성철 기사'], ['요새 지배자', '신성 방패군주'], ['천공 성벽', '불멸의 수호왕'], ['세계의 방패', '창세의 기사왕']],
+  archmage: [['비전 현자', '천체술사'], ['마력 지배자', '별폭풍 군주'], ['차원 대현자', '천궁의 마도왕'], ['창세의 마신', '무한의 대마도사']],
+  frostweaver: [['빙하술사', '서리 현자'], ['동토 지배자', '백야 마녀'], ['영겁빙제', '절대영도 군주'], ['시간을 얼린 자', '태초의 겨울신']],
+  sniper: [['성운 사수', '바람 저격수'], ['천궁 추적자', '혜성 사냥꾼'], ['별궤도 군주', '신궁'], ['운명을 꾰뚝는 자', '천공의 사냥신']],
+  beastmaster: [['정령 조련사', '야수 지배자'], ['고대 수호 조련왕', '환수 군주'], ['태고의 소환왕', '만수의 제왕'], ['세계수의 벗', '야생의 신']],
+  paladin: [['성역 기사', '심판관'], ['천벌 군주', '황금 수호왕'], ['천군 대원수', '신성 요새'], ['창세의 성기사', '광명의 전신']],
+  oracle: [['성좌 예언자', '시간 사제'], ['운명 관측자', '은하 성녀'], ['영원의 예지자', '성계의 군주'], ['운명을 짜는 자', '별빛의 신']],
+  assassin: [['야행 처형자', '독혈 살수'], ['심연 추적자', '적월 암살군주'], ['무영의 지배자', '멸혼의 왕'], ['종말의 처형자', '죽음의 신']],
+  trickster: [['신기루 도적', '운명 사기꾼'], ['환영 지배자', '월광 괴도'], ['천명을 훔친 자', '이면의 군주'], ['세계를 속인 자', '혼돈의 신']],
+};
+
+function advancedSkills(root, name, stage) {
+  return root.skills.map((skill, index) => ({
+    ...skill,
+    name: `${name}의 ${index === 0 ? '오의' : '권능'}`,
+    power: Number((skill.power + (stage - 1) * 0.45).toFixed(2)),
+    cost: skill.cost + (stage - 1) * 3,
+    ...(skill.heal ? { heal: skill.heal + (stage - 1) * 12 } : {}),
+  }));
+}
+
+export const ADVANCEMENTS = Object.fromEntries(Object.entries(BASE_ADVANCEMENTS).map(([classId, roots]) => [
+  classId,
+  roots.flatMap((root) => {
+    const first = { ...root, stage: 1, requiredLevel: 10, pathId: root.id };
+    const later = (ADVANCEMENT_BRANCH_NAMES[root.id] ?? []).flatMap((names, tierIndex) => {
+      const stage = tierIndex + 2;
+      return names.map((name, optionIndex) => ({
+        id: `${root.id}-t${stage}-${optionIndex === 0 ? 'a' : 'b'}`,
+        name,
+        color: root.color,
+        stage,
+        requiredLevel: ADVANCEMENT_STAGES[stage - 1].level,
+        pathId: root.id,
+        skills: advancedSkills(root, name, stage),
+      }));
+    });
+    return [first, ...later];
+  }),
+]));
+
 const REGION_BLUEPRINTS = [
   ['forest', '속삭이는 숲', '초보 사냥터', 1, 0x4c8b4b], ['frozen', '서리왕의 설원', '빙결 몬스터 출몰', 3, 0x79b9d9],
   ['blood', '피의 협곡', '광폭한 오크 부족', 5, 0xa63843], ['swamp', '독안개 늪지', '맹독에 주의', 7, 0x687746],
@@ -50,6 +102,7 @@ export const REGIONS = REGION_BLUEPRINTS.map(([biome, name, subtitle, minLevel, 
   id: index < 6 ? biome : `${biome}-${minLevel}`,
   biome, name, subtitle, minLevel, color,
   danger: Math.min(10, 1 + Math.floor(index / 3)),
+  requiredPower: Math.round(150 + (minLevel - 1) * 28 + Math.floor(index / 3) * 110),
 }));
 
 export const NPCS = [
@@ -72,10 +125,20 @@ export function getClass(id) { return CLASSES.find((entry) => entry.id === id); 
 export function getAdvancement(id) {
   return Object.values(ADVANCEMENTS).flat().find((entry) => entry.id === id);
 }
+export function advancementStageForLevel(level) {
+  return ADVANCEMENT_STAGES.filter((entry) => level >= entry.level).at(-1)?.stage ?? 0;
+}
+export function getAdvancementOptions(classId, stage, pathId = null) {
+  return (ADVANCEMENTS[classId] ?? []).filter((entry) => entry.stage === stage && (stage === 1 || entry.pathId === pathId));
+}
 export function getNpc(id) { return NPCS.find((entry) => entry.id === id); }
 export function getCompanion(id) { return COMPANIONS.find((entry) => entry.id === id); }
 
-export function xpForLevel(level) { return 80 + level * 45; }
+export function xpForLevel(level) {
+  const base = 80 + level * 45;
+  if (level < 200) return base;
+  return base + Math.floor(((level - 199) ** 2) * 0.5);
+}
 
 export function affinityPriceMultiplier(affinity = 0) {
   return Math.max(0.7, Math.min(1.3, 1 - affinity * 0.006));

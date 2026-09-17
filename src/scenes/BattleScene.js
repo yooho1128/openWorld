@@ -6,6 +6,7 @@ import { addLoot, addXp, combatStats, companionStats, ensureRpgCharacter, equipp
 import { advanceDailyQuests } from '../state/quests.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { addBattlefield, addFantasyBackdrop, addOrnatePanel } from '../ui/fantasyTheme.js';
+import { rollHuntEncounter } from '../state/hunting.js';
 
 const RANK_POWER = { F: 1, E: 2, D: 3, C: 4, B: 5, A: 6, S: 8 };
 
@@ -462,7 +463,11 @@ export class BattleScene extends Phaser.Scene {
     this.character.hunted[this.monsterData.id] = (this.character.hunted[this.monsterData.id] ?? 0) + 1;
     addLoot(this.character, loot);
     if (equipment) addLoot(this.character, equipment);
+    const hadLevel200Reward = this.character.level200WeaponGranted;
     const levels = addXp(this.character, xp);
+    const milestoneWeapon = !hadLevel200Reward && this.character.level200WeaponGranted
+      ? this.character.inventory.find((item) => item.source === 'level-200-mythic')
+      : null;
     const companionLevels = this.companion ? grantCompanionXp(this.character, this.companion.id, Math.round(xp * 0.4)) : [];
     advanceDailyQuests(this.character, { biome: this.monsterData.biome, isBoss: this.isBoss, goldEarned: gold });
     saveCharacter(this);
@@ -476,7 +481,8 @@ export class BattleScene extends Phaser.Scene {
     }
     const gearLine = equipment ? `\n${getRarity(equipment.rarity).name} 장비 획득!\n${equipmentDisplayName(equipment)}` : '';
     const companionLine = companionLevels.length ? `\n${this.companion.name} 유대 Lv.${companionLevels.at(-1)} 달성!` : '';
-    this.finish(`승리!\n${xp} XP · ${gold} 골드\n${loot.name} 획득${gearLine}${levels.length ? `\n레벨 ${levels.at(-1)} 달성!` : ''}${companionLine}`, equipment ? getRarity(equipment.rarity).color : 0x4f8557);
+    const milestoneLine = milestoneWeapon ? `\n★ Lv.200 신화 무기 획득!\n${equipmentDisplayName(milestoneWeapon)}` : '';
+    this.finish(`승리!\n${xp} XP · ${gold} 골드\n${loot.name} 획득${gearLine}${levels.length ? `\n레벨 ${levels.at(-1)} 달성!` : ''}${milestoneLine}${companionLine}`, equipment ? getRarity(equipment.rarity).color : 0x4f8557);
   }
 
   defeat() {
@@ -494,10 +500,15 @@ export class BattleScene extends Phaser.Scene {
 
   finish(message, color) {
     this.commandLayer.destroy(true);
+    saveCharacter(this);
     this.add.rectangle(240, 665, 440, 164, 0x17120f, 0.96).setStrokeStyle(2, color);
-    this.add.text(240, 620, message, { fontSize: '14px', color: '#ffe8b0', align: 'center', lineSpacing: 6 }).setOrigin(0.5);
-    const back = this.add.rectangle(240, 719, 210, 46, color, 0.95).setStrokeStyle(2, 0xd7b268).setInteractive({ useHandCursor: true });
-    this.add.text(240, 719, '길드로 귀환', { fontSize: '14px', fontStyle: 'bold', color: '#fff1bd' }).setOrigin(0.5);
+    const lines = message.split('\n').length;
+    this.add.text(240, 616, message, { fontSize: lines > 6 ? '11px' : lines > 4 ? '12px' : '14px', color: '#ffe8b0', align: 'center', lineSpacing: lines > 6 ? 3 : 5 }).setOrigin(0.5);
+    const again = this.add.rectangle(132, 719, 196, 46, 0x4f7958, 0.96).setStrokeStyle(2, 0xd7b268).setInteractive({ useHandCursor: true });
+    this.add.text(132, 719, '계속 사냥', { fontSize: '14px', fontStyle: 'bold', color: '#fff1bd' }).setOrigin(0.5);
+    const back = this.add.rectangle(348, 719, 196, 46, color, 0.95).setStrokeStyle(2, 0xd7b268).setInteractive({ useHandCursor: true });
+    this.add.text(348, 719, '마을로 귀환', { fontSize: '14px', fontStyle: 'bold', color: '#fff1bd' }).setOrigin(0.5);
+    again.on('pointerdown', () => this.scene.start('Battle', rollHuntEncounter(this.region)));
     back.on('pointerdown', () => this.scene.start('Town'));
   }
 }

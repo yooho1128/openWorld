@@ -1,5 +1,5 @@
-import { ADVANCEMENTS, getClass, getCompanion, xpForLevel } from '../data/rpg.js';
-import { enhancementStats, masterEquipmentSet, equipmentSetBonus, rollGachaEquipment } from '../data/equipment.js';
+import { ADVANCEMENTS, advancementStageForLevel, getAdvancement, getAdvancementOptions, getClass, getCompanion, xpForLevel } from '../data/rpg.js';
+import { enhancementStats, masterEquipmentSet, equipmentSetBonus, level200MythicWeapon, rollGachaEquipment } from '../data/equipment.js';
 
 export function ensureRpgCharacter(character) {
   character.inventory ??= [];
@@ -13,8 +13,22 @@ export function ensureRpgCharacter(character) {
   character.equipment.earrings ??= [null, null];
   character.redeemedCoupons ??= [];
   character.advancementId ??= null;
+  if (!Array.isArray(character.advancementHistory)) character.advancementHistory = [];
+  const classAdvancementIds = new Set((ADVANCEMENTS[character.classId] ?? []).map((entry) => entry.id));
+  character.advancementHistory = character.advancementHistory
+    .filter((id, index, entries) => classAdvancementIds.has(id) && entries.indexOf(id) === index)
+    .slice(0, 5);
+  if (!character.advancementHistory.length && classAdvancementIds.has(character.advancementId)) {
+    character.advancementHistory = [character.advancementId];
+  }
   character.agility ??= getClass(character.classId)?.agility ?? 10;
   character.mailbox ??= [];
+  character.level200WeaponGranted ??= false;
+  if (character.level >= 200 && character.classId && !character.level200WeaponGranted) {
+    character.level200WeaponGranted = true;
+    const reward = level200MythicWeapon(character.classId);
+    if (reward) character.inventory.unshift(reward);
+  }
   if (!character.mailboxWelcomeGranted) {
     character.mailboxWelcomeGranted = true;
     for (let i = 0; i < 10; i += 1) {
@@ -98,9 +112,10 @@ export function chooseClass(character, classId) {
 }
 
 export function addXp(character, amount) {
+  if (character.level >= 999) { character.level = 999; character.xp = 0; return []; }
   character.xp += amount;
   const levels = [];
-  while (character.xp >= xpForLevel(character.level)) {
+  while (character.level < 999 && character.xp >= xpForLevel(character.level)) {
     character.xp -= xpForLevel(character.level);
     character.level += 1;
     character.maxHp += 12;
@@ -116,6 +131,12 @@ export function addXp(character, amount) {
     const stats = combatStats(character);
     character.hp = stats.maxHp;
     character.mp = stats.maxMp;
+  }
+  if (character.level >= 999) character.xp = 0;
+  if (character.level >= 200 && character.classId && !character.level200WeaponGranted) {
+    character.level200WeaponGranted = true;
+    const reward = level200MythicWeapon(character.classId);
+    if (reward) character.inventory.unshift(reward);
   }
   return levels;
 }
@@ -202,21 +223,38 @@ export function combatStats(character) {
   return totals;
 }
 
+export function combatPower(character) {
+  const stats = combatStats(character);
+  return Math.max(1, Math.round(
+    stats.attack * 5
+    + stats.defense * 4
+    + stats.agility * 2
+    + stats.maxHp * 0.35
+    + stats.maxMp * 0.1,
+  ));
+}
+
 export function createMasterCharacter(nickname, classId) {
   const job = getClass(classId);
   const levelUps = 998;
-  const advancement = ADVANCEMENTS[classId]?.[0];
+  const firstAdvancement = ADVANCEMENTS[classId]?.find((entry) => entry.stage === 1);
+  const advancementHistory = firstAdvancement
+    ? [firstAdvancement, ...[2, 3, 4, 5].map((stage) => getAdvancementOptions(classId, stage, firstAdvancement.id)[0]).filter(Boolean)]
+    : [];
+  const advancement = advancementHistory.at(-1);
+  const advancementBonuses = advancementHistory.length;
   const items = masterEquipmentSet(classId);
   const bySlot = (slot, index = 0) => items.filter((item) => item.slot === slot)[index] ?? null;
   const character = ensureRpgCharacter({
     version: 'rpg-1', nickname, name: nickname, gender: 'master', classId, isAdmin: true,
     level: 999, xp: 0, gold: 99999999,
-    maxHp: job.hp + levelUps * 12 + 35, hp: job.hp + levelUps * 12 + 35,
-    maxMp: job.mp + levelUps * 5 + 25, mp: job.mp + levelUps * 5 + 25,
-    attack: job.attack + levelUps * 3 + 8, defense: job.defense + levelUps * 2 + 5, agility: job.agility,
+    maxHp: job.hp + levelUps * 12 + 35 * advancementBonuses, hp: job.hp + levelUps * 12 + 35 * advancementBonuses,
+    maxMp: job.mp + levelUps * 5 + 25 * advancementBonuses, mp: job.mp + levelUps * 5 + 25 * advancementBonuses,
+    attack: job.attack + levelUps * 3 + 8 * advancementBonuses, defense: job.defense + levelUps * 2 + 5 * advancementBonuses, agility: job.agility,
     potions: 999, inventory: [], companions: [], activeCompanionId: null,
     affinity: { merchant: 50, guildmaster: 50, innkeeper: 50, blacksmith: 50 }, dialogueHistory: {},
     victories: 0, defeats: 0, hunted: {}, advancementId: advancement?.id ?? null,
+    advancementHistory: advancementHistory.map((entry) => entry.id),
     redeemedCoupons: [], createdAt: Date.now(),
     equipment: {
       helmet: bySlot('helmet'), armor: bySlot('armor'), gloves: bySlot('gloves'), boots: bySlot('boots'), weapon: bySlot('weapon'), necklace: bySlot('necklace'),
@@ -263,8 +301,28 @@ export function unequipItem(character, slot, index = 0) {
   return true;
 }
 
+export function nextAdvancementStage(character) {
+  ensureRpgCharacter(character);
+  const unlockedStage = advancementStageForLevel(character.level);
+  for (let stage = 1; stage <= unlockedStage; stage += 1) {
+    const chosen = character.advancementHistory.some((id) => getAdvancement(id)?.stage === stage);
+    if (!chosen) return stage;
+  }
+  return null;
+}
+
+export function availableAdvancements(character) {
+  const stage = nextAdvancementStage(character);
+  if (!stage) return [];
+  const pathId = getAdvancement(character.advancementHistory[0])?.pathId ?? null;
+  return getAdvancementOptions(character.classId, stage, pathId);
+}
+
 export function chooseAdvancement(character, advancementId) {
-  if (character.level < 10) return false;
+  const stage = nextAdvancementStage(character);
+  const job = getAdvancement(advancementId);
+  if (!stage || !job || job.stage !== stage || !availableAdvancements(character).some((entry) => entry.id === advancementId)) return false;
+  character.advancementHistory.push(advancementId);
   character.advancementId = advancementId;
   character.attack += 8;
   character.defense += 5;

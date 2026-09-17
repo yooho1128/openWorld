@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { getClass, getAdvancement } from '../data/rpg.js';
 import { getRarity, getSlot, equipmentDisplayName, enhancementStats, levelEffectiveness, rollGachaEquipment } from '../data/equipment.js';
 import { BIOME_LABELS } from '../data/monsters.js';
-import { addLoot, combatStats, ensureRpgCharacter, equipItem, unequipItem, saveCharacter } from '../state/rpgCharacter.js';
+import { addLoot, combatPower, combatStats, ensureRpgCharacter, equipItem, unequipItem, saveCharacter } from '../state/rpgCharacter.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
@@ -61,7 +61,7 @@ export class StatusScene extends Phaser.Scene {
     openPanel(`
       <div class="panel status-panel">
         <h2>${c.name} · Lv.${c.level}</h2>
-        <div class="class-badge">${advancement?.name ?? job.name}</div>
+        <div class="class-badge">${advancement?.name ?? job.name} · 전투력 ${combatPower(c).toLocaleString()}</div>
         <div class="stat-grid"><span>HP <strong>${c.hp}/${stats.maxHp}</strong></span><span>MP <strong>${c.mp}/${stats.maxMp}</strong></span><span>공격력 <strong>${stats.attack}</strong></span><span>방어력 <strong>${stats.defense}</strong></span><span>민첩 <strong>${stats.agility}</strong></span><span>탈주 확률 <strong>적과 비교 계산</strong></span></div>
         ${setBonusHtml}
         ${message ? `<p class="trade-message">${message}</p>` : ''}
