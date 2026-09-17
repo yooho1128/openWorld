@@ -53,8 +53,9 @@ export class BattleScene extends Phaser.Scene {
     this.turn = 1;
     this.actionHistory = [];
     addFantasyBackdrop(this, { dark: true, accent: this.region.color });
-    addRegionBattlefield(this, this.region, { isBoss: this.isBoss });
+    this.regionVisual = addRegionBattlefield(this, this.region, { isBoss: this.isBoss });
     this.add.text(240, 35, `${this.region.name} · 전투`, { fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '21px', fontStyle: 'bold', color: '#f4dc9c' }).setOrigin(0.5);
+    this.add.text(240, 62, `${this.regionVisual.icon}  ${this.region.subtitle}  ·  위험 ${this.region.danger}`, { fontSize: '10px', fontStyle: 'bold', color: '#d5c69f', backgroundColor: '#120f13aa', padding: { x: 8, y: 3 } }).setOrigin(0.5);
     this.add.ellipse(342, 281, this.isBoss ? 145 : 120, 30, 0x0a100d, 0.38);
     this.enemySprite = this.add.sprite(342, 225, this.monsterData.texture).setScale(this.isBoss ? 2.85 : 2.35);
     if (this.isBoss) this.enemySprite.setTint(0xffd36a);
@@ -94,6 +95,34 @@ export class BattleScene extends Phaser.Scene {
     });
     this.selectEnemyIntent();
     this.refreshStatus();
+    if (this.isBoss) this.playBossEntrance();
+  }
+
+  playBossEntrance() {
+    this.busy = true;
+    this.commandLayer.setAlpha(0.32);
+    const targetScale = 2.85;
+    this.enemySprite.setAlpha(0).setScale(4.4).setAngle(-8);
+    const veil = this.add.rectangle(240, 245, 480, 310, 0x120006, 0.55).setDepth(45);
+    const banner = this.add.rectangle(240, 245, 430, 104, 0x26040a, 0.96).setStrokeStyle(4, 0xff4b45, 0.92).setDepth(46);
+    const warning = this.add.text(240, 218, '⚠  BOSS DOMAIN  ⚠', {
+      fontFamily: 'Georgia, serif', fontSize: '17px', fontStyle: 'bold', color: '#ffbe72', stroke: '#4a0008', strokeThickness: 4,
+    }).setOrigin(0.5).setDepth(47);
+    const bossName = this.add.text(240, 260, this.monsterData.name, {
+      fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '27px', fontStyle: 'bold', color: '#fff0c2', stroke: '#660914', strokeThickness: 6,
+    }).setOrigin(0.5).setDepth(47);
+    const healthGlow = this.add.rectangle(356, 135, 204, 18, 0x000000, 0).setStrokeStyle(3, 0xff4a45, 0.72).setDepth(15);
+    this.tweens.add({ targets: healthGlow, alpha: 0.2, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: this.enemySprite, alpha: 1, scale: targetScale, angle: 0, duration: 760, ease: 'Back.easeOut' });
+    this.tweens.add({ targets: [banner, warning, bossName], scaleX: 1.035, duration: 260, yoyo: true, repeat: 1, ease: 'Sine.easeInOut' });
+    this.cameras.main.shake(760, 0.018);
+    this.time.delayedCall(900, () => {
+      this.tweens.add({ targets: [veil, banner, warning, bossName], alpha: 0, duration: 260, onComplete: () => {
+        veil.destroy(); banner.destroy(); warning.destroy(); bossName.destroy();
+      } });
+      this.commandLayer.setAlpha(1);
+      this.busy = false;
+    });
   }
 
   addCommand(x, y, label, action, color, height = 52) {
