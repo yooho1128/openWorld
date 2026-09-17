@@ -1,5 +1,5 @@
 import { ADVANCEMENTS, getClass, getCompanion, xpForLevel } from '../data/rpg.js';
-import { enhancementStats, masterEquipmentSet, equipmentSetBonus } from '../data/equipment.js';
+import { enhancementStats, masterEquipmentSet, equipmentSetBonus, rollGachaEquipment } from '../data/equipment.js';
 
 export function ensureRpgCharacter(character) {
   character.inventory ??= [];
@@ -21,8 +21,8 @@ export function ensureRpgCharacter(character) {
       character.mailbox.push({
         id: `mail-welcome-${i}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
         title: '길드의 환영 선물',
-        body: '모험을 시작한 것을 축하하며, 장비 랜덤 뽑기권을 보냅니다.',
-        item: { id: `ticket-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}-${i}`, type: 'ticket', kind: 'gachaEquipment', name: '장비 랜덤 뽑기권', quantity: 1, value: 50 },
+        body: '모험을 시작한 것을 축하하며, 무작위 장비를 보냅니다.',
+        gachaEquipment: true,
         createdAt: Date.now(),
       });
     }
@@ -40,28 +40,37 @@ export function ensureRpgCharacter(character) {
   return character;
 }
 
+// 우편을 실제로 지급한다. gachaEquipment 우편은 미리 정해둔 아이템이 없고,
+// 수령하는 바로 그 시점의 직업/레벨 기준으로 그 자리에서 장비를 뽑는다.
 function grantMail(character, mail) {
+  let grantedItem = null;
   if (mail.gold) {
     character.gold += mail.gold;
     character.goldEarnedTotal = (character.goldEarnedTotal ?? 0) + mail.gold;
   }
-  if (mail.item) addLoot(character, mail.item);
+  if (mail.gachaEquipment) {
+    grantedItem = rollGachaEquipment(character.classId, character.level);
+    if (grantedItem) addLoot(character, grantedItem);
+  } else if (mail.item) {
+    grantedItem = mail.item;
+    addLoot(character, mail.item);
+  }
+  return grantedItem;
 }
 
 export function claimMail(character, mailId) {
   ensureRpgCharacter(character);
   const index = character.mailbox.findIndex((mail) => mail.id === mailId);
-  if (index < 0) return false;
+  if (index < 0) return null;
   const [mail] = character.mailbox.splice(index, 1);
-  grantMail(character, mail);
-  return true;
+  return { gold: mail.gold ?? 0, item: grantMail(character, mail) };
 }
 
 export function claimAllMail(character) {
   ensureRpgCharacter(character);
   const claimed = character.mailbox.splice(0, character.mailbox.length);
-  claimed.forEach((mail) => grantMail(character, mail));
-  return claimed.length;
+  const results = claimed.map((mail) => ({ gold: mail.gold ?? 0, item: grantMail(character, mail) }));
+  return results;
 }
 
 export function createRpgCharacter({ nickname, name, gender }) {
