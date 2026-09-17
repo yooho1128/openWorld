@@ -102,6 +102,8 @@ function sanitizeCharacter(input, nickname) {
     dialogueHistory: asPlainObject(c.dialogueHistory),
     hunted: asPlainObject(c.hunted),
     quests: asPlainObject(c.quests),
+    mailbox: asArray(c.mailbox, 200),
+    mailboxWelcomeGranted: c.mailboxWelcomeGranted === true,
     redeemedCoupons: asArray(c.redeemedCoupons, 50).filter((code) => typeof code === 'string'),
     createdAt: Number.isFinite(Number(c.createdAt)) ? Number(c.createdAt) : Date.now(),
   };
