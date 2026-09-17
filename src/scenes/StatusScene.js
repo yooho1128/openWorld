@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { getClass, getAdvancement } from '../data/rpg.js';
-import { getRarity, getSlot, equipmentDisplayName, enhancementStats, levelEffectiveness } from '../data/equipment.js';
+import { getRarity, getSlot, equipmentDisplayName, enhancementStats, levelEffectiveness, rollGachaEquipment } from '../data/equipment.js';
 import { BIOME_LABELS } from '../data/monsters.js';
-import { combatStats, ensureRpgCharacter, equipItem, unequipItem, saveCharacter } from '../state/rpgCharacter.js';
+import { addLoot, combatStats, ensureRpgCharacter, equipItem, unequipItem, saveCharacter } from '../state/rpgCharacter.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
@@ -40,6 +40,10 @@ export class StatusScene extends Phaser.Scene {
       const levelNote = item && eff < 1 ? `<small class="forge-risk">Lv.${item.level ?? 1} · 효과 ${Math.round(eff * 100)}%</small>` : '';
       return `<div class="equip-slot ${item ? `rarity-${item.rarity}` : 'empty'}"><span>${label}</span><strong>${item ? equipmentDisplayName(item) : '비어 있음'}</strong>${item ? `<small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<button id="unequip-${position}">해제</button>` : ''}</div>`;
     }).join('');
+    const ticketItems = c.inventory.filter((item) => item.type === 'ticket');
+    const ticketHtml = ticketItems.length
+      ? ticketItems.map((item, index) => `<div class="gear-card"><div><strong>${item.name}</strong><small>사용하면 무작위 부위 · 무작위 등급 장비 1개 획득</small></div><button id="use-ticket-${index}">사용하기</button></div>`).join('')
+      : '';
     const bagItems = c.inventory.filter((item) => item.type === 'equipment');
     const bagHtml = bagItems.length ? bagItems.map((item, index) => {
       const statsText = Object.entries(enhancementStats(item, c.level)).filter(([, value]) => value).map(([key, value]) => `${key.toUpperCase()} +${value}`).join(' · ');
@@ -62,6 +66,7 @@ export class StatusScene extends Phaser.Scene {
         ${setBonusHtml}
         ${message ? `<p class="trade-message">${message}</p>` : ''}
         <h3>착용 장비</h3><div class="equipped-grid">${equippedHtml}</div>
+        ${ticketItems.length ? `<h3>보유 아이템</h3><div class="gear-list">${ticketHtml}</div>` : ''}
         <h3>장비 가방</h3><div class="gear-list">${bagHtml}</div>
         <button id="status-back" class="secondary">길드로 돌아가기</button>
       </div>
@@ -72,6 +77,20 @@ export class StatusScene extends Phaser.Scene {
     bagItems.forEach((item, index) => qs(`equip-${index}`)?.addEventListener('click', () => {
       if (equipItem(c, item.id)) { saveCharacter(this); this.scene.restart(); }
     }));
+    ticketItems.forEach((item, index) => qs(`use-ticket-${index}`)?.addEventListener('click', () => this.useTicket(item.id)));
     qs('status-back').addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Town'); });
+  }
+
+  useTicket(itemId) {
+    const c = this.character;
+    const index = c.inventory.findIndex((entry) => entry.id === itemId);
+    if (index < 0) return;
+    const item = c.inventory[index];
+    item.quantity -= 1;
+    if (item.quantity <= 0) c.inventory.splice(index, 1);
+    const reward = rollGachaEquipment(c.classId, c.level);
+    if (reward) addLoot(c, reward);
+    saveCharacter(this);
+    this.render(reward ? `${getRarity(reward.rarity).name} 등급 「${equipmentDisplayName(reward)}」을(를) 획득했습니다!` : '뽑기에 실패했습니다.');
   }
 }
