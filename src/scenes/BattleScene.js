@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { MONSTERS } from '../data/monsters.js';
 import { REGIONS, getClass, getCompanion, getAdvancement } from '../data/rpg.js';
-import { equipmentForMonster, equipmentDisplayName, getRarity } from '../data/equipment.js';
+import { equipmentForMonster, guaranteedBossEquipment, equipmentDisplayName, getRarity } from '../data/equipment.js';
 import { addLoot, addXp, combatStats, companionStats, ensureRpgCharacter, equippedItems, grantCompanionXp, saveCharacter } from '../state/rpgCharacter.js';
 import { advanceDailyQuests } from '../state/quests.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
@@ -446,8 +446,9 @@ export class BattleScene extends Phaser.Scene {
     const xp = Math.round((25 + power * 15 + this.enemy.level * 12) * rewardMultiplier);
     const gold = Math.round((30 + power * 22 + this.enemy.level * 1.8 + Phaser.Math.Between(0, 25)) * rewardMultiplier);
     const loot = { id: `loot-${this.monsterData.id}`, name: `${this.monsterData.name} 전리품`, value: 18 + power * 17, quantity: 1, rarity: this.monsterData.rank };
-    const equipment = equipmentForMonster(this.monsterData, this.character.classId, this.enemy.level)
-      ?? (this.isBoss ? equipmentForMonster(this.monsterData, this.character.classId, this.enemy.level) : null);
+    const equipment = this.isBoss
+      ? guaranteedBossEquipment(this.monsterData, this.character.classId, this.enemy.level)
+      : equipmentForMonster(this.monsterData, this.character.classId, this.enemy.level);
     this.character.gold += gold;
     this.character.goldEarnedTotal = (this.character.goldEarnedTotal ?? 0) + gold;
     this.character.victories += 1;
