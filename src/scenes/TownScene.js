@@ -14,6 +14,7 @@ const HUBS = [
   { label: '달빛 여관', sub: '회복 · 대화', scene: 'NPC', data: { npcId: 'innkeeper' }, icon: '☾', color: 0x55795e },
   { label: '상태 · 장비', sub: '스탯과 장비 착용', scene: 'Status', icon: '▣', color: 0x4d7086 },
   { label: '대장간', sub: '장비 강화 +20', scene: 'Blacksmith', icon: '⚒', color: 0x75584c },
+  { label: '명예의 전당', sub: '레벨 · 승리 랭킹', scene: 'Ranking', icon: '♛', color: 0x8a6a2a },
 ];
 
 export class TownScene extends Phaser.Scene {
@@ -50,7 +51,7 @@ export class TownScene extends Phaser.Scene {
     const col = index % 2;
     const row = Math.floor(index / 2);
     const x = 128 + col * 224;
-    const y = 305 + row * 112;
+    const y = 305 + row * 100;
     const bg = this.add.rectangle(x, y, 204, 92, 0x241b16, 0.94).setStrokeStyle(2, hub.color, 0.9).setInteractive({ useHandCursor: true });
     this.add.circle(x - 69, y, 25, hub.color, 0.72);
     this.add.text(x - 69, y, hub.icon, { fontFamily: 'Georgia, serif', fontSize: '22px', color: '#fff0c0' }).setOrigin(0.5);

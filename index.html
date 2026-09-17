@@ -207,6 +207,19 @@
       .quest-tabs { display: flex; gap: 6px; margin: 10px 0 4px; }
       .quest-tabs button { flex: 1; margin: 0 !important; }
       .quest-tabs button.inactive { background: linear-gradient(#4a3a2c, #2c2119) !important; opacity: .75; }
+      .ranking-panel { width: min(430px, 100%) !important; }
+      .rank-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; max-height: 55vh; overflow-y: auto; }
+      .rank-row { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #9d835c; border-radius: 5px; background: #ead8b1; font-family: 'Malgun Gothic', sans-serif; }
+      .rank-num { flex: 0 0 24px; text-align: center; font-weight: 700; font-size: 13px; color: #5a432b; }
+      .rank-name { flex: 1; min-width: 0; }
+      .rank-name strong { display: block; font-size: 12px; }
+      .rank-name small { display: block; color: #6d5a41; font-size: 9px; margin-top: 1px; }
+      .rank-value { flex: 0 0 auto; font-size: 11px; font-weight: 700; color: #4c3420; }
+      .rank-top.rank-1 { background: linear-gradient(105deg, #f5dfa0, #eec161); border-color: #d19a2e; box-shadow: 0 0 10px #e8b53f66; }
+      .rank-top.rank-2 { background: linear-gradient(105deg, #e6e6ea, #c7c9d1); border-color: #9a9ca6; }
+      .rank-top.rank-3 { background: linear-gradient(105deg, #e8c5a6, #cf9a6f); border-color: #a9713f; }
+      .rank-top .rank-num { font-size: 15px; }
+      .rank-mine { outline: 2px solid #4a7fd1; }
     </style>
   </head>
   <body>
