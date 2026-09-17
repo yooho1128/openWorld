@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { COMPANIONS } from '../data/rpg.js';
-import { saveCharacter } from '../state/rpgCharacter.js';
+import { saveCharacter, companionStats } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
@@ -19,7 +19,11 @@ export class TavernScene extends Phaser.Scene {
     const cards = COMPANIONS.map((ally) => {
       const owned = c.companions.includes(ally.id);
       const active = c.activeCompanionId === ally.id;
-      return `<div class="companion-card ${active ? 'active' : ''}"><div class="companion-avatar" style="background:#${ally.color.toString(16).padStart(6, '0')}">${ally.name[0]}</div><div class="companion-copy"><strong>${ally.name}</strong><small>${ally.className} · Lv.${ally.level}</small><small>공격 ${ally.attack} · 방어 ${ally.defense} · ${ally.ability}</small></div><button id="ally-${ally.id}">${active ? '출전 중' : owned ? '파티 선택' : `${ally.cost}G 모집`}</button></div>`;
+      const bond = owned ? companionStats(c, ally.id) : null;
+      const bondLine = bond
+        ? `<small>유대 Lv.${bond.level} (${bond.xp}/${bond.xpToNext}) · 공격 ${bond.attack} · 방어 ${bond.defense}${bond.awakenings ? ` · 각성 ${bond.awakenings}단계 (위력 +${Math.round((bond.abilityMultiplier - 1) * 100)}%)` : ''}</small>`
+        : `<small>공격 ${ally.attack} · 방어 ${ally.defense} · ${ally.ability}</small>`;
+      return `<div class="companion-card ${active ? 'active' : ''}"><div class="companion-avatar" style="background:#${ally.color.toString(16).padStart(6, '0')}">${ally.name[0]}</div><div class="companion-copy"><strong>${ally.name}</strong><small>${ally.className} · ${ally.ability}</small>${bondLine}</div><button id="ally-${ally.id}">${active ? '출전 중' : owned ? '파티 선택' : `${ally.cost}G 모집`}</button></div>`;
     }).join('');
     openPanel(`
       <div class="panel companion-panel">
