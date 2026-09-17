@@ -1,4 +1,4 @@
-import { adminPasswordConfigured, createAdminCookie, isMasterNickname, verifyAdminPassword } from '../lib/adminAuth.js';
+import { adminPasswordConfigured, createAdminCookie, isMasterNickname, masterClassId, verifyAdminPassword } from '../lib/adminAuth.js';
 
 export default function handler(req, res) {
   if (req.method !== 'POST') {
@@ -12,5 +12,5 @@ export default function handler(req, res) {
   if (!verifyAdminPassword(req.body?.password)) return res.status(401).json({ error: 'invalid_password' });
 
   res.setHeader('Set-Cookie', createAdminCookie(nickname));
-  return res.json({ ok: true });
+  return res.json({ ok: true, classId: masterClassId(nickname) });
 }

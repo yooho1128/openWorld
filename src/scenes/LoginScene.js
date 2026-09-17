@@ -3,10 +3,6 @@ import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 import { combatStats, createMasterCharacter, ensureRpgCharacter, saveCharacter } from '../state/rpgCharacter.js';
 
-const MASTER_ACCOUNTS = {
-  '마스터_전사': 'warrior', '마스터_마법사': 'mage', '마스터_궁수': 'ranger', '마스터_성직자': 'cleric', '마스터_도적': 'rogue',
-};
-
 export class LoginScene extends Phaser.Scene {
   constructor() { super('Login'); }
 
@@ -31,15 +27,17 @@ export class LoginScene extends Phaser.Scene {
         </div>
         <div class="error" id="login-error"></div>
         <button id="login-submit">길드 입장</button>
+        <button id="admin-toggle" class="secondary" type="button">운영자이신가요?</button>
       </div>
     `);
     qs('login-submit').addEventListener('click', () => this.submit());
     qs('nickname').addEventListener('keydown', (event) => { if (event.key === 'Enter') this.submit(); });
     qs('admin-password').addEventListener('keydown', (event) => { if (event.key === 'Enter') this.submit(); });
-    qs('nickname').addEventListener('input', () => {
-      const isMaster = Boolean(MASTER_ACCOUNTS[qs('nickname').value.trim()]);
-      qs('admin-password-wrap').style.display = isMaster ? 'block' : 'none';
-      if (!isMaster) qs('admin-password').value = '';
+    qs('admin-toggle').addEventListener('click', () => {
+      this.adminMode = !this.adminMode;
+      qs('admin-password-wrap').style.display = this.adminMode ? 'block' : 'none';
+      qs('admin-toggle').textContent = this.adminMode ? '일반 로그인으로 전환' : '운영자이신가요?';
+      if (!this.adminMode) qs('admin-password').value = '';
     });
     qs('nickname').focus();
   }
@@ -47,10 +45,11 @@ export class LoginScene extends Phaser.Scene {
   async submit() {
     const nickname = qs('nickname').value.trim();
     if (!nickname) { qs('login-error').textContent = '별명을 입력해주세요.'; return; }
-    if (MASTER_ACCOUNTS[nickname]) {
+    if (this.adminMode) {
       const password = qs('admin-password').value;
       if (!password) { qs('login-error').textContent = '운영자 비밀번호를 입력해주세요.'; return; }
       qs('login-error').textContent = '운영자 권한을 확인하는 중...';
+      let classId;
       try {
         const response = await fetch('/api/admin-login', {
           method: 'POST',
@@ -60,14 +59,16 @@ export class LoginScene extends Phaser.Scene {
         if (!response.ok) {
           qs('login-error').textContent = response.status === 503
             ? '서버에 운영자 비밀번호가 설정되지 않았습니다.'
-            : '운영자 비밀번호가 올바르지 않습니다.';
+            : '운영자 계정 정보가 올바르지 않습니다.';
           return;
         }
+        ({ classId } = await response.json());
       } catch {
         qs('login-error').textContent = '운영자 인증 서버에 연결할 수 없습니다.';
         return;
       }
-      const character = createMasterCharacter(nickname, MASTER_ACCOUNTS[nickname]);
+      if (!classId) { qs('login-error').textContent = '운영자 계정 정보가 올바르지 않습니다.'; return; }
+      const character = createMasterCharacter(nickname, classId);
       this.registry.set('nickname', nickname);
       this.registry.set('character', character);
       saveCharacter(this);

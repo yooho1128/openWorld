@@ -35,20 +35,38 @@ export class SettingsScene extends Phaser.Scene {
     qs('settings-back').addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Town'); });
   }
 
-  redeem() {
+  // Coupon codes and what they grant are only known to the server - this
+  // just sends the typed code and applies whatever effect it's told the
+  // code unlocked, so the valid codes never ship in the client bundle.
+  async redeem() {
+    if (this.redeeming) return;
     const code = qs('coupon-code').value.trim();
-    const VALID_CODES = ['최유호는 너무 멋져', '최유호는 아쿠마다', '황금폭풍'];
-    if (!VALID_CODES.includes(code)) return this.render('존재하지 않는 쿠폰입니다.');
-    if (this.character.redeemedCoupons.includes(code)) return this.render('이미 사용한 쿠폰입니다.');
+    if (!code) return this.render('쿠폰 코드를 입력하세요.');
+    this.redeeming = true;
+    let result;
+    try {
+      const response = await fetch('/api/redeem-coupon', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: this.registry.get('nickname'), code }),
+      });
+      result = await response.json();
+    } catch {
+      this.redeeming = false;
+      return this.render('쿠폰 서버에 연결할 수 없습니다. 잠시 후 다시 시도하세요.');
+    }
+    this.redeeming = false;
+    if (!result.ok) {
+      return this.render(result.reason === 'used' ? '이미 사용한 쿠폰입니다.' : '존재하지 않는 쿠폰입니다.');
+    }
     this.character.redeemedCoupons.push(code);
-    if (code === '최유호는 너무 멋져') {
+    if (result.effect === 'weapon') {
       const weapon = classCouponWeapon(this.character.classId, this.character.level);
       addLoot(this.character, weapon);
       saveCharacter(this);
       return this.render(`유니크 직업 무기 「${equipmentDisplayName(weapon)}」을 획득했습니다!`);
     }
-    if (code === '황금폭풍') {
-      const amount = 30000;
+    if (result.effect === 'gold') {
+      const amount = result.amount ?? 0;
       this.character.gold += amount;
       this.character.goldEarnedTotal = (this.character.goldEarnedTotal ?? 0) + amount;
       saveCharacter(this);
