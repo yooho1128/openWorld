@@ -51,13 +51,16 @@ const ADVANCEMENT_BRANCH_NAMES = {
   trickster: [['신기루 도적', '운명 사기꾼'], ['환영 지배자', '월광 괴도'], ['천명을 훔친 자', '이면의 군주'], ['세계를 속인 자', '혼돈의 신']],
 };
 
-function advancedSkills(root, name, stage) {
+function advancedSkills(root, name, stage, optionIndex) {
+  const isAuthority = optionIndex === 1;
   return root.skills.map((skill, index) => ({
     ...skill,
     name: `${name}의 ${index === 0 ? '오의' : '권능'}`,
-    power: Number((skill.power + (stage - 1) * 0.45).toFixed(2)),
-    cost: skill.cost + (stage - 1) * 3,
-    ...(skill.heal ? { heal: skill.heal + (stage - 1) * 12 } : {}),
+    // 각 단계의 A 선택지는 저비용·정밀형, B 선택지는 고비용·폭발형으로 분리한다.
+    power: Number((skill.power + (stage - 1) * (isAuthority ? 0.85 : 0.65) + (isAuthority ? 0.35 : 0) + index * 0.08).toFixed(2)),
+    cost: skill.cost + (stage - 1) * (isAuthority ? 6 : 4) + (isAuthority ? 4 : 0) + index,
+    effect: `ascended:${skill.effect}:${stage}:${optionIndex}:${index}`,
+    ...(skill.heal ? { heal: skill.heal + (stage - 1) * (isAuthority ? 24 : 16) + (isAuthority ? 10 : 0) } : {}),
   }));
 }
 
@@ -74,7 +77,7 @@ export const ADVANCEMENTS = Object.fromEntries(Object.entries(BASE_ADVANCEMENTS)
         stage,
         requiredLevel: ADVANCEMENT_STAGES[stage - 1].level,
         pathId: root.id,
-        skills: advancedSkills(root, name, stage),
+        skills: advancedSkills(root, name, stage, optionIndex),
       }));
     });
     return [first, ...later];

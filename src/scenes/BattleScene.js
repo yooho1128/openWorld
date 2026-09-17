@@ -78,7 +78,7 @@ export class BattleScene extends Phaser.Scene {
     const commands = [
       ['공격', () => this.playerAction('attack'), 0x8d4436],
       [`${baseSkill.name} · ${baseSkill.cost}MP`, () => this.playerAction('skill', baseSkill), this.job.color],
-      ...(this.advancement?.skills ?? []).map((skill) => [`${skill.name} · ${skill.cost}MP`, () => this.playerAction('skill', skill), this.advancement.color]),
+      ...(this.advancement?.skills ?? []).map((skill) => [`${skill.name} · 위력 ${skill.power} · ${skill.cost}MP`, () => this.playerAction('skill', skill), this.advancement.color]),
       ['방어', () => this.playerAction('guard'), 0x4f667e],
       [`물약 (${totalPotionCount(this.character)})`, () => this.openPotionMenu(), 0x4f825b],
       [`탈주 · ${this.escapeChance()}%`, () => this.playerAction('escape'), 0x6c6255],
@@ -99,7 +99,8 @@ export class BattleScene extends Phaser.Scene {
     this.add.rectangle(x + 2, y + 4, 210, height, 0x08100d, 0.28);
     const bg = this.add.rectangle(x, y, 210, height, color, 0.92).setStrokeStyle(2, 0xe5c877).setInteractive({ useHandCursor: true });
     this.add.rectangle(x, y - height / 2 + 3, 192, 2, 0xfff1c2, 0.18);
-    const text = this.add.text(x, y, label, { fontSize: label.length > 15 ? '11px' : '13px', fontStyle: 'bold', color: '#fff0bf' }).setOrigin(0.5);
+    const fontSize = label.length > 24 ? '9px' : label.length > 15 ? '11px' : '13px';
+    const text = this.add.text(x, y, label, { fontSize, fontStyle: 'bold', color: '#fff0bf' }).setOrigin(0.5);
     bg.on('pointerdown', action);
     bg.on('pointerover', () => bg.setScale(1.025));
     bg.on('pointerout', () => bg.setScale(1));
@@ -313,19 +314,27 @@ export class BattleScene extends Phaser.Scene {
 
   async playSkillEffect(effect, color) {
     const palette = { frost: 0x8fe6ff, freeze: 0x63bfe8, meteor: 0xff6338, holy: 0xffe894, shadow: 0x7256a8, poison: 0x78bb4d, rage: 0xe84a45, sanctuary: 0xfff1a5, stars: 0xd7c1ff, time: 0x7dd7cf };
-    const tint = palette[effect] ?? color ?? 0xe7ba64;
+    const effectParts = String(effect).split(':');
+    const ascended = effectParts[0] === 'ascended';
+    const resolvedEffect = ascended ? effectParts[1] : effect;
+    const stage = ascended ? Number(effectParts[2]) || 2 : 0;
+    const option = ascended ? Number(effectParts[3]) || 0 : 0;
+    const skillIndex = ascended ? Number(effectParts[4]) || 0 : 0;
+    const tint = palette[resolvedEffect] ?? color ?? 0xe7ba64;
     const animations = {
       warrior: () => this.swordEffect(tint), mage: () => this.magicEffect(tint), ranger: () => this.arrowEffect(tint),
       cleric: () => this.holyLightEffect(tint), rogue: () => this.shadowSlashEffect(tint),
     };
-    const isAdvanced = !Object.hasOwn(animations, effect);
-    if (isAdvanced) this.advancedSkillEffect(effect, tint);
-    else animations[effect]?.();
+    const isAdvanced = !Object.hasOwn(animations, resolvedEffect);
+    if (isAdvanced) this.advancedSkillEffect(resolvedEffect, tint);
+    else animations[resolvedEffect]?.();
+    if (ascended) this.ascendedSkillEffect(resolvedEffect, tint, stage, option, skillIndex);
     const intensity = Phaser.Math.Clamp(1 + Math.floor(this.character.level / 200), 1, 6);
     this.time.delayedCall(280, () => this.impactBurst(tint, 8 + intensity * 3));
     this.enemySprite.setTint(tint);
-    this.time.delayedCall(isAdvanced ? 650 : 430, () => this.enemySprite?.clearTint());
-    await this.pause(isAdvanced ? 760 : 520);
+    const duration = ascended ? 940 : isAdvanced ? 760 : 520;
+    this.time.delayedCall(duration - 110, () => this.enemySprite?.clearTint());
+    await this.pause(duration);
   }
 
   advancedSkillEffect(effect, tint) {
@@ -430,6 +439,56 @@ export class BattleScene extends Phaser.Scene {
         const angle = (Math.PI * 2 * index) / (8 + levelFlair);
         this.tweens.add({ targets: card, x: 342 + Math.cos(angle) * 45, y: 225 + Math.sin(angle) * 45, angle: 540, scale: 0.35, alpha: 0, duration: 580, delay: index * 28, onComplete: () => card.destroy() });
       }
+    }
+  }
+
+  ascendedSkillEffect(baseEffect, tint, stage, option, skillIndex) {
+    const x = 342;
+    const y = 225;
+    const tier = Phaser.Math.Clamp(stage, 2, 5);
+    const symbols = {
+      rage: '⚔', quake: '◆', shield: '♜', barrier: '◈', meteor: '✦', arcane: '✺',
+      frost: '❄', freeze: '❄', snipe: '⊙', arrows: '➶', beast: '◇', eagle: '✧',
+      holy: '✦', sanctuary: '✚', stars: '✦', time: '◷', shadow: '◆', poison: '✥',
+      illusion: '◈', fortune: '♦',
+    };
+    const symbol = symbols[baseEffect] ?? '✦';
+    const fade = (target, duration, delay = 0, scale = 1.8, angle = 0) => this.tweens.add({
+      targets: target, alpha: 0, scale, angle, duration, delay, ease: 'Cubic.easeOut', onComplete: () => target.destroy(),
+    });
+
+    if (option === 0) {
+      // 오의: 적 하나에게 수렴하는 정밀한 마법진과 연속 교차격.
+      for (let index = 0; index < tier + 1; index += 1) {
+        const ring = this.add.circle(x, y, 25 + index * 15, 0x000000, 0).setStrokeStyle(2 + (index % 2), index % 2 ? 0xffffff : tint, 0.9).setDepth(38);
+        fade(ring, 500 + index * 55, index * 45, 0.18, (index % 2 ? -1 : 1) * (180 + tier * 30));
+      }
+      for (let index = 0; index < 3 + tier + skillIndex; index += 1) {
+        const angle = (Math.PI * 2 * index) / (3 + tier + skillIndex);
+        const slash = this.add.rectangle(x + Math.cos(angle) * 105, y + Math.sin(angle) * 85, 5, 66 + tier * 8, index % 2 ? 0xfff1c2 : tint, 0.95).setAngle(Phaser.Math.RadToDeg(angle) + 90).setDepth(39);
+        this.tweens.add({ targets: slash, x, y, scaleY: 0.15, alpha: 0, duration: 360 + index * 28, delay: index * 32, ease: 'Cubic.easeIn', onComplete: () => slash.destroy() });
+      }
+      const crest = this.add.text(x, y, symbol, { fontFamily: 'Georgia, serif', fontSize: `${32 + tier * 6}px`, color: '#fff4c7', stroke: '#4b281b', strokeThickness: 3 }).setOrigin(0.5).setDepth(40);
+      fade(crest, 620, 120, 2.2, skillIndex ? -360 : 360);
+      this.cameras.main.shake(220 + tier * 35, 0.008 + tier * 0.0015);
+    } else {
+      // 권능: 넓은 영역을 덮는 고비용 폭발과 방사형 잔광.
+      const halo = this.add.circle(x, y, 48 + tier * 8, tint, 0.16).setStrokeStyle(6 + tier, 0xffefb0, 0.85).setDepth(37);
+      fade(halo, 720, 0, 2.7 + tier * 0.18, 180);
+      const rayCount = 7 + tier * 2 + skillIndex * 2;
+      for (let index = 0; index < rayCount; index += 1) {
+        const angle = (360 / rayCount) * index;
+        const ray = this.add.rectangle(x, y, 7 + tier, 72 + tier * 20, index % 2 ? 0xffffff : tint, 0.82).setOrigin(0.5, 1).setAngle(angle).setDepth(38);
+        fade(ray, 540 + index * 18, index * 20, 1.45, angle + (skillIndex ? -140 : 140));
+      }
+      for (let index = 0; index < 5 + tier; index += 1) {
+        const orb = this.add.circle(Phaser.Math.Between(30, 450), Phaser.Math.Between(50, 390), 5 + tier, index % 2 ? tint : 0xffe99a, 0.9).setDepth(40);
+        this.tweens.add({ targets: orb, x, y, scale: 0.15, alpha: 0, duration: 430 + index * 35, delay: index * 34, ease: 'Expo.easeIn', onComplete: () => orb.destroy() });
+      }
+      const crest = this.add.text(x, y, symbol, { fontFamily: 'Georgia, serif', fontSize: `${44 + tier * 8}px`, color: '#ffffff', stroke: '#2b172f', strokeThickness: 5 }).setOrigin(0.5).setDepth(41);
+      fade(crest, 760, 80, 2.8, skillIndex ? -540 : 540);
+      if (tier >= 4) this.cameras.main.flash(150, 255, 235, 180, false);
+      this.cameras.main.shake(360 + tier * 45, 0.014 + tier * 0.002);
     }
   }
 
