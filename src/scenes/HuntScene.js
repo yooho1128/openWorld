@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { REGIONS } from '../data/rpg.js';
 import { MONSTERS } from '../data/monsters.js';
-import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
+import { addFantasyBackdrop, addOrnatePanel, addSceneTitle } from '../ui/fantasyTheme.js';
 
 export class HuntScene extends Phaser.Scene {
   constructor() { super('Hunt'); }
@@ -9,7 +9,7 @@ export class HuntScene extends Phaser.Scene {
   create() {
     this.character = this.registry.get('character');
     if (!this.character) return this.scene.start('Login');
-    addFantasyBackdrop(this, { dark: true });
+    addFantasyBackdrop(this, { dark: true, accent: 0x6d7f65 });
     addSceneTitle(this, '왕국 사냥 지도', '보스·난입·도주 등 돌발 상황이 발생할 수 있습니다');
     this.renderPage();
     this.addButton(240, 758, 180, 42, '길드로 돌아가기', () => this.scene.start('Town'), 0x4d4237);
@@ -30,19 +30,21 @@ export class HuntScene extends Phaser.Scene {
   addRegion(region, index) {
     const locked = this.character.level < region.minLevel;
     const y = 166 + index * 86;
-    const bg = this.add.rectangle(240, y, 420, 70, locked ? 0x242424 : 0x2b211a, 0.95)
-      .setStrokeStyle(2, locked ? 0x555555 : region.color, 0.9);
+    const card = addOrnatePanel(this, 240, y, 420, 70, {
+      color: locked ? 0x232b27 : 0x203129, border: locked ? 0x59615d : region.color, alpha: 0.96,
+    });
+    const bg = this.add.rectangle(240, y, 420, 70, 0xffffff, 0.001);
     if (!locked) bg.setInteractive({ useHandCursor: true });
     const icon = this.add.circle(72, y, 23, locked ? 0x4a4a4a : region.color, 0.8);
     const iconText = this.add.text(72, y, locked ? '🔒' : '⚔', { fontSize: '17px' }).setOrigin(0.5);
     const name = this.add.text(112, y - 18, region.name, { fontSize: '15px', fontStyle: 'bold', color: locked ? '#777' : '#ffe8ad' });
     const subtitle = this.add.text(112, y + 7, `${region.subtitle} · 권장 Lv.${region.minLevel}`, { fontSize: '10px', color: locked ? '#666' : '#b9aa8d' });
     const danger = this.add.text(402, y, `위험 ${region.danger}`, { fontSize: '9px', color: locked ? '#666' : '#e28a69' }).setOrigin(1, 0.5);
-    this.pageLayer.add([bg, icon, iconText, name, subtitle, danger]);
+    this.pageLayer.add([card.shadow, card.panel, bg, icon, iconText, name, subtitle, danger]);
     if (!locked) {
       bg.on('pointerdown', () => this.startHunt(region));
-      bg.on('pointerover', () => bg.setFillStyle(0x49372a));
-      bg.on('pointerout', () => bg.setFillStyle(0x2b211a));
+      bg.on('pointerover', () => { card.panel.setAlpha(0.82); bg.setScale(1.01); });
+      bg.on('pointerout', () => { card.panel.setAlpha(1); bg.setScale(1); });
     }
   }
 

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { getClass, getCompanion, xpForLevel } from '../data/rpg.js';
-import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
+import { addFantasyBackdrop, addOrnatePanel, addSceneTitle } from '../ui/fantasyTheme.js';
 import { combatStats, ensureRpgCharacter } from '../state/rpgCharacter.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 
@@ -20,11 +20,11 @@ export class TownScene extends Phaser.Scene {
     this.character = ensureRpgCharacter(this.registry.get('character'));
     if (!this.character?.classId) return this.scene.start('Login');
     if (this.character.level >= 10 && !this.character.advancementId) return this.scene.start('Advancement');
-    addFantasyBackdrop(this);
+    addFantasyBackdrop(this, { accent: 0x85a873 });
     addSceneTitle(this, '에버글렌 모험가 길드', '사냥을 준비하고 왕국의 인연을 쌓으세요');
     this.renderHeroCard();
     HUBS.forEach((hub, index) => this.addHub(hub, index));
-    const settings = this.add.rectangle(425, 105, 82, 30, 0x33261e, 0.95).setStrokeStyle(1, 0xc79a4b).setInteractive({ useHandCursor: true });
+    const settings = this.add.rectangle(425, 105, 82, 30, 0x213229, 0.96).setStrokeStyle(1, 0xe0c274).setInteractive({ useHandCursor: true });
     this.add.text(425, 105, '⚙ 설정', { fontSize: '11px', color: '#ffe5a5' }).setOrigin(0.5);
     settings.on('pointerdown', () => this.scene.start('Settings'));
   }
@@ -34,9 +34,7 @@ export class TownScene extends Phaser.Scene {
     const job = getClass(c.classId);
     const stats = combatStats(c);
     const companion = getCompanion(c.activeCompanionId);
-    const panel = this.add.graphics();
-    panel.fillStyle(0x17130f, 0.9).fillRoundedRect(24, 130, 432, 112, 10);
-    panel.lineStyle(2, job.color, 0.8).strokeRoundedRect(24, 130, 432, 112, 10);
+    addOrnatePanel(this, 240, 186, 432, 112, { color: 0x1b2d25, border: job.color, alpha: 0.96 });
     createEquippedHero(this, c, 74, 184, 1.35);
     this.add.text(116, 145, `${c.name}  Lv.${c.level}  ${job.name}`, { fontSize: '15px', fontStyle: 'bold', color: '#ffe6a7' });
     this.add.text(116, 174, `HP ${c.hp}/${stats.maxHp}   MP ${c.mp}/${stats.maxMp}   골드 ${c.gold.toLocaleString()}`, { fontSize: '11px', color: '#d9c9a6' });
@@ -49,13 +47,15 @@ export class TownScene extends Phaser.Scene {
     const row = Math.floor(index / 2);
     const x = 128 + col * 224;
     const y = 305 + row * 112;
-    const bg = this.add.rectangle(x, y, 204, 92, 0x241b16, 0.94).setStrokeStyle(2, hub.color, 0.9).setInteractive({ useHandCursor: true });
-    this.add.circle(x - 69, y, 25, hub.color, 0.72);
+    const card = addOrnatePanel(this, x, y, 204, 92, { color: 0x1d2f27, border: hub.color, alpha: 0.95 });
+    const bg = this.add.rectangle(x, y, 204, 92, 0xffffff, 0.001).setInteractive({ useHandCursor: true });
+    this.add.circle(x - 69, y + 3, 28, 0x0b1511, 0.32);
+    this.add.circle(x - 69, y, 25, hub.color, 0.82).setStrokeStyle(2, 0xffe7ad, 0.28);
     this.add.text(x - 69, y, hub.icon, { fontFamily: 'Georgia, serif', fontSize: '22px', color: '#fff0c0' }).setOrigin(0.5);
     this.add.text(x - 31, y - 20, hub.label, { fontSize: '14px', fontStyle: 'bold', color: '#f5dfac' });
     this.add.text(x - 31, y + 8, hub.sub, { fontSize: '10px', color: '#b8aa8d' });
     bg.on('pointerdown', () => this.scene.start(hub.scene, hub.data));
-    bg.on('pointerover', () => bg.setFillStyle(0x463429));
-    bg.on('pointerout', () => bg.setFillStyle(0x241b16));
+    bg.on('pointerover', () => { card.panel.setAlpha(0.82); bg.setScale(1.018); });
+    bg.on('pointerout', () => { card.panel.setAlpha(1); bg.setScale(1); });
   }
 }

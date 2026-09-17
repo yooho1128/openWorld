@@ -4,7 +4,7 @@ import { REGIONS, getClass, getCompanion, getAdvancement } from '../data/rpg.js'
 import { equipmentForMonster, equipmentDisplayName, getRarity } from '../data/equipment.js';
 import { addLoot, addXp, combatStats, ensureRpgCharacter, equippedItems, saveCharacter } from '../state/rpgCharacter.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
-import { addFantasyBackdrop } from '../ui/fantasyTheme.js';
+import { addBattlefield, addFantasyBackdrop, addOrnatePanel } from '../ui/fantasyTheme.js';
 
 const RANK_POWER = { F: 1, E: 2, D: 3, C: 4, B: 5, A: 6, S: 8 };
 
@@ -46,11 +46,13 @@ export class BattleScene extends Phaser.Scene {
     this.busy = false;
     this.turn = 1;
     this.actionHistory = [];
-    addFantasyBackdrop(this, { dark: true });
-    this.add.rectangle(240, 315, 480, 360, this.region.color, 0.16);
+    addFantasyBackdrop(this, { dark: true, accent: this.region.color });
+    addBattlefield(this, this.region.color, true);
     this.add.text(240, 35, `${this.region.name} · 전투`, { fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '21px', fontStyle: 'bold', color: '#f4dc9c' }).setOrigin(0.5);
+    this.add.ellipse(342, 281, this.isBoss ? 145 : 120, 30, 0x0a100d, 0.38);
     this.enemySprite = this.add.sprite(342, 225, this.monsterData.texture).setScale(this.isBoss ? 2.85 : 2.35);
     if (this.isBoss) this.enemySprite.setTint(0xffd36a);
+    this.add.ellipse(115, 468, 105, 25, 0x0a100d, 0.4);
     createEquippedHero(this, this.character, 115, 425, 2.1);
     if (this.companion) {
       this.add.circle(205, 438, 27, this.companion.color, 0.85);
@@ -61,6 +63,7 @@ export class BattleScene extends Phaser.Scene {
     this.enemyText = this.add.text(456, 104, '', { fontSize: '11px', color: '#e9dcb9', align: 'right' }).setOrigin(1, 0);
     this.intentText = this.add.text(342, 158, '', { fontSize: '10px', fontStyle: 'bold', color: '#ffd480', backgroundColor: '#17100dcc', padding: { x: 7, y: 4 } }).setOrigin(0.5).setDepth(12);
     const openingMessage = this.isBoss ? `경고! 우두머리 ${this.monsterData.name}(이)가 나타났다!` : this.eventType === 'reinforcement' ? `${this.monsterData.name} 뒤에서 또 다른 기척이 느껴진다...` : this.eventType === 'reinforcement-second' ? `난입한 ${this.monsterData.name}(이)가 길을 막았다!` : `야생의 ${this.monsterData.name}(이)가 나타났다!`;
+    addOrnatePanel(this, 240, 558, 438, 72, { color: 0x17251f, border: 0xc9ad6c, alpha: 0.95 });
     this.logText = this.add.text(240, 555, openingMessage, {
       fontSize: '12px', color: '#ffe5a5', align: 'center', wordWrap: { width: 430 }, lineSpacing: 4,
     }).setOrigin(0.5);
@@ -87,9 +90,13 @@ export class BattleScene extends Phaser.Scene {
   }
 
   addCommand(x, y, label, action, color, height = 52) {
-    const bg = this.add.rectangle(x, y, 210, height, color, 0.94).setStrokeStyle(2, 0xd9b66a).setInteractive({ useHandCursor: true });
+    this.add.rectangle(x + 2, y + 4, 210, height, 0x08100d, 0.28);
+    const bg = this.add.rectangle(x, y, 210, height, color, 0.92).setStrokeStyle(2, 0xe5c877).setInteractive({ useHandCursor: true });
+    this.add.rectangle(x, y - height / 2 + 3, 192, 2, 0xfff1c2, 0.18);
     const text = this.add.text(x, y, label, { fontSize: label.length > 15 ? '11px' : '13px', fontStyle: 'bold', color: '#fff0bf' }).setOrigin(0.5);
     bg.on('pointerdown', action);
+    bg.on('pointerover', () => bg.setScale(1.025));
+    bg.on('pointerout', () => bg.setScale(1));
     this.commandLayer.add([bg, text]);
     return { bg, text };
   }
