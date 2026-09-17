@@ -14,6 +14,7 @@ import { BlacksmithScene } from './scenes/BlacksmithScene.js';
 import { SettingsScene } from './scenes/SettingsScene.js';
 import { AdvancementScene } from './scenes/AdvancementScene.js';
 import { QuestScene } from './scenes/QuestScene.js';
+import { RankingScene } from './scenes/RankingScene.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -29,7 +30,7 @@ const config = {
     // 2 so a thumb can hold a d-pad direction while the other taps interact.
     activePointers: 2,
   },
-  scene: [BootScene, LoginScene, CreateScene, ClassScene, TownScene, HuntScene, BattleScene, InventoryScene, TavernScene, NPCScene, StatusScene, BlacksmithScene, SettingsScene, AdvancementScene, QuestScene],
+  scene: [BootScene, LoginScene, CreateScene, ClassScene, TownScene, HuntScene, BattleScene, InventoryScene, TavernScene, NPCScene, StatusScene, BlacksmithScene, SettingsScene, AdvancementScene, QuestScene, RankingScene],
 };
 
 new Phaser.Game(config);
