@@ -62,7 +62,7 @@ function compareBadgeHtml(item, equipment, characterLevel) {
   if (cmp.status === 'empty') return `<small class="compare-badge compare-empty">빈 슬롯 · 바로 장착 가능</small>`;
   if (cmp.status === 'stronger') return `<small class="compare-badge compare-up">▲ 착용 중인 ${cmp.name}보다 강함 (+${cmp.diff})</small>`;
   if (cmp.status === 'weaker') return `<small class="compare-badge compare-down">▼ 착용 중인 ${cmp.name}보다 약함 (${cmp.diff})</small>`;
-  return `<small class="compare-badge compare-equal">≈ 착용 중인 ${cmp.name}과 비슷함</small>`;
+  return `<small class="compare-badge compare-equal">- 착용 중인 ${cmp.name}과 동일함</small>`;
 }
 
 function tabsHtml(prefix, activeTab) {

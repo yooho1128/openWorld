@@ -337,7 +337,9 @@ export function masterEquipmentSet(classId) {
 export const SET_BONUS_TIERS = [
   { count: 3, statMultiplier: 0.06 },
   { count: 5, statMultiplier: 0.14 },
+  { count: 7, statMultiplier: 0.19 },
   { count: 8, statMultiplier: 0.25 },
+  { count: 10, statMultiplier: 0.35 },
 ];
 
 export function equipmentSetBonus(items) {
