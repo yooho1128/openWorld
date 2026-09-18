@@ -1,27 +1,9 @@
 import Phaser from 'phaser';
-import { ENHANCEMENT_BLESSINGS, ENHANCEMENT_DESTROY_RATES as DESTROY_RATES, baseItemPower, getRarity, equipmentDisplayName, enhancementStats, enhancementVisualClass, enhancementSuccessRate, isSafeEnhancement, levelEffectiveness } from '../data/equipment.js';
+import { ENHANCEMENT_BLESSINGS, ENHANCEMENT_DESTROY_RATES as DESTROY_RATES, getRarity, equipmentDisplayName, enhancementStats, enhancementVisualClass, enhancementSuccessRate, isSafeEnhancement, levelEffectiveness } from '../data/equipment.js';
 import { affinityPriceMultiplier } from '../data/rpg.js';
 import { adjustAffinity, ensureRpgCharacter, equippedItems, saveCharacter } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
-
-// 강화는 돈과 축복을 태워서 스탯을 영구히 굳히는 행위라, 가방에 같은
-// 부위의 더 좋은 장비가 있으면 그걸 먼저 장착하고 강화하는 게 맞다.
-// 착용 중인 장비를 가방 속 같은 부위 후보들과 비교해 안내/차단한다.
-function bestBagAlternative(character, slot) {
-  const candidates = character.inventory.filter((entry) => entry.type === 'equipment' && entry.slot === slot);
-  if (!candidates.length) return null;
-  return candidates.reduce((best, cur) => (baseItemPower(cur, character.level) > baseItemPower(best, character.level) ? cur : best));
-}
-
-function forgeCompareBadge(item, character) {
-  const alt = bestBagAlternative(character, item.slot);
-  if (!alt) return { html: '<small class="compare-badge compare-up">▲ 가방에 대체 장비 없음 · 강화 추천</small>', blockedBy: null };
-  const diff = baseItemPower(alt, character.level) - baseItemPower(item, character.level);
-  if (diff > 0) return { html: `<small class="compare-badge compare-down">▼ 가방의 ${equipmentDisplayName(alt)}이(가) 더 강함 (+${diff}) · 먼저 장착하세요</small>`, blockedBy: alt };
-  if (diff < 0) return { html: `<small class="compare-badge compare-up">▲ 가방보다 강함 (+${-diff}) · 강화 추천</small>`, blockedBy: null };
-  return { html: '<small class="compare-badge compare-equal">- 가방과 동일함</small>', blockedBy: null };
-}
 
 export class BlacksmithScene extends Phaser.Scene {
   constructor() { super('Blacksmith'); }
@@ -54,9 +36,7 @@ export class BlacksmithScene extends Phaser.Scene {
       const levelNote = effectiveness < 1 ? `<small class="forge-risk">아이템 Lv.${item.level ?? 1} · 레벨 차이로 효과 ${Math.round(effectiveness * 100)}%</small>` : '';
       const blessingText = activeBlessing ? ` · ${activeBlessing.name} +${activeBlessing.bonus}%` : '';
       const failText = isSafeEnhancement(level) ? ' · 실패 시 유지' : ' · 실패 시 -1';
-      const compare = forgeCompareBadge(item, this.character);
-      const forgeDisabled = level >= 20 || compare.blockedBy;
-      return `<div class="forge-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${statText}</small><small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}${compare.html}<small class="forge-risk">성공 ${rate}%${blessingText}${destroy ? ` · 파괴 ${destroy}%` : ''}${failText}</small></div><div class="forge-actions"><button id="forge-${index}" ${forgeDisabled ? 'disabled' : ''}>${level >= 20 ? '최대 강화' : compare.blockedBy ? '더 좋은 장비 먼저' : `강화 ${cost.toLocaleString()}G`}</button><button id="repair-${index}" class="repair" ${repairCost <= 0 ? 'disabled' : ''}>${repairCost > 0 ? `수리 ${repairCost.toLocaleString()}G` : '내구도 최대'}</button></div></div>`;
+      return `<div class="forge-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${statText}</small><small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<small class="forge-risk">성공 ${rate}%${blessingText}${destroy ? ` · 파괴 ${destroy}%` : ''}${failText}</small></div><div class="forge-actions"><button id="forge-${index}" ${level >= 20 ? 'disabled' : ''}>${level >= 20 ? '최대 강화' : `강화 ${cost.toLocaleString()}G`}</button><button id="repair-${index}" class="repair" ${repairCost <= 0 ? 'disabled' : ''}>${repairCost > 0 ? `수리 ${repairCost.toLocaleString()}G` : '내구도 최대'}</button></div></div>`;
     }).join('') : '<p class="empty-state">착용 중인 장비가 없습니다. 상태창에서 먼저 장비를 착용해주세요.</p>';
     const affinity = this.character.affinity.blacksmith ?? 0;
     const blessingButtons = Object.entries(ENHANCEMENT_BLESSINGS).map(([key, blessing]) => {
@@ -114,7 +94,6 @@ export class BlacksmithScene extends Phaser.Scene {
   enhance(item) {
     const level = item.enhancement ?? 0;
     if (level >= 20) return this.render('이미 최대 강화에 도달했습니다.');
-    if (forgeCompareBadge(item, this.character).blockedBy) return this.render('가방에 더 좋은 장비가 있습니다. 먼저 장착한 뒤 강화해주세요.', 'fail');
     const cost = this.cost(item);
     if (this.character.gold < cost) return this.render('강화 비용이 부족합니다.', 'fail');
     this.character.gold -= cost;
