@@ -7,6 +7,7 @@ const sql = connectionString ? neon(connectionString) : null;
 const CLASS_IDS = ['warrior', 'mage', 'ranger', 'cleric', 'rogue'];
 const BASE_ADVANCEMENT_IDS = ['berserker', 'guardian', 'archmage', 'frostweaver', 'sniper', 'beastmaster', 'paladin', 'oracle', 'assassin', 'trickster'];
 const POTION_IDS = ['potion-hp-small', 'potion-hp-medium', 'potion-hp-large', 'potion-hp-superior', 'potion-mp-small', 'potion-mp-large', 'potion-elixir'];
+const COMPANION_IDS = ['kael', 'luna', 'eris', 'seraph', 'nyx', 'brom'];
 const GLOBAL_TITLE_IDS = ['lucky-lottery'];
 
 async function ensureTable() {
@@ -67,6 +68,15 @@ function sanitizePotions(value, isMaster) {
 function sanitizeBlessings(value) {
   const src = asPlainObject(value);
   return Object.fromEntries(['small', 'normal', 'great'].map((key) => [key, clampInt(src[key], 0, 9999, 0)]));
+}
+
+function sanitizeCompanionProgress(value) {
+  const src = asPlainObject(value);
+  return Object.fromEntries(COMPANION_IDS.filter((id) => src[id]).map((id) => {
+    const progress = asPlainObject(src[id]);
+    const level = clampInt(progress.level, 1, 999, 1);
+    return [id, { level, xp: level >= 999 ? 0 : clampNumber(progress.xp, 0, 10_000_000, 0) }];
+  }));
 }
 
 // rings/earrings are spread (...equipment.rings) by the client, so they must
@@ -135,7 +145,7 @@ function sanitizeCharacter(input, nickname) {
     equippedTitle: unlockedTitles.includes(c.equippedTitle) ? c.equippedTitle : null,
     inventory: asArray(c.inventory, 3000),
     companions: asArray(c.companions, 50).filter((id) => typeof id === 'string'),
-    companionProgress: asPlainObject(c.companionProgress),
+    companionProgress: sanitizeCompanionProgress(c.companionProgress),
     activeCompanionId: typeof c.activeCompanionId === 'string' ? c.activeCompanionId : null,
     equipment: sanitizeEquipment(c.equipment),
     affinity: asPlainObject(c.affinity),

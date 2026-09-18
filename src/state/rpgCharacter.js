@@ -3,6 +3,7 @@ import { enhancementStats, masterEquipmentSet, equipmentSetBonus, level200Mythic
 import { DEFAULT_POTION_ID, getPotion } from '../data/potions.js';
 
 const GLOBAL_BOSS_TITLE_ID = 'lucky-lottery';
+export const MAX_COMPANION_LEVEL = 999;
 
 export function ensureRpgCharacter(character) {
   character.inventory ??= [];
@@ -232,7 +233,10 @@ export function ensureCompanionProgress(character, companionId) {
   if (!character.companionProgress[companionId]) {
     character.companionProgress[companionId] = { level: 1, xp: 0 };
   }
-  return character.companionProgress[companionId];
+  const progress = character.companionProgress[companionId];
+  progress.level = Math.max(1, Math.min(MAX_COMPANION_LEVEL, Math.floor(Number(progress.level) || 1)));
+  progress.xp = progress.level >= MAX_COMPANION_LEVEL ? 0 : Math.max(0, Number(progress.xp) || 0);
+  return progress;
 }
 
 export function companionStats(character, companionId) {
@@ -245,7 +249,7 @@ export function companionStats(character, companionId) {
     id: companionId,
     level: bondLevel,
     xp: progress.xp,
-    xpToNext: companionBondXpForLevel(bondLevel),
+    xpToNext: bondLevel >= MAX_COMPANION_LEVEL ? 0 : companionBondXpForLevel(bondLevel),
     attack: base.attack + Math.round((bondLevel - 1) * 2.2),
     defense: base.defense + Math.round((bondLevel - 1) * 1.4),
     hp: base.hp + Math.round((bondLevel - 1) * 8),
@@ -258,12 +262,14 @@ export function companionStats(character, companionId) {
 export function grantCompanionXp(character, companionId, amount) {
   const progress = ensureCompanionProgress(character, companionId);
   const levels = [];
+  if (progress.level >= MAX_COMPANION_LEVEL) return levels;
   progress.xp += Math.max(0, amount);
-  while (progress.level < 60 && progress.xp >= companionBondXpForLevel(progress.level)) {
+  while (progress.level < MAX_COMPANION_LEVEL && progress.xp >= companionBondXpForLevel(progress.level)) {
     progress.xp -= companionBondXpForLevel(progress.level);
     progress.level += 1;
     levels.push(progress.level);
   }
+  if (progress.level >= MAX_COMPANION_LEVEL) progress.xp = 0;
   return levels;
 }
 
