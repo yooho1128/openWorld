@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { classCouponWeapon, equipmentDisplayName } from '../data/equipment.js';
+import { classCouponWeapon, equipmentDisplayName, mythicAccessoryCoupon, mythicWeaponCoupon } from '../data/equipment.js';
 import { ADVANCEMENTS } from '../data/rpg.js';
 import { addLoot, ensureRpgCharacter, saveCharacter } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
@@ -24,6 +24,8 @@ export class SettingsScene extends Phaser.Scene {
         <select id="admin-coupon-effect">
           <option value="gold">골드 지급</option>
           <option value="weapon">직업 유니크 무기 지급</option>
+          <option value="mythic-weapon">신화급 무기 지급</option>
+          <option value="mythic-accessory">신화급 악세서리 지급</option>
           <option value="drain">골드 전부 삭제(장난용)</option>
         </select>
         <label for="admin-coupon-amount">골드량 (골드 지급일 때만)</label><input id="admin-coupon-amount" type="number" min="0" placeholder="예: 200000" />
@@ -81,6 +83,20 @@ export class SettingsScene extends Phaser.Scene {
       addLoot(this.character, weapon);
       saveCharacter(this);
       return this.render(`유니크 직업 무기 「${equipmentDisplayName(weapon)}」을 획득했습니다!`);
+    }
+    if (result.effect === 'mythic-weapon') {
+      const weapon = mythicWeaponCoupon(this.character.classId, this.character.level);
+      if (!weapon) return this.render('신화급 무기를 지급할 수 없습니다.');
+      addLoot(this.character, weapon);
+      saveCharacter(this);
+      return this.render(`신화급 무기 「${equipmentDisplayName(weapon)}」을 획득했습니다!`);
+    }
+    if (result.effect === 'mythic-accessory') {
+      const accessory = mythicAccessoryCoupon(this.character.level);
+      if (!accessory) return this.render('신화급 악세서리를 지급할 수 없습니다.');
+      addLoot(this.character, accessory);
+      saveCharacter(this);
+      return this.render(`신화급 악세서리 「${equipmentDisplayName(accessory)}」을 획득했습니다!`);
     }
     if (result.effect === 'gold') {
       const amount = result.amount ?? 0;

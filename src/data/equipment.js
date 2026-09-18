@@ -186,6 +186,31 @@ export function level200MythicWeapon(classId) {
   return item;
 }
 
+// 쿠폰용 신화급 무기: 직업 전용 무기가 있으면 그중 하나를, 없으면 아무 신화급
+// 무기나 무작위로 지급한다(레벨 200 마일스톤 보상과는 별개의 지급 경로).
+export function mythicWeaponCoupon(classId, level = 1) {
+  const classPool = EQUIPMENT_CATALOG.filter((item) => item.slot === 'weapon' && item.rarity === 'mythic' && item.classId === classId);
+  const pool = classPool.length ? classPool : EQUIPMENT_CATALOG.filter((item) => item.slot === 'weapon' && item.rarity === 'mythic');
+  const base = pool[Math.floor(Math.random() * pool.length)];
+  if (!base) return null;
+  const item = cloneItem(base, '-coupon-mythic');
+  item.level = Math.max(1, level);
+  return item;
+}
+
+const ACCESSORY_SLOTS = ['ring', 'necklace', 'earring'];
+
+// 쿠폰용 신화급 악세서리: 반지/목걸이/귀걸이 중 하나를 무작위로 지급한다.
+export function mythicAccessoryCoupon(level = 1) {
+  const slot = ACCESSORY_SLOTS[Math.floor(Math.random() * ACCESSORY_SLOTS.length)];
+  const pool = EQUIPMENT_CATALOG.filter((item) => item.slot === slot && item.rarity === 'mythic');
+  const base = pool[Math.floor(Math.random() * pool.length)];
+  if (!base) return null;
+  const item = cloneItem(base, '-coupon-mythic');
+  item.level = Math.max(1, level);
+  return item;
+}
+
 // 캐릭터 레벨이 장비 레벨보다 20 이상 높아지면 서서히 성능이 떨어진다
 // (초과분 1레벨당 1%씩, 최대 80% 감소 - 완전히 못 쓰게 되진 않는다).
 // 저레벨 사냥터에서 얻은 장비를 고레벨에서 계속 우려먹지 못하게 하기 위함.

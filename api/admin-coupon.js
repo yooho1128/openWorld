@@ -4,7 +4,7 @@ import { adminPasswordConfigured, hasValidAdminSession, isMasterNickname, verify
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
 
-const VALID_EFFECTS = ['gold', 'weapon', 'drain'];
+const VALID_EFFECTS = ['gold', 'weapon', 'mythic-weapon', 'mythic-accessory', 'drain'];
 
 async function ensureTable() {
   await sql`
