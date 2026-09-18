@@ -5,6 +5,7 @@ import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
 function attachLabel(entry) {
+  if (entry.titleReward) return `특별 칭호 「${entry.titleReward.name}」`;
   if (entry.gachaEquipment) return '무작위 장비 1개';
   if (entry.item) return `${entry.item.name}${entry.item.quantity > 1 ? ` x${entry.item.quantity}` : ''}`;
   if (entry.gold) return `골드 ${entry.gold.toLocaleString()}`;
@@ -50,6 +51,7 @@ export class MailboxScene extends Phaser.Scene {
     const parts = [];
     if (result.gold) parts.push(`골드 ${result.gold.toLocaleString()}`);
     if (result.item) parts.push(`${getRarity(result.item.rarity).name} 「${equipmentDisplayName(result.item)}」`);
+    if (result.title) parts.push(`칭호 「${result.title.name}」`);
     return parts.length ? `${parts.join(' · ')} 획득!` : '수령했습니다.';
   }
 
@@ -66,9 +68,11 @@ export class MailboxScene extends Phaser.Scene {
     saveCharacter(this);
     const goldTotal = results.reduce((sum, r) => sum + (r.gold || 0), 0);
     const itemCount = results.filter((r) => r.item).length;
+    const titleCount = results.filter((r) => r.title).length;
     const parts = [];
     if (goldTotal) parts.push(`골드 ${goldTotal.toLocaleString()}`);
     if (itemCount) parts.push(`장비 ${itemCount}개`);
+    if (titleCount) parts.push(`칭호 ${titleCount}개`);
     this.render(`편지 ${results.length}통을 모두 수령했습니다 (${parts.join(' · ') || '내용 없음'}).`);
   }
 }

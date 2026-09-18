@@ -582,6 +582,7 @@ export class BattleScene extends Phaser.Scene {
     this.character.gold += gold;
     this.character.goldEarnedTotal = (this.character.goldEarnedTotal ?? 0) + gold;
     this.character.victories += 1;
+    if (this.isBoss) this.character.bossVictories = (this.character.bossVictories ?? 0) + 1;
     this.character.hunted[this.monsterData.id] = (this.character.hunted[this.monsterData.id] ?? 0) + 1;
     addLoot(this.character, loot);
     if (equipment) addLoot(this.character, equipment);
@@ -630,7 +631,7 @@ export class BattleScene extends Phaser.Scene {
     this.add.text(132, 719, '계속 사냥', { fontSize: '14px', fontStyle: 'bold', color: '#fff1bd' }).setOrigin(0.5);
     const back = this.add.rectangle(348, 719, 196, 46, color, 0.95).setStrokeStyle(2, 0xd7b268).setInteractive({ useHandCursor: true });
     this.add.text(348, 719, '마을로 귀환', { fontSize: '14px', fontStyle: 'bold', color: '#fff1bd' }).setOrigin(0.5);
-    again.on('pointerdown', () => this.scene.start('Battle', rollHuntEncounter(this.region)));
+    again.on('pointerdown', () => this.scene.start('Battle', rollHuntEncounter(this.region, this.character)));
     back.on('pointerdown', () => this.scene.start('Town'));
   }
 }

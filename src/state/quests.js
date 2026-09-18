@@ -1,7 +1,7 @@
 import { DAILY_QUEST_POOL, MILESTONE_QUESTS, BIOME_IDS } from '../data/quests.js';
-import { BIOME_LABELS } from '../data/monsters.js';
+import { BIOME_LABELS, MONSTERS } from '../data/monsters.js';
 import { DEFAULT_POTION_ID } from '../data/potions.js';
-import { addPotion, addXp, adjustAffinity } from './rpgCharacter.js';
+import { addPotion, addXp, adjustAffinity, combatPower } from './rpgCharacter.js';
 
 function todayKey() {
   const d = new Date();
@@ -42,6 +42,10 @@ function generateDailyQuests() {
 export function ensureQuestState(character) {
   character.quests ??= { daily: null, milestoneClaims: [] };
   character.quests.milestoneClaims ??= [];
+  character.unlockedTitles ??= [];
+  const earnedTitles = MILESTONE_QUESTS.filter((entry) => character.quests.milestoneClaims.includes(entry.id) && entry.title).map((entry) => entry.id);
+  character.unlockedTitles = [...new Set([...character.unlockedTitles, ...earnedTitles])];
+  if (character.equippedTitle && !character.unlockedTitles.includes(character.equippedTitle)) character.equippedTitle = null;
   character.goldEarnedTotal ??= character.gold ?? 0;
   const today = todayKey();
   if (!character.quests.daily || character.quests.daily.date !== today) {
@@ -79,6 +83,13 @@ export function claimDailyQuest(character, questId) {
 function milestoneStatValue(character, stat) {
   if (stat === 'huntedTotal') return Object.values(character.hunted ?? {}).reduce((sum, n) => sum + n, 0);
   if (stat === 'goldEarnedTotal') return character.goldEarnedTotal ?? 0;
+  if (stat === 'combatPower') return combatPower(character);
+  if (stat === 'advancementCount') return character.advancementHistory?.length ?? 0;
+  if (stat === 'bossVictories') {
+    const bossIds = new Set(MONSTERS.filter((monster) => ['A', 'S'].includes(monster.rank)).map((monster) => monster.id));
+    const inferred = Object.entries(character.hunted ?? {}).reduce((sum, [id, count]) => sum + (bossIds.has(id) ? Number(count) || 0 : 0), 0);
+    return Math.max(character.bossVictories ?? 0, inferred);
+  }
   return character[stat] ?? 0;
 }
 
@@ -98,12 +109,14 @@ export function claimMilestone(character, id) {
   const value = milestoneStatValue(character, entry.stat);
   if (value < entry.target) return null;
   quests.milestoneClaims.push(id);
+  character.unlockedTitles ??= [];
+  if (entry.title && !character.unlockedTitles.includes(entry.id)) character.unlockedTitles.push(entry.id);
   character.gold += entry.rewardGold ?? 0;
   character.goldEarnedTotal = (character.goldEarnedTotal ?? 0) + (entry.rewardGold ?? 0);
   addPotion(character, DEFAULT_POTION_ID, entry.rewardPotions ?? 0);
   adjustAffinity(character, 'guildmaster', 2);
   const levels = addXp(character, entry.rewardXp ?? 0);
-  return { entry, levels };
+  return { entry, levels, titleUnlocked: entry.title ?? null };
 }
 
 export function claimableCount(character) {

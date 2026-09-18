@@ -53,7 +53,7 @@ export class HuntScene extends Phaser.Scene {
   }
 
   startHunt(region) {
-    this.scene.start('Battle', rollHuntEncounter(region));
+    this.scene.start('Battle', rollHuntEncounter(region, this.character));
   }
 
   addPageButton(x, label, delta) {

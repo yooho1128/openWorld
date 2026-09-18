@@ -15,6 +15,10 @@ export function ensureRpgCharacter(character) {
   character.affinity ??= { merchant: 0, guildmaster: 0, innkeeper: 0, blacksmith: 0 };
   character.dialogueHistory ??= {};
   character.hunted ??= {};
+  character.bossVictories = Math.max(0, Math.floor(Number(character.bossVictories) || 0));
+  character.attendanceDays = Math.max(0, Math.min(7, Math.floor(Number(character.attendanceDays) || 0)));
+  character.unlockedTitles = Array.isArray(character.unlockedTitles) ? [...new Set(character.unlockedTitles.filter((id) => typeof id === 'string'))] : [];
+  character.equippedTitle = character.unlockedTitles.includes(character.equippedTitle) ? character.equippedTitle : null;
   character.equipment ??= { helmet: null, armor: null, gloves: null, boots: null, weapon: null, necklace: null, rings: [null, null], earrings: [null, null] };
   character.equipment.rings ??= [null, null];
   character.equipment.earrings ??= [null, null];
@@ -75,6 +79,8 @@ export function ensureRpgCharacter(character) {
   const equipment = character.equipment;
   const allItems = [...character.inventory, equipment.helmet, equipment.armor, equipment.gloves, equipment.boots, equipment.weapon, equipment.necklace, ...equipment.rings, ...equipment.earrings].filter((item) => item?.type === 'equipment');
   allItems.forEach((item) => { item.maxDurability ??= 100; item.durability ??= item.maxDurability; });
+  const earnedEnhancements = allItems.filter((item) => !['attendance-7day', 'master-account'].includes(item.source)).map((item) => Number(item.enhancement) || 0);
+  character.highestEnhancement = Math.max(Number(character.highestEnhancement) || 0, ...earnedEnhancements, 0);
   return character;
 }
 
@@ -96,18 +102,26 @@ function grantMail(character, mail) {
   return grantedItem;
 }
 
+function grantMailTitle(character, mail) {
+  const title = mail.titleReward;
+  if (!title || typeof title.id !== 'string' || typeof title.name !== 'string') return null;
+  character.unlockedTitles ??= [];
+  if (!character.unlockedTitles.includes(title.id)) character.unlockedTitles.push(title.id);
+  return title;
+}
+
 export function claimMail(character, mailId) {
   ensureRpgCharacter(character);
   const index = character.mailbox.findIndex((mail) => mail.id === mailId);
   if (index < 0) return null;
   const [mail] = character.mailbox.splice(index, 1);
-  return { gold: mail.gold ?? 0, item: grantMail(character, mail) };
+  return { gold: mail.gold ?? 0, item: grantMail(character, mail), title: grantMailTitle(character, mail) };
 }
 
 export function claimAllMail(character) {
   ensureRpgCharacter(character);
   const claimed = character.mailbox.splice(0, character.mailbox.length);
-  const results = claimed.map((mail) => ({ gold: mail.gold ?? 0, item: grantMail(character, mail) }));
+  const results = claimed.map((mail) => ({ gold: mail.gold ?? 0, item: grantMail(character, mail), title: grantMailTitle(character, mail) }));
   return results;
 }
 
@@ -118,7 +132,8 @@ export function createRpgCharacter({ nickname, name, gender }) {
     attack: 12, defense: 8, agility: 10, potions: 3,
     inventory: [], companions: [], activeCompanionId: null,
     affinity: { merchant: 0, guildmaster: 0, innkeeper: 0, blacksmith: 0 },
-    dialogueHistory: {}, victories: 0, defeats: 0, hunted: {}, createdAt: Date.now(),
+    dialogueHistory: {}, victories: 0, defeats: 0, bossVictories: 0, hunted: {}, createdAt: Date.now(),
+    attendanceDays: 0, highestEnhancement: 0, unlockedTitles: [], equippedTitle: null,
     enhancementBlessings: { small: 0, normal: 0, great: 0 }, activeEnhancementBlessing: null,
     astrologerDaily: { date: '', answered: 0, correct: 0 },
   });

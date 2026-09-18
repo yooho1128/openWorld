@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getClass, getAdvancement } from '../data/rpg.js';
+import { getTitle } from '../data/quests.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
@@ -45,9 +46,10 @@ export class RankingScene extends Phaser.Scene {
           const rank = index + 1;
           const topClass = rank <= 3 ? `rank-top rank-${rank}` : '';
           const mine = entry.nickname === myNickname ? 'rank-mine' : '';
+          const title = getTitle(entry.equippedTitle);
           return `<div class="rank-row ${topClass} ${mine}">
             <span class="rank-num">${rank}</span>
-            <span class="rank-name"><strong>${entry.name}</strong><small>${advancement?.name ?? job?.name ?? '미정'} · Lv.${entry.level}</small></span>
+            <span class="rank-name"><strong>${title ? `[${title.name}] ` : ''}${entry.name}</strong><small>${advancement?.name ?? job?.name ?? '미정'} · Lv.${entry.level}</small></span>
             <span class="rank-value">${entry.victories.toLocaleString()}승</span>
           </div>`;
         }).join('')

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ensureRpgCharacter, waitForPendingSaves } from '../state/rpgCharacter.js';
+import { ensureRpgCharacter, saveCharacter, waitForPendingSaves } from '../state/rpgCharacter.js';
 import { equipmentDisplayName } from '../data/equipment.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
@@ -37,6 +37,7 @@ export class EventScene extends Phaser.Scene {
         this.character = ensureRpgCharacter(status.character);
         this.registry.set('character', this.character);
       }
+      this.syncAttendanceDays(status.days);
       this.render(status, message);
     } catch {
       this.renderError('출석 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
@@ -90,6 +91,7 @@ export class EventScene extends Phaser.Scene {
         this.character = ensureRpgCharacter(result.character);
         this.registry.set('character', this.character);
       }
+      this.syncAttendanceDays(result.days);
       const message = result.rewardGranted && result.reward
         ? `★ 7일 출석 완료! 「${equipmentDisplayName(result.reward)}」을(를) 획득했습니다!`
         : result.claimed ? `${result.days}일차 출석이 기록됐습니다.` : '오늘 출석은 이미 완료했습니다.';
@@ -97,5 +99,12 @@ export class EventScene extends Phaser.Scene {
     } catch {
       await this.loadStatus('출석 기록에 실패했습니다. 다시 시도해주세요.');
     }
+  }
+
+  syncAttendanceDays(days) {
+    const value = Math.max(0, Math.min(7, Number(days) || 0));
+    if (value <= (this.character.attendanceDays ?? 0)) return;
+    this.character.attendanceDays = value;
+    saveCharacter(this);
   }
 }

@@ -87,7 +87,8 @@ export class InventoryScene extends Phaser.Scene {
     const bagPotionHtml = this.bagTab === 'consumable' ? ownedPotions.map(([id, qty]) => {
       const potion = getPotion(id);
       if (!potion) return '';
-      return `<div class="inventory-row"><div><strong>${potion.name}</strong><small>${potionDescription(potion)} · 전투 중 사용</small></div><span class="item-count">${qty}개</span></div>`;
+      const sellPrice = Math.max(1, Math.round(potion.price * 0.5 * sellBonus));
+      return `<div class="inventory-row"><div><strong>${potion.name}</strong><small>${potionDescription(potion)} · ${qty}개 보유 · 판매가 ${sellPrice.toLocaleString()}G</small></div><div class="potion-sell-actions"><button id="sell-potion-one-${id}">1개</button><button id="sell-potion-all-${id}">전부</button></div></div>`;
     }).join('') : '';
     const bagHtml = bagCardsHtml || bagPotionHtml || `<p class="empty-state">보유한 ${CATEGORY_LABELS[this.bagTab]} 아이템이 없습니다.</p>`;
 
@@ -137,6 +138,10 @@ export class InventoryScene extends Phaser.Scene {
     bagSorted.forEach(({ index }) => qs(`sell-${index}`)?.addEventListener('click', () => this.sell(index, sellBonus)));
     shopSorted.forEach(({ index }) => qs(`buy-gear-${index}`)?.addEventListener('click', () => this.buyGear(index, multiplier)));
     POTIONS.forEach((potion) => qs(`buy-potion-${potion.id}`)?.addEventListener('click', () => this.buyPotion(potion.id, Math.round(potion.price * multiplier))));
+    ownedPotions.forEach(([id]) => {
+      qs(`sell-potion-one-${id}`)?.addEventListener('click', () => this.sellPotion(id, 1, sellBonus));
+      qs(`sell-potion-all-${id}`)?.addEventListener('click', () => this.sellPotion(id, this.character.potions[id] ?? 0, sellBonus));
+    });
     qs('inventory-back').addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Town'); });
   }
 
@@ -162,6 +167,21 @@ export class InventoryScene extends Phaser.Scene {
     adjustAffinity(this.character, 'merchant', count);
     saveCharacter(this);
     this.render(`잡템 ${count}개를 모두 판매해 ${total.toLocaleString()}G를 획득했습니다.`);
+  }
+
+  sellPotion(potionId, amount, bonus) {
+    const potion = getPotion(potionId);
+    const owned = this.character.potions?.[potionId] ?? 0;
+    const quantity = Math.max(0, Math.min(owned, Math.floor(amount)));
+    if (!potion || quantity <= 0) return this.render('판매할 물약이 없습니다.');
+    const unitPrice = Math.max(1, Math.round(potion.price * 0.5 * bonus));
+    const total = unitPrice * quantity;
+    this.character.potions[potionId] = owned - quantity;
+    if (this.character.potions[potionId] <= 0) delete this.character.potions[potionId];
+    this.character.gold += total;
+    adjustAffinity(this.character, 'merchant', quantity);
+    saveCharacter(this);
+    this.render(`${potion.name} ${quantity}개를 ${total.toLocaleString()}G에 판매했습니다.`);
   }
 
   buyPotion(potionId, price) {

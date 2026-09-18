@@ -4,10 +4,11 @@ import { addFantasyBackdrop, addOrnatePanel, addSceneTitle } from '../ui/fantasy
 import { combatPower, combatStats, ensureRpgCharacter, nextAdvancementStage } from '../state/rpgCharacter.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { claimableCount } from '../state/quests.js';
+import { getTitle } from '../data/quests.js';
 
 const HUBS = [
   { label: '사냥 게시판', sub: '지역을 골라 출정', scene: 'Hunt', icon: '⚔', color: 0x9f4738 },
-  { label: '의뢰소', sub: '일일 의뢰 · 업적', scene: 'Quest', icon: '⚑', color: 0x5e7a3f, badge: 'quest' },
+  { label: '의뢰소', sub: '일일 의뢰 · 업적 · 칭호', scene: 'Quest', icon: '⚑', color: 0x5e7a3f, badge: 'quest' },
   { label: '우편함', sub: '받은 편지 수령', scene: 'Mailbox', icon: '✉', color: 0x3f6a7a, badge: 'mail' },
   { label: '황금 뿔피리', sub: '동료 모집 · 파티', scene: 'Tavern', icon: '♞', color: 0x9b6b3f },
   { label: '상인 리아', sub: '거래할수록 우호도 상승', scene: 'NPC', data: { npcId: 'merchant' }, icon: '◆', color: 0xb28a43 },
@@ -47,9 +48,10 @@ export class TownScene extends Phaser.Scene {
     const advancement = getAdvancement(c.advancementId);
     const stats = combatStats(c);
     const companion = getCompanion(c.activeCompanionId);
+    const title = getTitle(c.equippedTitle);
     addOrnatePanel(this, 240, 186, 432, 112, { color: 0x1b2d25, border: job.color, alpha: 0.96 });
     createEquippedHero(this, c, 74, 184, 1.35);
-    this.add.text(116, 145, `${c.name}  Lv.${c.level}  ${advancement?.name ?? job.name}  · 전투력 ${combatPower(c).toLocaleString()}`, { fontSize: '13px', fontStyle: 'bold', color: '#ffe6a7' });
+    this.add.text(116, 145, `${title ? `[${title.name}] ` : ''}${c.name}  Lv.${c.level}  ${advancement?.name ?? job.name}  · 전투력 ${combatPower(c).toLocaleString()}`, { fontSize: title ? '11px' : '13px', fontStyle: 'bold', color: '#ffe6a7' });
     this.add.text(116, 174, `HP ${c.hp}/${stats.maxHp}   MP ${c.mp}/${stats.maxMp}   골드 ${c.gold.toLocaleString()}`, { fontSize: '11px', color: '#d9c9a6' });
     const xpText = c.level >= 999 ? 'MAX' : `${c.xp}/${xpForLevel(c.level)}`;
     this.add.text(116, 198, `공격 ${stats.attack} · 방어 ${stats.defense} · 민첩 ${stats.agility}   경험치 ${xpText}`, { fontSize: '9px', color: '#9fc7a4' });

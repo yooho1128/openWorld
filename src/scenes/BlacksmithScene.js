@@ -107,6 +107,7 @@ export class BlacksmithScene extends Phaser.Scene {
     this.character.activeEnhancementBlessing = null;
     if (Math.random() * 100 < successRate) {
       item.enhancement = level + 1;
+      this.character.highestEnhancement = Math.max(this.character.highestEnhancement ?? 0, item.enhancement);
       saveCharacter(this);
       return this.render(`${item.name} 강화 성공! +${item.enhancement}`, 'success');
     }
