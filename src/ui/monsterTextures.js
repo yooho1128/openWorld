@@ -8,7 +8,9 @@ function drawMonster(g, monster) {
   const p = monster.primary;
   const s = monster.secondary;
   const a = monster.accent;
-  g.fillStyle(0x130f0d, 0.3).fillEllipse(32, 57, 46, 9);
+  g.fillStyle(a, 0.08).fillCircle(32, 31, 29);
+  g.lineStyle(2, a, 0.24).strokeCircle(32, 31, 27 + monster.variant);
+  g.fillStyle(0x130f0d, 0.38).fillEllipse(32, 58, 50, 10);
 
   if (monster.body === 'ooze') {
     g.fillStyle(p).fillRoundedRect(9, 28, 46, 27, 14).fillTriangle(13, 35, 31, 8, 52, 35);
@@ -66,9 +68,24 @@ function drawMonster(g, monster) {
     g.lineStyle(2, a).strokeCircle(32, 38, 7);
   }
 
+  // Inked storybook edge, pearly highlights, and rank ornaments make the
+  // tiny procedural sprites read as illustrated creatures instead of icons.
+  g.lineStyle(1.5, 0x1a1213, 0.72).strokeCircle(32, 30, 26);
+  g.fillStyle(0xffffff, 0.2).fillEllipse(24, 17, 12, 5);
+  if (['B', 'A', 'S'].includes(monster.rank)) {
+    g.lineStyle(2, a, 0.8).strokeEllipse(32, 58, 48, 9);
+    g.fillStyle(a, 0.72).fillTriangle(6, 50, 12, 40, 16, 53).fillTriangle(58, 50, 52, 40, 48, 53);
+  }
+  if (monster.rank === 'S') {
+    g.fillStyle(0xffefae, 0.92).fillTriangle(22, 8, 27, 0, 32, 8).fillTriangle(32, 8, 37, 0, 42, 8);
+    g.lineStyle(1, a, 0.75).lineBetween(20, 10, 44, 10);
+  }
+
   // Regional crest makes every palette family readable even at small size.
-  g.fillStyle(a, 0.92).fillCircle(52, 9, 5);
-  g.lineStyle(1, 0xffffff, 0.6).strokeCircle(52, 9, 6 + monster.variant);
+  g.fillStyle(a, 0.96).fillCircle(52, 9, 5);
+  g.fillStyle(0xffffff, 0.62).fillCircle(50.5, 7.5, 1.3);
+  g.lineStyle(1, 0xffffff, 0.72).strokeCircle(52, 9, 6 + monster.variant);
+  g.lineStyle(1, a, 0.45).strokeCircle(52, 9, 8 + monster.variant);
 }
 
 export function generateMonsterTextures(scene) {

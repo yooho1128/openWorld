@@ -14,6 +14,19 @@ export function createEquippedHero(scene, character, x, y, scale = 1) {
     const bScore = getRarity(b.rarity).order * 100 + (b.enhancement ?? 0);
     return bScore - aScore;
   })[0];
+  const classMarks = { warrior: '⚔', mage: '✦', ranger: '➶', cleric: '✚', rogue: '◆' };
+  const classColors = { warrior: 0xd87055, mage: 0x8f7fe3, ranger: 0x72a95a, cleric: 0xf0cf75, rogue: 0x73629b };
+  const classColor = classColors[character.classId] ?? 0x8fb493;
+  aura.fillStyle(classColor, 0.09).fillCircle(0, 0, 29);
+  aura.lineStyle(1.5, classColor, 0.42).strokeEllipse(0, 20, 55, 14);
+  const cape = scene.add.graphics();
+  cape.fillStyle(classColor, 0.76).fillTriangle(-10, -8, -20, 20, 0, 14).fillTriangle(10, -8, 20, 20, 0, 14);
+  cape.lineStyle(1.5, 0xffe9ad, 0.45).lineBetween(-10, -7, -19, 19).lineBetween(10, -7, 19, 19);
+  const classCrest = scene.add.text(0, 29, classMarks[character.classId] ?? '✦', {
+    fontFamily: 'Georgia, serif', fontSize: '8px', color: '#fff1b6', stroke: '#2a1b18', strokeThickness: 2,
+  }).setOrigin(0.5);
+  ascension.add(classCrest);
+  scene.tweens.add({ targets: classCrest, alpha: 0.48, duration: 950, yoyo: true, repeat: -1 });
   if (strongest && getRarity(strongest.rarity).order >= 2) {
     const color = getRarity(strongest.rarity).color;
     const enhancement = strongest.enhancement ?? 0;
@@ -87,6 +100,6 @@ export function createEquippedHero(scene, character, x, y, scale = 1) {
   if (equipment.necklace) gear.fillStyle(getRarity(equipment.necklace.rarity).color, 1).fillCircle(0, 2, 3);
   equipment.rings.filter(Boolean).forEach((item, index) => gear.lineStyle(2, getRarity(item.rarity).color, 1).strokeCircle(index ? 18 : -18, 11, 3));
   equipment.earrings.filter(Boolean).forEach((item, index) => gear.fillStyle(getRarity(item.rarity).color, 1).fillCircle(index ? 10 : -10, -9, 2));
-  container.add([aura, ascension, base, gear]);
+  container.add([aura, cape, ascension, base, gear]);
   return container;
 }

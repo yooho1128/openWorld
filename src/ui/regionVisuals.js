@@ -54,6 +54,7 @@ function drawLandscape(g, visual) {
   g.fillStyle(ground, 0.98).fillEllipse(240, 370, 620, 250);
   g.fillStyle(groundLight, 0.74).fillEllipse(240, 342, 520, 160);
   g.lineStyle(2, accent, 0.32).strokeEllipse(240, 340, 430, 125);
+  g.lineStyle(1, 0xffedb0, 0.12).strokeEllipse(240, 350, 470, 146);
   if (kind === 'desert') {
     g.fillStyle(groundLight, 0.8).fillEllipse(110, 300, 310, 125).fillEllipse(385, 325, 360, 145);
   } else if (kind === 'frozen') {
@@ -182,6 +183,21 @@ function addBossThreatBackground(scene, visual) {
   scene.cameras.main.flash(220, 90, 0, 8, false);
 }
 
+function addFairyTaleDepth(scene, visual) {
+  const silhouette = scene.add.graphics();
+  silhouette.fillStyle(0x090d12, 0.3);
+  for (let index = 0; index < 6; index += 1) {
+    const x = 18 + index * 91;
+    silhouette.fillTriangle(x - 34, 386, x, 280 - (index % 3) * 20, x + 38, 386);
+    silhouette.fillTriangle(x - 27, 350, x, 246 - (index % 2) * 24, x + 29, 350);
+  }
+  const arch = scene.add.graphics().setDepth(2);
+  arch.lineStyle(3, visual.accent, 0.24).strokeRoundedRect(15, 14, 450, 398, 24);
+  arch.lineStyle(1, 0xffe7a0, 0.16).strokeRoundedRect(22, 21, 436, 384, 20);
+  arch.fillStyle(visual.accent, 0.34);
+  arch.fillCircle(30, 30, 4).fillCircle(450, 30, 4).fillCircle(30, 395, 4).fillCircle(450, 395, 4);
+}
+
 export function addRegionBattlefield(scene, region, { isBoss = false } = {}) {
   const visual = getRegionVisual(region);
   const sky = scene.add.graphics();
@@ -191,6 +207,7 @@ export function addRegionBattlefield(scene, region, { isBoss = false } = {}) {
   }
   drawLandscape(sky, visual);
   drawLandmark(sky, visual);
+  addFairyTaleDepth(scene, visual);
   addWeather(scene, visual);
   if (isBoss) addBossThreatBackground(scene, visual);
   return visual;

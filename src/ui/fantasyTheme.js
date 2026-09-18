@@ -29,6 +29,22 @@ function addFireflies(scene, dark) {
   }
 }
 
+function addStorybookFiligree(scene, accent) {
+  const frame = scene.add.graphics();
+  frame.lineStyle(2, 0xf3d98a, 0.22).strokeRoundedRect(9, 9, 462, 782, 18);
+  frame.lineStyle(1, accent, 0.25).strokeRoundedRect(15, 15, 450, 770, 15);
+  frame.fillStyle(0xf6df9b, 0.32);
+  [[20, 20], [460, 20], [20, 780], [460, 780]].forEach(([x, y]) => {
+    frame.fillCircle(x, y, 4);
+    frame.fillTriangle(x - 10, y, x, y - 4, x, y + 4);
+    frame.fillTriangle(x + 10, y, x, y - 4, x, y + 4);
+  });
+  for (let i = 0; i < 7; i += 1) {
+    const x = 46 + i * 65;
+    frame.fillStyle(i % 2 ? accent : 0xf3d98a, 0.12).fillCircle(x, 31, 2.5).fillCircle(480 - x, 769, 2.5);
+  }
+}
+
 // Storybook depth made entirely with Phaser primitives, so every existing scene
 // gains a richer background without loading external art assets.
 export function addFantasyBackdrop(scene, { dark = false, accent = 0x72956f } = {}) {
@@ -62,6 +78,7 @@ export function addFantasyBackdrop(scene, { dark = false, accent = 0x72956f } = 
   haze.fillStyle(accent, dark ? 0.08 : 0.1).fillEllipse(240, 470, 520, 190);
   haze.fillStyle(0xe9efd3, dark ? 0.025 : 0.06).fillEllipse(240, 620, 590, 155);
   addFireflies(scene, dark);
+  addStorybookFiligree(scene, accent);
 }
 
 export function addOrnatePanel(scene, x, y, width, height, { color = THEME.panel, border = THEME.gold, alpha = 0.94 } = {}) {
@@ -70,8 +87,12 @@ export function addOrnatePanel(scene, x, y, width, height, { color = THEME.panel
   panel.fillStyle(color, alpha).fillRoundedRect(x - width / 2, y - height / 2, width, height, 15);
   panel.lineStyle(2, border, 0.78).strokeRoundedRect(x - width / 2, y - height / 2, width, height, 15);
   panel.lineStyle(1, 0xfff0bd, 0.16).strokeRoundedRect(x - width / 2 + 6, y - height / 2 + 6, width - 12, height - 12, 11);
+  panel.fillStyle(border, 0.09).fillRoundedRect(x - width / 2 + 8, y - height / 2 + 8, width - 16, Math.min(16, height / 4), 7);
   panel.fillStyle(border, 0.85);
   panel.fillCircle(x - width / 2 + 11, y, 2.5).fillCircle(x + width / 2 - 11, y, 2.5);
+  panel.fillStyle(border, 0.65);
+  panel.fillTriangle(x - width / 2 + 8, y - height / 2 + 8, x - width / 2 + 24, y - height / 2 + 8, x - width / 2 + 8, y - height / 2 + 24);
+  panel.fillTriangle(x + width / 2 - 8, y + height / 2 - 8, x + width / 2 - 24, y + height / 2 - 8, x + width / 2 - 8, y + height / 2 - 24);
   return { shadow, panel };
 }
 
@@ -80,11 +101,16 @@ export function addSceneTitle(scene, title, subtitle = '') {
   addOrnatePanel(scene, 240, 88, 400, height, { color: 0x18251f, border: THEME.gold, alpha: 0.94 });
   const crest = scene.add.circle(240, 48, 16, THEME.gold, 0.94).setStrokeStyle(2, 0xffefbd, 0.7);
   scene.add.text(240, 48, '✦', { fontFamily: 'Georgia, serif', fontSize: '14px', color: '#344536' }).setOrigin(0.5);
+  const titleSize = title.length > 18 ? '19px' : title.length > 13 ? '21px' : '24px';
   scene.add.text(240, subtitle ? 78 : 86, title, {
-    fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '24px', fontStyle: 'bold', color: '#fff0c2',
+    fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: titleSize, fontStyle: 'bold', color: '#fff0c2',
     stroke: '#172019', strokeThickness: 4,
+    align: 'center', wordWrap: { width: 350, useAdvancedWrap: true },
   }).setOrigin(0.5);
-  if (subtitle) scene.add.text(240, 108, subtitle, { fontSize: '11px', color: '#c9d8bf' }).setOrigin(0.5);
+  if (subtitle) scene.add.text(240, 108, subtitle, {
+    fontSize: subtitle.length > 38 ? '9px' : '11px', color: '#c9d8bf', align: 'center',
+    wordWrap: { width: 380, useAdvancedWrap: true },
+  }).setOrigin(0.5);
   scene.tweens.add({ targets: crest, scale: 1.08, duration: 1350, ease: 'Sine.easeInOut', yoyo: true, repeat: -1 });
 }
 

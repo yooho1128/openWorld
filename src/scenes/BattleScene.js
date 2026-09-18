@@ -57,6 +57,12 @@ export class BattleScene extends Phaser.Scene {
     this.add.text(240, 35, `${this.region.name} · 전투`, { fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '21px', fontStyle: 'bold', color: '#f4dc9c' }).setOrigin(0.5);
     this.add.text(240, 62, `${this.regionVisual.icon}  ${this.region.subtitle}  ·  위험 ${this.region.danger}`, { fontSize: '10px', fontStyle: 'bold', color: '#d5c69f', backgroundColor: '#120f13aa', padding: { x: 8, y: 3 } }).setOrigin(0.5);
     this.add.ellipse(342, 281, this.isBoss ? 145 : 120, 30, 0x0a100d, 0.38);
+    if (this.isBoss) {
+      const bossHalo = this.add.circle(342, 225, 88, this.region.color, 0.08).setStrokeStyle(3, 0xffd36a, 0.32).setDepth(3);
+      const bossRune = this.add.text(342, 225, '✦  ◇  ✦  ◈', { fontFamily: 'Georgia, serif', fontSize: '20px', color: '#ffe18a' }).setOrigin(0.5).setAlpha(0.28).setDepth(4);
+      this.tweens.add({ targets: bossHalo, angle: 360, scale: 1.12, duration: 4600, repeat: -1 });
+      this.tweens.add({ targets: bossRune, angle: -360, alpha: 0.55, duration: 3800, repeat: -1 });
+    }
     this.enemySprite = this.add.sprite(342, 225, this.monsterData.texture).setScale(this.isBoss ? 2.85 : 2.35);
     if (this.isBoss) this.enemySprite.setTint(0xffd36a);
     this.add.ellipse(115, 468, 105, 25, 0x0a100d, 0.4);
@@ -67,12 +73,12 @@ export class BattleScene extends Phaser.Scene {
       this.add.text(205, 460, `Lv.${this.companionCombat.level}`, { fontSize: '9px', fontStyle: 'bold', color: '#ffe6a1' }).setOrigin(0.5);
     }
     this.statusGraphics = this.add.graphics();
-    this.playerText = this.add.text(24, 485, '', { fontSize: '11px', color: '#e9dcb9' });
-    this.enemyText = this.add.text(456, 104, '', { fontSize: '11px', color: '#e9dcb9', align: 'right' }).setOrigin(1, 0);
+    this.playerText = this.add.text(24, 474, '', { fontSize: '9px', color: '#e9dcb9', lineSpacing: 1, fixedWidth: 210, wordWrap: { width: 210 } });
+    this.enemyText = this.add.text(456, 104, '', { fontSize: '11px', color: '#e9dcb9', align: 'right', fixedWidth: 220, wordWrap: { width: 220 } }).setOrigin(1, 0);
     this.intentText = this.add.text(342, 158, '', { fontSize: '10px', fontStyle: 'bold', color: '#ffd480', backgroundColor: '#17100dcc', padding: { x: 7, y: 4 } }).setOrigin(0.5).setDepth(12);
     const openingMessage = this.isBoss ? `경고! 우두머리 ${this.monsterData.name}(이)가 나타났다!` : this.eventType === 'reinforcement' ? `${this.monsterData.name} 뒤에서 또 다른 기척이 느껴진다...` : this.eventType === 'reinforcement-second' ? `난입한 ${this.monsterData.name}(이)가 길을 막았다!` : `야생의 ${this.monsterData.name}(이)가 나타났다!`;
-    addOrnatePanel(this, 240, 558, 438, 72, { color: 0x17251f, border: 0xc9ad6c, alpha: 0.95 });
-    this.logText = this.add.text(240, 555, openingMessage, {
+    addOrnatePanel(this, 240, 568, 438, 68, { color: 0x17251f, border: 0xc9ad6c, alpha: 0.95 });
+    this.logText = this.add.text(240, 566, openingMessage, {
       fontSize: '12px', color: '#ffe5a5', align: 'center', wordWrap: { width: 430 }, lineSpacing: 4,
     }).setOrigin(0.5);
     this.commandLayer = this.add.container();
@@ -129,8 +135,13 @@ export class BattleScene extends Phaser.Scene {
     this.add.rectangle(x + 2, y + 4, 210, height, 0x08100d, 0.28);
     const bg = this.add.rectangle(x, y, 210, height, color, 0.92).setStrokeStyle(2, 0xe5c877).setInteractive({ useHandCursor: true });
     this.add.rectangle(x, y - height / 2 + 3, 192, 2, 0xfff1c2, 0.18);
-    const fontSize = label.length > 24 ? '9px' : label.length > 15 ? '11px' : '13px';
-    const text = this.add.text(x, y, label, { fontSize, fontStyle: 'bold', color: '#fff0bf' }).setOrigin(0.5);
+    const fontSize = label.length > 24 ? '9px' : label.length > 15 ? '10px' : '13px';
+    const isSkill = label.includes('MP') || label.includes('위력');
+    if (isSkill) {
+      this.add.circle(x - 88, y, 12, 0x130f20, 0.65).setStrokeStyle(1, 0xffe09b, 0.65);
+      this.add.text(x - 88, y, '✦', { fontFamily: 'Georgia, serif', fontSize: '11px', color: '#fff0a8' }).setOrigin(0.5);
+    }
+    const text = this.add.text(x + (isSkill ? 8 : 0), y, label, { fontSize, fontStyle: 'bold', color: '#fff0bf', align: 'center', fixedWidth: isSkill ? 174 : 194, wordWrap: { width: isSkill ? 174 : 194 } }).setOrigin(0.5);
     bg.on('pointerdown', action);
     bg.on('pointerover', () => bg.setScale(1.025));
     bg.on('pointerout', () => bg.setScale(1));
@@ -141,10 +152,10 @@ export class BattleScene extends Phaser.Scene {
   refreshStatus() {
     const c = this.character;
     this.statusGraphics.clear();
-    this.drawBar(24, 513, 200, 13, c.hp / this.playerStats.maxHp, 0x55b56d);
-    this.drawBar(24, 532, 200, 8, c.mp / this.playerStats.maxMp, 0x638ed4);
+    this.drawBar(24, 507, 200, 11, c.hp / this.playerStats.maxHp, 0x55b56d);
+    this.drawBar(24, 521, 200, 7, c.mp / this.playerStats.maxMp, 0x638ed4);
     this.drawBar(256, 129, 200, 13, this.enemy.hp / this.enemy.maxHp, 0xcf5548);
-    this.playerText.setText(`${c.name} Lv.${c.level}  HP ${Math.max(0, c.hp)}/${this.playerStats.maxHp}  MP ${c.mp}/${this.playerStats.maxMp}\n공격 ${this.playerStats.attack} · 방어 ${this.playerStats.defense}`);
+    this.playerText.setText(`${c.name} · Lv.${c.level}\nHP ${Math.max(0, c.hp)}/${this.playerStats.maxHp} · MP ${c.mp}/${this.playerStats.maxMp}\n공격 ${this.playerStats.attack} · 방어 ${this.playerStats.defense}`);
     this.enemyText.setText(`${this.isBoss ? '★ 우두머리 ' : ''}${this.monsterData.name}  ${this.monsterData.rank}급 Lv.${this.enemy.level}\nHP ${Math.max(0, this.enemy.hp)}/${this.enemy.maxHp}`);
   }
 

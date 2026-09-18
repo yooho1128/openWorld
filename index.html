@@ -25,8 +25,13 @@
       }
       #app {
         line-height: 0;
-        box-shadow: 0 0 0 2px #7d6038, 0 0 40px #000;
+        max-width: 100vw;
+        max-height: 100dvh;
+        overflow: hidden;
+        border-radius: 10px;
+        box-shadow: 0 0 0 2px #b9954e, 0 0 0 5px #26352d, 0 0 48px #000;
       }
+      #app canvas { display: block; max-width: 100%; max-height: 100dvh; }
       #overlay {
         display: none;
         position: absolute;
@@ -58,6 +63,8 @@
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
         scrollbar-gutter: stable;
+        overflow-wrap: anywhere;
+        word-break: keep-all;
       }
       #overlay .panel::before,
       #overlay .panel::after {
@@ -69,7 +76,7 @@
       }
       #overlay .panel::before { left: 9px; }
       #overlay .panel::after { right: 9px; }
-      #overlay p { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
+      #overlay p { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; overflow-wrap: anywhere; }
       #overlay h2 {
         margin: 0 0 12px;
         font-size: 21px;
@@ -163,6 +170,11 @@
       #overlay button.bulk-sell { margin-top: 7px; background: linear-gradient(#a14b35, #65291f); border-color: #e3a263; }
       .inventory-row, .companion-card { display: flex; align-items: center; gap: 9px; padding: 8px; background: #ead8b1; border: 1px solid #a78955; border-radius: 5px; font-family: 'Malgun Gothic', sans-serif; }
       .inventory-row > div, .companion-copy { flex: 1; min-width: 0; }
+      .inventory-row strong, .companion-copy strong, .gear-card strong, .forge-card strong,
+      .rank-name strong, .quest-card strong, .milestone-card strong {
+        overflow-wrap: anywhere;
+        word-break: keep-all;
+      }
       .potion-sell-actions { display: flex; gap: 4px; flex: 0 0 auto !important; }
       #overlay .potion-sell-actions button { width: auto; margin: 0; padding: 6px 7px; font-size: 10px; }
       .inventory-row small, .companion-copy small { display: block; color: #6c573b; font-size: 10px; margin-top: 2px; }
@@ -270,6 +282,14 @@
       .sort-row label { margin: 0; flex: 0 0 auto; font-size: 11px; color: #5a432b; font-weight: 700; font-family: 'Malgun Gothic', sans-serif; }
       .sort-row select { margin: 0; flex: 1; font-size: 12px; padding: 6px; }
       .item-count { flex: 0 0 auto; font-size: 11px; font-weight: 700; color: #4c3420; padding: 0 4px; }
+      @media (max-width: 420px), (max-height: 700px) {
+        #overlay { padding: 8px; }
+        #overlay .panel { padding: 18px 14px 16px; max-height: calc(100dvh - 16px); }
+        #overlay h2 { font-size: 19px; }
+        .inventory-row, .companion-card, .gear-card, .forge-card { gap: 6px; padding: 7px; }
+        .equipped-grid { grid-template-columns: 1fr; }
+        .star-answers { grid-template-columns: 1fr; }
+      }
       .ranking-panel { width: min(430px, 100%) !important; }
       .rank-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; max-height: 55vh; overflow-y: auto; }
       .rank-list, .mail-list, .chat-log { touch-action: pan-y; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-gutter: stable; }

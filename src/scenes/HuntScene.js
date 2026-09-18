@@ -41,8 +41,8 @@ export class HuntScene extends Phaser.Scene {
     const bg = this.add.rectangle(240, y, 420, 70, 0xffffff, 0.001);
     if (!locked) bg.setInteractive({ useHandCursor: true });
     const emblem = addRegionCardEmblem(this, 72, y, region, locked);
-    const name = this.add.text(112, y - 18, region.name, { fontSize: '15px', fontStyle: 'bold', color: locked ? '#777' : '#ffe8ad' });
-    const subtitle = this.add.text(112, y + 7, `${region.subtitle} · 필요 전투력 ${region.requiredPower.toLocaleString()}`, { fontSize: '10px', color: locked ? '#666' : '#b9aa8d' });
+    const name = this.add.text(112, y - 18, region.name, { fontSize: region.name.length > 13 ? '12px' : '15px', fontStyle: 'bold', color: locked ? '#777' : '#ffe8ad', fixedWidth: 230 });
+    const subtitle = this.add.text(112, y + 7, `${region.subtitle} · 필요 전투력 ${region.requiredPower.toLocaleString()}`, { fontSize: '10px', color: locked ? '#666' : '#b9aa8d', fixedWidth: 245, wordWrap: { width: 245 } });
     const danger = this.add.text(402, y, `위험 ${region.danger}`, { fontSize: '9px', color: locked ? '#666' : '#e28a69' }).setOrigin(1, 0.5);
     this.pageLayer.add([card.shadow, card.panel, bg, emblem.graphics, emblem.text, name, subtitle, danger]);
     if (!locked) {
