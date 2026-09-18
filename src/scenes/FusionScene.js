@@ -4,6 +4,8 @@ import { addLoot, ensureRpgCharacter, saveCharacter } from '../state/rpgCharacte
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
+const BULK_FUSION_RARITIES = ['normal', 'rare', 'unique'];
+
 export class FusionScene extends Phaser.Scene {
   constructor() { super('Fusion'); }
 
@@ -25,6 +27,7 @@ export class FusionScene extends Phaser.Scene {
 
   render(message = '', messageClass = '') {
     const items = this.character.inventory.filter((item) => item.type === 'equipment');
+    const bulkPairCount = BULK_FUSION_RARITIES.reduce((sum, rarity) => sum + Math.floor(items.filter((item) => item.rarity === rarity).length / 2), 0);
     const selected = this.selectedItems();
     const selectedRarity = selected[0]?.rarity ?? null;
     const chance = selected.length === 2 ? fusionUpgradeChance(selected[0], selected[1]) : 0;
@@ -48,12 +51,14 @@ export class FusionScene extends Phaser.Scene {
         ${message ? `<p class="forge-message ${messageClass}">${message}</p>` : ''}
         <div class="fusion-selected"><strong>${selectionText}</strong><small>${resultText}</small></div>
         <button id="fusion-submit" class="fusion-submit" ${selected.length !== 2 ? 'disabled' : ''}>선택한 장비 2개 합성</button>
+        <button id="fusion-bulk" class="fusion-submit" ${bulkPairCount < 1 ? 'disabled' : ''}>노멀·레어·유니크 일괄 합성 · ${bulkPairCount}회</button>
         <div class="fusion-list">${cards}</div>
         <button id="fusion-back" class="secondary">상태창으로 돌아가기</button>
       </div>
     `);
     [...items].sort((a, b) => getRarity(b.rarity).order - getRarity(a.rarity).order).forEach((item, index) => qs(`fusion-pick-${index}`)?.addEventListener('click', () => this.toggle(item)));
     qs('fusion-submit')?.addEventListener('click', () => this.fuse());
+    qs('fusion-bulk')?.addEventListener('click', () => this.bulkFuse());
     qs('fusion-back').addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Status'); });
   }
 
@@ -79,5 +84,33 @@ export class FusionScene extends Phaser.Scene {
     this.selectedIds = [];
     saveCharacter(this);
     this.render(`${result.upgraded ? '★ 상위 등급 승급 성공!' : '장비 합성 완료!'} ${getRarity(result.item.rarity).name} 「${equipmentDisplayName(result.item)}」 획득`, result.upgraded ? 'success' : '');
+  }
+
+  bulkFuse() {
+    const groups = Object.fromEntries(BULK_FUSION_RARITIES.map((rarity) => [rarity, this.character.inventory.filter((item) => item.type === 'equipment' && item.rarity === rarity)]));
+    const pairCount = BULK_FUSION_RARITIES.reduce((sum, rarity) => sum + Math.floor(groups[rarity].length / 2), 0);
+    if (!pairCount) return this.render('일괄 합성할 장비가 부족합니다.', 'fail');
+    if (!window.confirm(`노멀·레어·유니크 장비를 등급별로 ${pairCount}회 합성합니다. 강화 장비도 재료에 포함되며 되돌릴 수 없습니다. 계속할까요?`)) return;
+
+    const consumed = new Set();
+    const results = [];
+    for (const rarity of BULK_FUSION_RARITIES) {
+      const materials = groups[rarity];
+      for (let index = 0; index + 1 < materials.length; index += 2) {
+        const first = materials[index];
+        const second = materials[index + 1];
+        const result = rollFusionEquipment(first, second, this.character.classId);
+        if (!result) continue;
+        consumed.add(first.id);
+        consumed.add(second.id);
+        results.push(result);
+      }
+    }
+    this.character.inventory = this.character.inventory.filter((item) => !consumed.has(item.id));
+    results.forEach((result) => addLoot(this.character, result.item));
+    this.selectedIds = [];
+    saveCharacter(this);
+    const upgraded = results.filter((result) => result.upgraded).length;
+    this.render(`일괄 합성 ${results.length}회 완료 · 상위 등급 승급 ${upgraded}개 · 홀수 재료와 결과물은 가방에 남았습니다.`, upgraded ? 'success' : '');
   }
 }

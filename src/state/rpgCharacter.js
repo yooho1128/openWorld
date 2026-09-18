@@ -1,5 +1,5 @@
 import { ADVANCEMENTS, advancementStageForLevel, getAdvancement, getAdvancementOptions, getClass, getCompanion, xpForLevel } from '../data/rpg.js';
-import { enhancementStats, masterEquipmentSet, equipmentSetBonus, level200MythicWeapon, rollGachaEquipment } from '../data/equipment.js';
+import { enhancementStats, masterEquipmentSet, equipmentSetBonus, level200MythicWeapon, normalizeEquipmentStats, rollGachaEquipment } from '../data/equipment.js';
 import { DEFAULT_POTION_ID, getPotion } from '../data/potions.js';
 
 const GLOBAL_BOSS_TITLE_ID = 'lucky-lottery';
@@ -82,7 +82,11 @@ export function ensureRpgCharacter(character) {
   }
   const equipment = character.equipment;
   const allItems = [...character.inventory, equipment.helmet, equipment.armor, equipment.gloves, equipment.boots, equipment.weapon, equipment.necklace, ...equipment.rings, ...equipment.earrings].filter((item) => item?.type === 'equipment');
-  allItems.forEach((item) => { item.maxDurability ??= 100; item.durability ??= item.maxDurability; });
+  allItems.forEach((item) => {
+    item.maxDurability ??= 100;
+    item.durability ??= item.maxDurability;
+    normalizeEquipmentStats(item);
+  });
   const earnedEnhancements = allItems.filter((item) => !['attendance-7day', 'master-account'].includes(item.source)).map((item) => Number(item.enhancement) || 0);
   character.highestEnhancement = Math.max(Number(character.highestEnhancement) || 0, ...earnedEnhancements, 0);
   return character;
