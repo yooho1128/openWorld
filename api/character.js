@@ -7,6 +7,7 @@ const sql = connectionString ? neon(connectionString) : null;
 const CLASS_IDS = ['warrior', 'mage', 'ranger', 'cleric', 'rogue'];
 const BASE_ADVANCEMENT_IDS = ['berserker', 'guardian', 'archmage', 'frostweaver', 'sniper', 'beastmaster', 'paladin', 'oracle', 'assassin', 'trickster'];
 const POTION_IDS = ['potion-hp-small', 'potion-hp-medium', 'potion-hp-large', 'potion-hp-superior', 'potion-mp-small', 'potion-mp-large', 'potion-elixir'];
+const GLOBAL_TITLE_IDS = ['lucky-lottery'];
 
 async function ensureTable() {
   await sql`
@@ -95,7 +96,10 @@ function sanitizeCharacter(input, nickname) {
   const isMaster = isMasterNickname(nickname);
   const classId = CLASS_IDS.includes(c.classId) ? c.classId : null;
   const level = clampInt(c.level, 1, 999, 1);
-  const unlockedTitles = [...new Set(asArray(c.unlockedTitles, 100).filter((id) => typeof id === 'string').map((id) => id.slice(0, 60)))];
+  const unlockedTitles = [...new Set([
+    ...asArray(c.unlockedTitles, 100).filter((id) => typeof id === 'string').map((id) => id.slice(0, 60)),
+    ...GLOBAL_TITLE_IDS,
+  ])];
   const blessingKeys = ['small', 'normal', 'great'];
 
   const out = {

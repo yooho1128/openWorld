@@ -70,6 +70,7 @@ export class StatusScene extends Phaser.Scene {
         <div class="stat-grid"><span>HP <strong>${c.hp}/${stats.maxHp}</strong></span><span>MP <strong>${c.mp}/${stats.maxMp}</strong></span><span>공격력 <strong>${stats.attack}</strong></span><span>방어력 <strong>${stats.defense}</strong></span><span>민첩 <strong>${stats.agility}</strong></span><span>탈주 확률 <strong>적과 비교 계산</strong></span></div>
         ${setBonusHtml}
         ${message ? `<p class="trade-message">${message}</p>` : ''}
+        <button id="open-fusion" class="fusion-link">✦ 장비 합성소</button>
         <h3>착용 장비</h3><div class="equipped-grid">${equippedHtml}</div>
         ${ticketItems.length ? `<h3>보유 아이템</h3><div class="gear-list">${ticketHtml}</div>` : ''}
         <h3>장비 가방</h3><div class="gear-list">${bagHtml}</div>
@@ -83,6 +84,7 @@ export class StatusScene extends Phaser.Scene {
       if (equipItem(c, item.id)) { saveCharacter(this); this.scene.restart(); }
     }));
     ticketItems.forEach((item, index) => qs(`use-ticket-${index}`)?.addEventListener('click', () => this.useTicket(item.id)));
+    qs('open-fusion')?.addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Fusion'); });
     qs('title-select')?.addEventListener('change', (event) => {
       const id = event.target.value || null;
       c.equippedTitle = id && c.unlockedTitles.includes(id) ? id : null;

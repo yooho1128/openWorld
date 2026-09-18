@@ -2,6 +2,8 @@ import { ADVANCEMENTS, advancementStageForLevel, getAdvancement, getAdvancementO
 import { enhancementStats, masterEquipmentSet, equipmentSetBonus, level200MythicWeapon, rollGachaEquipment } from '../data/equipment.js';
 import { DEFAULT_POTION_ID, getPotion } from '../data/potions.js';
 
+const GLOBAL_BOSS_TITLE_ID = 'lucky-lottery';
+
 export function ensureRpgCharacter(character) {
   character.inventory ??= [];
   // Older saves stored a single flat potion counter; fold it into the new
@@ -18,6 +20,7 @@ export function ensureRpgCharacter(character) {
   character.bossVictories = Math.max(0, Math.floor(Number(character.bossVictories) || 0));
   character.attendanceDays = Math.max(0, Math.min(7, Math.floor(Number(character.attendanceDays) || 0)));
   character.unlockedTitles = Array.isArray(character.unlockedTitles) ? [...new Set(character.unlockedTitles.filter((id) => typeof id === 'string'))] : [];
+  if (!character.unlockedTitles.includes(GLOBAL_BOSS_TITLE_ID)) character.unlockedTitles.push(GLOBAL_BOSS_TITLE_ID);
   character.equippedTitle = character.unlockedTitles.includes(character.equippedTitle) ? character.equippedTitle : null;
   character.equipment ??= { helmet: null, armor: null, gloves: null, boots: null, weapon: null, necklace: null, rings: [null, null], earrings: [null, null] };
   character.equipment.rings ??= [null, null];

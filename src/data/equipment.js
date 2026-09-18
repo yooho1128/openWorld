@@ -84,6 +84,35 @@ export const EQUIPMENT_COUNT = EQUIPMENT_CATALOG.length;
 export const getRarity = (id) => RARITIES[id] ?? RARITIES.normal;
 export const getSlot = (id) => EQUIPMENT_SLOTS.find((slot) => slot.id === id);
 
+const RARITY_SEQUENCE = ['normal', 'rare', 'unique', 'legendary', 'mythic'];
+export const FUSION_UPGRADE_RATES = { normal: 30, rare: 20, unique: 12, legendary: 5, mythic: 0 };
+
+export function nextRarity(rarity) {
+  const index = RARITY_SEQUENCE.indexOf(rarity);
+  return index >= 0 && index < RARITY_SEQUENCE.length - 1 ? RARITY_SEQUENCE[index + 1] : null;
+}
+
+export function fusionUpgradeChance(first, second) {
+  if (!first || !second || first.rarity !== second.rarity || !nextRarity(first.rarity)) return 0;
+  const enhancementBonus = Math.min(10, ((Number(first.enhancement) || 0) + (Number(second.enhancement) || 0)) * 0.5);
+  return Math.min(100, FUSION_UPGRADE_RATES[first.rarity] + enhancementBonus);
+}
+
+export function rollFusionEquipment(first, second, classId) {
+  if (!first || !second || first.rarity !== second.rarity) return null;
+  const upgraded = Math.random() * 100 < fusionUpgradeChance(first, second);
+  const rarity = upgraded ? nextRarity(first.rarity) : first.rarity;
+  const pool = EQUIPMENT_CATALOG.filter((item) => item.rarity === rarity && (!item.classId || item.classId === classId));
+  const base = pool[Math.floor(Math.random() * pool.length)];
+  if (!base) return null;
+  const item = cloneItem(base, '-fusion');
+  item.level = Math.max(1, Math.min(999, Math.round(((Number(first.level) || 1) + (Number(second.level) || 1)) / 2)));
+  item.enhancement = 0;
+  item.durability = item.maxDurability ?? 100;
+  item.source = 'equipment-fusion';
+  return { item, upgraded, chance: fusionUpgradeChance(first, second) };
+}
+
 function cloneItem(item, suffix = '') {
   return { ...item, id: `${item.catalogId}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}${suffix}`, stats: { ...item.stats } };
 }
