@@ -19,8 +19,7 @@ export class BlacksmithScene extends Phaser.Scene {
   }
 
   ownedEquipment() {
-    const bag = this.character.inventory.filter((item) => item.type === 'equipment');
-    return [...bag, ...equippedItems(this.character)].filter((item, index, array) => array.findIndex((entry) => entry.id === item.id) === index);
+    return equippedItems(this.character);
   }
 
   render(message = '', messageClass = '') {
@@ -35,7 +34,7 @@ export class BlacksmithScene extends Phaser.Scene {
       const effectiveness = levelEffectiveness(item.level ?? 1, this.character.level);
       const levelNote = effectiveness < 1 ? `<small class="forge-risk">아이템 Lv.${item.level ?? 1} · 레벨 차이로 효과 ${Math.round(effectiveness * 100)}%</small>` : '';
       return `<div class="forge-card rarity-${item.rarity}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${statText}</small><small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<small class="forge-risk">성공 ${rate}%${destroy ? ` · 파괴 ${destroy}%` : ''} · 실패 시 -1</small></div><div class="forge-actions"><button id="forge-${index}" ${level >= 20 ? 'disabled' : ''}>${level >= 20 ? '최대 강화' : `강화 ${cost.toLocaleString()}G`}</button><button id="repair-${index}" class="repair" ${repairCost <= 0 ? 'disabled' : ''}>${repairCost > 0 ? `수리 ${repairCost.toLocaleString()}G` : '내구도 최대'}</button></div></div>`;
-    }).join('') : '<p class="empty-state">강화할 장비가 없습니다.</p>';
+    }).join('') : '<p class="empty-state">착용 중인 장비가 없습니다. 상태창에서 먼저 장비를 착용해주세요.</p>';
     const affinity = this.character.affinity.blacksmith ?? 0;
     openPanel(`
       <div class="panel forge-panel">
