@@ -7,6 +7,8 @@ const sql = connectionString ? neon(connectionString) : null;
 const CLASS_IDS = ['warrior', 'mage', 'ranger', 'cleric', 'rogue'];
 const BASE_ADVANCEMENT_IDS = ['berserker', 'guardian', 'archmage', 'frostweaver', 'sniper', 'beastmaster', 'paladin', 'oracle', 'assassin', 'trickster'];
 const POTION_IDS = ['potion-hp-small', 'potion-hp-medium', 'potion-hp-large', 'potion-hp-superior', 'potion-mp-small', 'potion-mp-large', 'potion-elixir'];
+const COMPANION_IDS = ['kael', 'luna', 'eris', 'seraph', 'nyx', 'brom'];
+const GLOBAL_TITLE_IDS = ['lucky-lottery'];
 
 async function ensureTable() {
   await sql`
@@ -63,6 +65,20 @@ function sanitizePotions(value, isMaster) {
   return out;
 }
 
+function sanitizeBlessings(value) {
+  const src = asPlainObject(value);
+  return Object.fromEntries(['small', 'normal', 'great'].map((key) => [key, clampInt(src[key], 0, 9999, 0)]));
+}
+
+function sanitizeCompanionProgress(value) {
+  const src = asPlainObject(value);
+  return Object.fromEntries(COMPANION_IDS.filter((id) => src[id]).map((id) => {
+    const progress = asPlainObject(src[id]);
+    const level = clampInt(progress.level, 1, 999, 1);
+    return [id, { level, xp: level >= 999 ? 0 : clampNumber(progress.xp, 0, 10_000_000, 0) }];
+  }));
+}
+
 // rings/earrings are spread (...equipment.rings) by the client, so they must
 // always be real arrays or a tampered save would crash the game on load.
 function sanitizeEquipment(value) {
@@ -90,6 +106,11 @@ function sanitizeCharacter(input, nickname) {
   const isMaster = isMasterNickname(nickname);
   const classId = CLASS_IDS.includes(c.classId) ? c.classId : null;
   const level = clampInt(c.level, 1, 999, 1);
+  const unlockedTitles = [...new Set([
+    ...asArray(c.unlockedTitles, 100).filter((id) => typeof id === 'string').map((id) => id.slice(0, 60)),
+    ...GLOBAL_TITLE_IDS,
+  ])];
+  const blessingKeys = ['small', 'normal', 'great'];
 
   const out = {
     version: 'rpg-1',
@@ -112,11 +133,19 @@ function sanitizeCharacter(input, nickname) {
     defense: clampNumber(c.defense, 0, 1_000_000, 0),
     agility: clampNumber(c.agility, 0, 1_000_000, 10),
     potions: sanitizePotions(c.potions, isMaster),
+    enhancementBlessings: sanitizeBlessings(c.enhancementBlessings),
+    activeEnhancementBlessing: blessingKeys.includes(c.activeEnhancementBlessing) ? c.activeEnhancementBlessing : null,
+    astrologerDaily: asPlainObject(c.astrologerDaily),
     victories: clampInt(c.victories, 0, 10_000_000, 0),
     defeats: clampInt(c.defeats, 0, 10_000_000, 0),
+    bossVictories: clampInt(c.bossVictories, 0, 10_000_000, 0),
+    attendanceDays: clampInt(c.attendanceDays, 0, 7, 0),
+    highestEnhancement: clampInt(c.highestEnhancement, 0, 20, 0),
+    unlockedTitles,
+    equippedTitle: unlockedTitles.includes(c.equippedTitle) ? c.equippedTitle : null,
     inventory: asArray(c.inventory, 3000),
     companions: asArray(c.companions, 50).filter((id) => typeof id === 'string'),
-    companionProgress: asPlainObject(c.companionProgress),
+    companionProgress: sanitizeCompanionProgress(c.companionProgress),
     activeCompanionId: typeof c.activeCompanionId === 'string' ? c.activeCompanionId : null,
     equipment: sanitizeEquipment(c.equipment),
     affinity: asPlainObject(c.affinity),

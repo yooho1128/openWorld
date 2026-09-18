@@ -41,7 +41,10 @@ function baseStats(slot, power) {
 function createEquipment({ id, name, slot, rarity, biome, color, variant, classId = null, source = null }) {
   const rarityData = RARITIES[rarity];
   const slotIndex = EQUIPMENT_SLOTS.findIndex((entry) => entry.id === slot) + 1;
-  const power = Math.round((slotIndex + 2 + variant) * rarityData.multiplier);
+  // Variants only add a small roll. Keeping that roll inside a 10% band means
+  // the weakest item of a higher rarity always beats the strongest item of
+  // the previous rarity in the same slot.
+  const power = Math.round((slotIndex + 4) * rarityData.multiplier * (1 + variant * 0.02));
   const stats = baseStats(slot, power);
   return {
     id, catalogId: id, name, type: 'equipment', slot, rarity, biome, color,
@@ -81,8 +84,52 @@ for (const classId of CLASS_IDS) {
 
 export const EQUIPMENT_CATALOG = generated;
 export const EQUIPMENT_COUNT = EQUIPMENT_CATALOG.length;
+const EQUIPMENT_BY_CATALOG_ID = new Map(EQUIPMENT_CATALOG.map((item) => [item.catalogId, item]));
 export const getRarity = (id) => RARITIES[id] ?? RARITIES.normal;
 export const getSlot = (id) => EQUIPMENT_SLOTS.find((slot) => slot.id === id);
+
+export function normalizeEquipmentStats(item) {
+  if (!item || item.type !== 'equipment') return item;
+  const catalog = EQUIPMENT_BY_CATALOG_ID.get(item.catalogId);
+  if (!catalog) return item;
+  const level = Math.max(1, Math.min(999, Math.round(Number(item.level) || 1)));
+  const levelMultiplier = 1 + (level - 1) * 0.008;
+  const sourceMultiplier = String(item.source ?? '').startsWith('fallen-') ? 1.12 : 1;
+  item.level = level;
+  item.stats = Object.fromEntries(Object.entries(catalog.stats).map(([key, value]) => [key, Math.round(value * levelMultiplier * sourceMultiplier)]));
+  item.statVersion = 2;
+  return item;
+}
+
+const RARITY_SEQUENCE = ['normal', 'rare', 'unique', 'legendary', 'mythic'];
+export const FUSION_UPGRADE_RATES = { normal: 30, rare: 20, unique: 12, legendary: 5, mythic: 0 };
+
+export function nextRarity(rarity) {
+  const index = RARITY_SEQUENCE.indexOf(rarity);
+  return index >= 0 && index < RARITY_SEQUENCE.length - 1 ? RARITY_SEQUENCE[index + 1] : null;
+}
+
+export function fusionUpgradeChance(first, second) {
+  if (!first || !second || first.rarity !== second.rarity || !nextRarity(first.rarity)) return 0;
+  const enhancementBonus = Math.min(10, ((Number(first.enhancement) || 0) + (Number(second.enhancement) || 0)) * 0.5);
+  return Math.min(100, FUSION_UPGRADE_RATES[first.rarity] + enhancementBonus);
+}
+
+export function rollFusionEquipment(first, second, classId) {
+  if (!first || !second || first.rarity !== second.rarity) return null;
+  const upgraded = Math.random() * 100 < fusionUpgradeChance(first, second);
+  const rarity = upgraded ? nextRarity(first.rarity) : first.rarity;
+  const pool = EQUIPMENT_CATALOG.filter((item) => item.rarity === rarity && (!item.classId || item.classId === classId));
+  const base = pool[Math.floor(Math.random() * pool.length)];
+  if (!base) return null;
+  const item = cloneItem(base, '-fusion');
+  item.level = Math.max(1, Math.min(999, Math.round(((Number(first.level) || 1) + (Number(second.level) || 1)) / 2)));
+  item.enhancement = 0;
+  item.durability = item.maxDurability ?? 100;
+  item.source = 'equipment-fusion';
+  normalizeEquipmentStats(item);
+  return { item, upgraded, chance: fusionUpgradeChance(first, second) };
+}
 
 function cloneItem(item, suffix = '') {
   return { ...item, id: `${item.catalogId}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}${suffix}`, stats: { ...item.stats } };
@@ -117,8 +164,8 @@ export function equipmentForMonster(monster, classId, level = 1) {
   if (Math.random() < 0.16) {
     item.name = `쓰러진 모험가의 ${base.name}`;
     item.source = `fallen-${monster.id}`;
-    item.stats = Object.fromEntries(Object.entries(item.stats).map(([key, value]) => [key, Math.ceil(value * 1.12)]));
   } else item.source = monster.id;
+  normalizeEquipmentStats(item);
   return item;
 }
 
@@ -137,6 +184,7 @@ export function guaranteedBossEquipment(monster, classId, level = 1) {
   item.level = Math.max(1, level);
   item.name = `${monster.name}의 유산 · ${base.name}`;
   item.source = `boss-${monster.id}`;
+  normalizeEquipmentStats(item);
   return item;
 }
 
@@ -168,6 +216,7 @@ export function rollGachaEquipment(classId, level = 1) {
   const item = cloneItem(base, '-gacha');
   item.level = Math.max(1, level);
   item.source = 'gacha-ticket';
+  normalizeEquipmentStats(item);
   return item;
 }
 
@@ -177,6 +226,7 @@ export function shopEquipment(classId, level = 1) {
   return Array.from({ length: 8 }, (_, index) => {
     const item = cloneItem(pool[(seed * (index + 3) * 97) % pool.length], `-shop-${index}`);
     item.level = Math.max(1, level);
+    normalizeEquipmentStats(item);
     return item;
   });
 }
@@ -186,6 +236,7 @@ export function classCouponWeapon(classId, level = 1) {
   if (!base) return null;
   const item = cloneItem(base, '-coupon');
   item.level = Math.max(1, level);
+  normalizeEquipmentStats(item);
   return item;
 }
 
@@ -197,6 +248,7 @@ export function level200MythicWeapon(classId) {
   item.level = 200;
   item.name = `영웅의 서약 · ${CLASS_WEAPONS[classId]}`;
   item.source = 'level-200-mythic';
+  normalizeEquipmentStats(item);
   return item;
 }
 
@@ -209,6 +261,7 @@ export function mythicWeaponCoupon(classId, level = 1) {
   if (!base) return null;
   const item = cloneItem(base, '-coupon-mythic');
   item.level = Math.max(1, level);
+  normalizeEquipmentStats(item);
   return item;
 }
 
@@ -222,6 +275,7 @@ export function mythicAccessoryCoupon(level = 1) {
   if (!base) return null;
   const item = cloneItem(base, '-coupon-mythic');
   item.level = Math.max(1, level);
+  normalizeEquipmentStats(item);
   return item;
 }
 
@@ -258,7 +312,8 @@ export function masterEquipmentSet(classId) {
     const index = usage[slot] ?? 0;
     usage[slot] = index + 1;
     const item = cloneItem(candidates[index % candidates.length], '-master');
-    return { ...item, level: 999, enhancement: 20, durability: 100, maxDurability: 100, source: 'master-account' };
+    Object.assign(item, { level: 999, enhancement: 20, durability: 100, maxDurability: 100, source: 'master-account' });
+    return normalizeEquipmentStats(item);
   });
 }
 
@@ -292,6 +347,35 @@ export function equipmentSetBonus(items) {
 
 export function equipmentDisplayName(item) {
   return `${item.enhancement > 0 ? `+${item.enhancement} ` : ''}${item.name}`;
+}
+
+export function enhancementVisualClass(item) {
+  const level = item?.enhancement ?? 0;
+  if (level >= 20) return 'enhancement-max';
+  if (level >= 10) return 'enhancement-high';
+  if (level >= 5) return 'enhancement-mid';
+  return '';
+}
+
+// +10까지는 성장 구간으로 보고 높은 성공률과 실패 안전장치를 적용한다.
+// +10 이후부터는 기존의 고위험 강화 곡선을 그대로 사용한다.
+export const ENHANCEMENT_SUCCESS_RATES = [100, 100, 98, 96, 93, 90, 86, 82, 76, 70, 28, 22, 17, 13, 10, 7, 5, 3, 2, 1];
+// 실패 시 파괴될 확률(%). +10부터 존재하며, 파괴되지 않으면(+10 이후 구간만) 강화 수치가 1 하락한다.
+export const ENHANCEMENT_DESTROY_RATES = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 8, 12, 18, 25, 33, 43, 55, 70, 85];
+
+export const ENHANCEMENT_BLESSINGS = {
+  small: { name: '작은 축복', bonus: 10, symbol: '✧' },
+  normal: { name: '별의 축복', bonus: 20, symbol: '✦' },
+  great: { name: '대축복', bonus: 30, symbol: '★' },
+};
+
+export function enhancementSuccessRate(level, blessingBonus = 0) {
+  const base = ENHANCEMENT_SUCCESS_RATES[Math.max(0, Math.min(19, level))] ?? 0;
+  return Math.min(100, base + Math.max(0, Math.min(30, blessingBonus)));
+}
+
+export function isSafeEnhancement(level) {
+  return level < 10;
 }
 
 export function catalogStats() {

@@ -38,6 +38,7 @@ export default async function handler(req, res) {
       victories: Number(row.data.victories) || 0,
       defeats: Number(row.data.defeats) || 0,
       gold: Number(row.data.gold) || 0,
+      equippedTitle: typeof row.data.equippedTitle === 'string' ? row.data.equippedTitle : null,
     }));
     return res.json({ ranking });
   } catch (err) {

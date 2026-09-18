@@ -14,6 +14,7 @@ function rewardLine(entry) {
   if (entry.rewardGold) parts.push(`골드 ${entry.rewardGold.toLocaleString()}`);
   if (entry.rewardXp) parts.push(`XP ${entry.rewardXp.toLocaleString()}`);
   if (entry.rewardPotions) parts.push(`물약 ${entry.rewardPotions}개`);
+  if (entry.title) parts.push(`칭호 「${entry.title}」`);
   return `보상: ${parts.join(' · ') || '-'}`;
 }
 
@@ -45,7 +46,7 @@ export class QuestScene extends Phaser.Scene {
       </div>`).join('');
     const milestoneHtml = milestones.map((entry) => `
       <div class="milestone-card ${entry.claimedAlready ? 'done' : entry.achieved ? '' : 'locked'}">
-        <strong>${entry.name}</strong>
+        <span class="achievement-category">${entry.category ?? '업적'}</span><strong>${entry.name}</strong>
         ${progressBar(entry.value, entry.target)}
         <small>${rewardLine(entry)}</small>
         <button id="claim-milestone-${entry.id}" ${entry.claimedAlready || !entry.achieved ? 'disabled' : ''}>
@@ -59,7 +60,7 @@ export class QuestScene extends Phaser.Scene {
         ${message ? `<p class="trade-message">${message}</p>` : ''}
         <div class="quest-tabs">
           <button id="tab-daily" class="${this.tab === 'daily' ? '' : 'inactive'}">오늘의 의뢰</button>
-          <button id="tab-milestone" class="${this.tab === 'milestone' ? '' : 'inactive'}">업적</button>
+          <button id="tab-milestone" class="${this.tab === 'milestone' ? '' : 'inactive'}">업적 · 칭호</button>
         </div>
         <div class="quest-list milestone-list">${this.tab === 'daily' ? dailyHtml : milestoneHtml}</div>
         <button id="quest-back" class="secondary">길드로 돌아가기</button>
@@ -85,6 +86,7 @@ export class QuestScene extends Phaser.Scene {
     if (!result) return this.render('아직 달성하지 못한 업적입니다.');
     saveCharacter(this);
     const levelLine = result.levels.length ? ` · 레벨 ${result.levels.at(-1)} 달성!` : '';
-    this.render(`업적 「${result.entry.name}」 달성! 보상을 수령했습니다.${levelLine}`);
+    const titleLine = result.titleUnlocked ? ` · 칭호 「${result.titleUnlocked}」 해금!` : '';
+    this.render(`업적 「${result.entry.name}」 달성! 보상을 수령했습니다.${titleLine}${levelLine}`);
   }
 }

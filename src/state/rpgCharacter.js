@@ -1,6 +1,9 @@
 import { ADVANCEMENTS, advancementStageForLevel, getAdvancement, getAdvancementOptions, getClass, getCompanion, xpForLevel } from '../data/rpg.js';
-import { enhancementStats, masterEquipmentSet, equipmentSetBonus, level200MythicWeapon, rollGachaEquipment } from '../data/equipment.js';
+import { enhancementStats, masterEquipmentSet, equipmentSetBonus, level200MythicWeapon, normalizeEquipmentStats, rollGachaEquipment } from '../data/equipment.js';
 import { DEFAULT_POTION_ID, getPotion } from '../data/potions.js';
+
+const GLOBAL_BOSS_TITLE_ID = 'lucky-lottery';
+export const MAX_COMPANION_LEVEL = 999;
 
 export function ensureRpgCharacter(character) {
   character.inventory ??= [];
@@ -15,10 +18,25 @@ export function ensureRpgCharacter(character) {
   character.affinity ??= { merchant: 0, guildmaster: 0, innkeeper: 0, blacksmith: 0 };
   character.dialogueHistory ??= {};
   character.hunted ??= {};
+  character.bossVictories = Math.max(0, Math.floor(Number(character.bossVictories) || 0));
+  character.attendanceDays = Math.max(0, Math.min(7, Math.floor(Number(character.attendanceDays) || 0)));
+  character.unlockedTitles = Array.isArray(character.unlockedTitles) ? [...new Set(character.unlockedTitles.filter((id) => typeof id === 'string'))] : [];
+  if (!character.unlockedTitles.includes(GLOBAL_BOSS_TITLE_ID)) character.unlockedTitles.push(GLOBAL_BOSS_TITLE_ID);
+  character.equippedTitle = character.unlockedTitles.includes(character.equippedTitle) ? character.equippedTitle : null;
   character.equipment ??= { helmet: null, armor: null, gloves: null, boots: null, weapon: null, necklace: null, rings: [null, null], earrings: [null, null] };
   character.equipment.rings ??= [null, null];
   character.equipment.earrings ??= [null, null];
   character.redeemedCoupons ??= [];
+  character.enhancementBlessings ??= { small: 0, normal: 0, great: 0 };
+  for (const key of ['small', 'normal', 'great']) character.enhancementBlessings[key] = Math.max(0, Math.floor(Number(character.enhancementBlessings[key]) || 0));
+  character.activeEnhancementBlessing = ['small', 'normal', 'great'].includes(character.activeEnhancementBlessing) ? character.activeEnhancementBlessing : null;
+  // 짧게 사용됐던 숫자형 축복 저장값도 새 소모품 구조로 안전하게 옮긴다.
+  if (Number(character.enhancementBlessing) > 0) {
+    const migratedKey = Number(character.enhancementBlessing) >= 30 ? 'great' : Number(character.enhancementBlessing) >= 20 ? 'normal' : 'small';
+    character.enhancementBlessings[migratedKey] += 1;
+    delete character.enhancementBlessing;
+  }
+  character.astrologerDaily ??= { date: '', answered: 0, correct: 0 };
   character.advancementId ??= null;
   if (!Array.isArray(character.advancementHistory)) character.advancementHistory = [];
   const classAdvancementIds = new Set((ADVANCEMENTS[character.classId] ?? []).map((entry) => entry.id));
@@ -64,7 +82,13 @@ export function ensureRpgCharacter(character) {
   }
   const equipment = character.equipment;
   const allItems = [...character.inventory, equipment.helmet, equipment.armor, equipment.gloves, equipment.boots, equipment.weapon, equipment.necklace, ...equipment.rings, ...equipment.earrings].filter((item) => item?.type === 'equipment');
-  allItems.forEach((item) => { item.maxDurability ??= 100; item.durability ??= item.maxDurability; });
+  allItems.forEach((item) => {
+    item.maxDurability ??= 100;
+    item.durability ??= item.maxDurability;
+    normalizeEquipmentStats(item);
+  });
+  const earnedEnhancements = allItems.filter((item) => !['attendance-7day', 'master-account'].includes(item.source)).map((item) => Number(item.enhancement) || 0);
+  character.highestEnhancement = Math.max(Number(character.highestEnhancement) || 0, ...earnedEnhancements, 0);
   return character;
 }
 
@@ -86,18 +110,26 @@ function grantMail(character, mail) {
   return grantedItem;
 }
 
+function grantMailTitle(character, mail) {
+  const title = mail.titleReward;
+  if (!title || typeof title.id !== 'string' || typeof title.name !== 'string') return null;
+  character.unlockedTitles ??= [];
+  if (!character.unlockedTitles.includes(title.id)) character.unlockedTitles.push(title.id);
+  return title;
+}
+
 export function claimMail(character, mailId) {
   ensureRpgCharacter(character);
   const index = character.mailbox.findIndex((mail) => mail.id === mailId);
   if (index < 0) return null;
   const [mail] = character.mailbox.splice(index, 1);
-  return { gold: mail.gold ?? 0, item: grantMail(character, mail) };
+  return { gold: mail.gold ?? 0, item: grantMail(character, mail), title: grantMailTitle(character, mail) };
 }
 
 export function claimAllMail(character) {
   ensureRpgCharacter(character);
   const claimed = character.mailbox.splice(0, character.mailbox.length);
-  const results = claimed.map((mail) => ({ gold: mail.gold ?? 0, item: grantMail(character, mail) }));
+  const results = claimed.map((mail) => ({ gold: mail.gold ?? 0, item: grantMail(character, mail), title: grantMailTitle(character, mail) }));
   return results;
 }
 
@@ -108,7 +140,10 @@ export function createRpgCharacter({ nickname, name, gender }) {
     attack: 12, defense: 8, agility: 10, potions: 3,
     inventory: [], companions: [], activeCompanionId: null,
     affinity: { merchant: 0, guildmaster: 0, innkeeper: 0, blacksmith: 0 },
-    dialogueHistory: {}, victories: 0, defeats: 0, hunted: {}, createdAt: Date.now(),
+    dialogueHistory: {}, victories: 0, defeats: 0, bossVictories: 0, hunted: {}, createdAt: Date.now(),
+    attendanceDays: 0, highestEnhancement: 0, unlockedTitles: [], equippedTitle: null,
+    enhancementBlessings: { small: 0, normal: 0, great: 0 }, activeEnhancementBlessing: null,
+    astrologerDaily: { date: '', answered: 0, correct: 0 },
   });
 }
 
@@ -192,7 +227,7 @@ export function usePotion(character, potionId) {
   return potion;
 }
 
-// 동료는 모집 후에도 전투마다 유대 경험치를 얻어 성장한다 (5레벨마다 각성으로 위력 강화).
+// 동료는 플레이어를 보조하는 역할이며 플레이어 레벨을 추월해서 성장하지 않는다.
 export function companionBondXpForLevel(level) {
   return 40 + level * 20;
 }
@@ -202,7 +237,10 @@ export function ensureCompanionProgress(character, companionId) {
   if (!character.companionProgress[companionId]) {
     character.companionProgress[companionId] = { level: 1, xp: 0 };
   }
-  return character.companionProgress[companionId];
+  const progress = character.companionProgress[companionId];
+  progress.level = Math.max(1, Math.min(MAX_COMPANION_LEVEL, Math.floor(Number(progress.level) || 1)));
+  progress.xp = progress.level >= MAX_COMPANION_LEVEL ? 0 : Math.max(0, Number(progress.xp) || 0);
+  return progress;
 }
 
 export function companionStats(character, companionId) {
@@ -210,17 +248,19 @@ export function companionStats(character, companionId) {
   if (!base) return null;
   const progress = ensureCompanionProgress(character, companionId);
   const bondLevel = progress.level;
-  const awakenings = Math.floor((bondLevel - 1) / 5);
+  const playerLevel = Math.max(1, Math.min(999, Math.floor(Number(character.level) || 1)));
+  const awakenings = Math.floor(bondLevel / 50);
   return {
     id: companionId,
     level: bondLevel,
     xp: progress.xp,
-    xpToNext: companionBondXpForLevel(bondLevel),
-    attack: base.attack + Math.round((bondLevel - 1) * 2.2),
-    defense: base.defense + Math.round((bondLevel - 1) * 1.4),
-    hp: base.hp + Math.round((bondLevel - 1) * 8),
-    heal: base.heal ? base.heal + Math.round((bondLevel - 1) * 1.2) : undefined,
-    abilityMultiplier: 1 + awakenings * 0.15,
+    xpToNext: bondLevel >= MAX_COMPANION_LEVEL ? 0 : companionBondXpForLevel(bondLevel),
+    levelCappedByPlayer: bondLevel >= playerLevel && bondLevel < MAX_COMPANION_LEVEL,
+    attack: base.attack + Math.round((bondLevel - 1) * 0.8),
+    defense: base.defense + Math.round((bondLevel - 1) * 0.5),
+    hp: base.hp + Math.round((bondLevel - 1) * 3),
+    heal: base.heal ? base.heal + Math.round((bondLevel - 1) * 0.4) : undefined,
+    abilityMultiplier: 1 + Math.min(1, awakenings * 0.05),
     awakenings,
   };
 }
@@ -228,12 +268,18 @@ export function companionStats(character, companionId) {
 export function grantCompanionXp(character, companionId, amount) {
   const progress = ensureCompanionProgress(character, companionId);
   const levels = [];
+  const levelCap = Math.max(1, Math.min(MAX_COMPANION_LEVEL, Math.floor(Number(character.level) || 1)));
+  if (progress.level >= levelCap) return levels;
   progress.xp += Math.max(0, amount);
-  while (progress.level < 60 && progress.xp >= companionBondXpForLevel(progress.level)) {
+  while (progress.level < levelCap && progress.xp >= companionBondXpForLevel(progress.level)) {
     progress.xp -= companionBondXpForLevel(progress.level);
     progress.level += 1;
     levels.push(progress.level);
   }
+  if (progress.level >= levelCap && levelCap < MAX_COMPANION_LEVEL) {
+    progress.xp = Math.min(progress.xp, companionBondXpForLevel(progress.level) - 1);
+  }
+  if (progress.level >= MAX_COMPANION_LEVEL) progress.xp = 0;
   return levels;
 }
 
@@ -400,6 +446,10 @@ function flushSaveQueue() {
     activeSave = null;
     if (queuedSaveBody) flushSaveQueue();
   });
+}
+
+export async function waitForPendingSaves() {
+  while (activeSave) await activeSave;
 }
 
 export function saveCharacter(scene) {

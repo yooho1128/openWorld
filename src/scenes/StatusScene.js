@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { getClass, getAdvancement } from '../data/rpg.js';
-import { getRarity, getSlot, equipmentDisplayName, enhancementStats, levelEffectiveness, rollGachaEquipment } from '../data/equipment.js';
+import { getRarity, getSlot, equipmentDisplayName, enhancementStats, enhancementVisualClass, levelEffectiveness, rollGachaEquipment } from '../data/equipment.js';
 import { BIOME_LABELS } from '../data/monsters.js';
+import { getTitle } from '../data/quests.js';
 import { addLoot, combatPower, combatStats, ensureRpgCharacter, equipItem, unequipItem, saveCharacter } from '../state/rpgCharacter.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
@@ -34,11 +35,14 @@ export class StatusScene extends Phaser.Scene {
     const stats = combatStats(c);
     const job = getClass(c.classId);
     const advancement = getAdvancement(c.advancementId);
+    const equippedTitle = getTitle(c.equippedTitle);
+    const titleOptions = (c.unlockedTitles ?? []).map((id) => getTitle(id)).filter(Boolean);
+    const titleOptionsHtml = titleOptions.map((title) => `<option value="${title.id}" ${title.id === c.equippedTitle ? 'selected' : ''}>[${title.category}] ${title.name}${title.bossChanceBonus ? ' · 보스 조우 +2%p' : ''}</option>`).join('');
     const equippedHtml = EQUIPPED_POSITIONS.map(([slot, index, label], position) => {
       const item = this.equippedAt(slot, index);
       const eff = item ? levelEffectiveness(item.level ?? 1, c.level) : 1;
       const levelNote = item && eff < 1 ? `<small class="forge-risk">Lv.${item.level ?? 1} · 효과 ${Math.round(eff * 100)}%</small>` : '';
-      return `<div class="equip-slot ${item ? `rarity-${item.rarity}` : 'empty'}"><span>${label}</span><strong>${item ? equipmentDisplayName(item) : '비어 있음'}</strong>${item ? `<small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<button id="unequip-${position}">해제</button>` : ''}</div>`;
+      return `<div class="equip-slot ${item ? `rarity-${item.rarity} ${enhancementVisualClass(item)}` : 'empty'}"><span>${label}</span><strong>${item ? equipmentDisplayName(item) : '비어 있음'}</strong>${item ? `<small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<button id="unequip-${position}">해제</button>` : ''}</div>`;
     }).join('');
     const ticketItems = c.inventory.filter((item) => item.type === 'ticket');
     const ticketHtml = ticketItems.length
@@ -50,7 +54,7 @@ export class StatusScene extends Phaser.Scene {
       const blocked = item.classId && item.classId !== c.classId;
       const eff = levelEffectiveness(item.level ?? 1, c.level);
       const levelNote = eff < 1 ? ` · Lv.${item.level ?? 1} (효과 ${Math.round(eff * 100)}%)` : '';
-      return `<div class="gear-card rarity-${item.rarity}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}${levelNote}</small><small>${statsText}</small></div><button id="equip-${index}" ${blocked ? 'disabled' : ''}>${blocked ? '타 직업' : '착용'}</button></div>`;
+      return `<div class="gear-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}${levelNote}</small><small>${statsText}</small></div><button id="equip-${index}" ${blocked ? 'disabled' : ''}>${blocked ? '타 직업' : '착용'}</button></div>`;
     }).join('') : '<p class="empty-state">착용할 장비가 없습니다.</p>';
     const setBonus = stats.setBonus;
     const setBonusHtml = setBonus?.tier
@@ -60,11 +64,13 @@ export class StatusScene extends Phaser.Scene {
         : '';
     openPanel(`
       <div class="panel status-panel">
-        <h2>${c.name} · Lv.${c.level}</h2>
+        <h2>${equippedTitle ? `[${equippedTitle.name}] ` : ''}${c.name} · Lv.${c.level}</h2>
         <div class="class-badge">${advancement?.name ?? job.name} · 전투력 ${combatPower(c).toLocaleString()}</div>
+        <div class="title-picker"><label for="title-select">장착 칭호</label><select id="title-select"><option value="">칭호 없음</option>${titleOptionsHtml}</select><small>${equippedTitle?.bossChanceBonus ? '현재 효과: 보스 조우 확률 +2%p' : '업적 보상을 수령하면 새로운 칭호가 해금됩니다.'}</small></div>
         <div class="stat-grid"><span>HP <strong>${c.hp}/${stats.maxHp}</strong></span><span>MP <strong>${c.mp}/${stats.maxMp}</strong></span><span>공격력 <strong>${stats.attack}</strong></span><span>방어력 <strong>${stats.defense}</strong></span><span>민첩 <strong>${stats.agility}</strong></span><span>탈주 확률 <strong>적과 비교 계산</strong></span></div>
         ${setBonusHtml}
         ${message ? `<p class="trade-message">${message}</p>` : ''}
+        <button id="open-fusion" class="fusion-link">✦ 장비 합성소</button>
         <h3>착용 장비</h3><div class="equipped-grid">${equippedHtml}</div>
         ${ticketItems.length ? `<h3>보유 아이템</h3><div class="gear-list">${ticketHtml}</div>` : ''}
         <h3>장비 가방</h3><div class="gear-list">${bagHtml}</div>
@@ -78,6 +84,13 @@ export class StatusScene extends Phaser.Scene {
       if (equipItem(c, item.id)) { saveCharacter(this); this.scene.restart(); }
     }));
     ticketItems.forEach((item, index) => qs(`use-ticket-${index}`)?.addEventListener('click', () => this.useTicket(item.id)));
+    qs('open-fusion')?.addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Fusion'); });
+    qs('title-select')?.addEventListener('change', (event) => {
+      const id = event.target.value || null;
+      c.equippedTitle = id && c.unlockedTitles.includes(id) ? id : null;
+      saveCharacter(this);
+      this.render(c.equippedTitle ? `칭호 「${getTitle(c.equippedTitle)?.name}」을(를) 장착했습니다.` : '칭호를 해제했습니다.');
+    });
     qs('status-back').addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Town'); });
   }
 
