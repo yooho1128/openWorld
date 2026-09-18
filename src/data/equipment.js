@@ -88,16 +88,26 @@ function cloneItem(item, suffix = '') {
   return { ...item, id: `${item.catalogId}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}${suffix}`, stats: { ...item.stats } };
 }
 
+// 일반 사냥 드랍 확률(누적 아님, 각 등급이 걸릴 개별 확률).
+// B/A/S급 몬스터만 unique 이상을 노려볼 수 있고, A/S급(우두머리)만 legendary/mythic이 뜬다.
+export const HUNT_DROP_RATES = {
+  bossMythic: 0.0002,
+  bossLegendary: 0.0015,
+  specialUnique: 0.012,
+  rare: 0.09,
+  normal: 0.38,
+};
+
 export function equipmentForMonster(monster, classId, level = 1) {
   const special = ['B', 'A', 'S'].includes(monster.rank);
   const boss = ['A', 'S'].includes(monster.rank);
   const roll = Math.random();
   let rarity = null;
-  if (boss && roll < 0.0002) rarity = 'mythic';
-  else if (boss && roll < 0.0015) rarity = 'legendary';
-  else if (special && roll < 0.012) rarity = 'unique';
-  else if (roll < 0.09) rarity = 'rare';
-  else if (roll < 0.38) rarity = 'normal';
+  if (boss && roll < HUNT_DROP_RATES.bossMythic) rarity = 'mythic';
+  else if (boss && roll < HUNT_DROP_RATES.bossLegendary) rarity = 'legendary';
+  else if (special && roll < HUNT_DROP_RATES.specialUnique) rarity = 'unique';
+  else if (roll < HUNT_DROP_RATES.rare) rarity = 'rare';
+  else if (roll < HUNT_DROP_RATES.normal) rarity = 'normal';
   if (!rarity) return null;
   const eligible = EQUIPMENT_CATALOG.filter((item) => item.biome === monster.biome && item.rarity === rarity && (!item.classId || item.classId === classId));
   const base = eligible[Math.floor(Math.random() * eligible.length)];
@@ -112,10 +122,13 @@ export function equipmentForMonster(monster, classId, level = 1) {
   return item;
 }
 
+// 우두머리(보스) 처치 확정 지급 등급 확률 (2% 신화 / 13% 전설 / 나머지 85% 유니크).
+export const BOSS_GUARANTEED_RATES = { mythic: 0.02, legendary: 0.15 };
+
 // 우두머리(보스) 몬스터를 처치하면 등급과 무관하게 항상 유니크 이상 장비를 확정 지급한다.
 export function guaranteedBossEquipment(monster, classId, level = 1) {
   const roll = Math.random();
-  const rarity = roll < 0.02 ? 'mythic' : roll < 0.15 ? 'legendary' : 'unique';
+  const rarity = roll < BOSS_GUARANTEED_RATES.mythic ? 'mythic' : roll < BOSS_GUARANTEED_RATES.legendary ? 'legendary' : 'unique';
   const pool = EQUIPMENT_CATALOG.filter((item) => item.rarity === rarity && (!item.classId || item.classId === classId));
   const eligible = pool.filter((item) => item.biome === monster.biome);
   const base = (eligible.length ? eligible : pool)[Math.floor(Math.random() * (eligible.length ? eligible.length : pool.length))];
@@ -128,7 +141,7 @@ export function guaranteedBossEquipment(monster, classId, level = 1) {
 }
 
 // 장비 랜덤 뽑기권: 부위 전체 랜덤, 등급은 노멀 50%/레어 25%/유니크 15%/레전더리 8%/신화 2%.
-const GACHA_RARITY_TABLE = [
+export const GACHA_RARITY_TABLE = [
   ['normal', 0.5],
   ['rare', 0.25],
   ['unique', 0.15],
@@ -170,6 +183,7 @@ export function shopEquipment(classId, level = 1) {
 
 export function classCouponWeapon(classId, level = 1) {
   const base = EQUIPMENT_CATALOG.find((item) => item.source === 'class-relic' && item.classId === classId);
+  if (!base) return null;
   const item = cloneItem(base, '-coupon');
   item.level = Math.max(1, level);
   return item;

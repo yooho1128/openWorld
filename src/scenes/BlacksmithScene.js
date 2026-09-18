@@ -1,12 +1,10 @@
 import Phaser from 'phaser';
 import { getRarity, equipmentDisplayName, enhancementStats, levelEffectiveness } from '../data/equipment.js';
+import { SUCCESS_RATES, DESTROY_RATES } from '../data/forge.js';
 import { affinityPriceMultiplier } from '../data/rpg.js';
 import { adjustAffinity, ensureRpgCharacter, equippedItems, saveCharacter } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
-
-const SUCCESS_RATES = [100, 96, 92, 87, 80, 72, 63, 54, 45, 36, 28, 22, 17, 13, 10, 7, 5, 3, 2, 1];
-const DESTROY_RATES = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 8, 12, 18, 25, 33, 43, 55, 70, 85];
 
 export class BlacksmithScene extends Phaser.Scene {
   constructor() { super('Blacksmith'); }

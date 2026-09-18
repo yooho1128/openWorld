@@ -78,6 +78,20 @@ DB 연동이 없으면 매번 새 캐릭터로 시작하게 될 뿐 게임 자�
 별명으로 입장하고 `ADMIN_PASSWORD` 환경변수와 같은 비밀번호를 입력하면, 캐릭터 생성 과정
 없이 레벨 999 · 전 부위 신화 등급 +20 장비를 갖춘 테스트용 캐릭터로 바로 마을에 입장합니다.
 
+### 관리자 사이트
+
+게임(`/`)과는 완전히 별도인 `/admin.html`에서 운영자 비밀번호(`ADMIN_PASSWORD`)만으로
+입장하는 관리 도구를 제공합니다(게임 계정과 무관, 마스터 닉네임도 필요 없음).
+
+- **쿠폰 관리**: 코드/효과(골드·직업 무기·신화급 무기·신화급 악세서리·골드 삭제)/재사용
+  여부를 등록·수정하고, 기존 쿠폰 목록을 보거나 비활성화합니다.
+- **드랍/강화 확률**: 몬스터 등급별 장비 드랍률, 가챠 확률, 강화 단계별 성공·파괴 확률을
+  코드에 있는 실제 값 그대로 보여줍니다(읽기 전용 - 값 자체를 바꾸려면 코드를 고쳐야 합니다).
+- **우편함으로 아이템/골드 보내기**: 닉네임을 지정해 제목·내용·골드·아이템(무작위 뽑기권
+  / 직업 전용 무기 / 신화급 무기 / 신화급 악세서리)을 즉시 그 캐릭터의 우편함에 넣습니다.
+
+비밀번호는 `sessionStorage`에만 저장되어 탭을 닫으면 사라집니다.
+
 ## 배포 (Vercel)
 
 이 저장소를 Vercel 프로젝트로 그대로 import하면 됩니다 (Framework: Vite 자동 감지).
@@ -87,9 +101,12 @@ DB 연동이 없으면 매번 새 캐릭터로 시작하게 될 뿐 게임 자�
 ## 코드 구조
 
 ```
+admin.html   운영자 전용 관리 사이트 (게임과 별도 페이지)
 src/
+  admin/     관리 사이트 스크립트(main.js)
   data/      직업/전직/지역/NPC/동료(rpg.js), 몬스터 240종(monsters.js),
-             장비 카탈로그·세트 효과(equipment.js), 의뢰 템플릿(quests.js)
+             장비 카탈로그·세트 효과·드랍률(equipment.js), 강화 확률(forge.js),
+             물약(potions.js), 의뢰 템플릿(quests.js)
   state/     캐릭터 상태·전투 스탯·장비 착용·동료 유대(rpgCharacter.js),
              의뢰 진행도(quests.js)
   scenes/    Boot, Login, Create, ClassSelect, Town, Hunt, Battle, Status,
@@ -97,8 +114,9 @@ src/
   ui/        판타지 배경/타이틀(fantasyTheme.js), 장비 반영 캐릭터 그래픽
              (equipmentVisuals.js), 몬스터 텍스처 생성(monsterTextures.js),
              DOM 오버레이 패널 헬퍼(domForms.js)
-api/         character.js(저장), admin-login.js/admin-coupon.js(운영자 인증·쿠폰 관리),
-             redeem-coupon.js(쿠폰 사용), leaderboard.js(랭킹)
+api/         character.js(저장), admin-login.js(운영자 로그인), admin-coupon.js
+             (쿠폰 관리), admin-mail.js(우편 발송), redeem-coupon.js(쿠폰 사용),
+             leaderboard.js(랭킹)
 ```
 
 ## 다음 단계 후보

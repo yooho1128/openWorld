@@ -80,6 +80,7 @@ export class SettingsScene extends Phaser.Scene {
     this.character.redeemedCoupons.push(code);
     if (result.effect === 'weapon') {
       const weapon = classCouponWeapon(this.character.classId, this.character.level);
+      if (!weapon) return this.render('직업 전용 무기를 지급할 수 없습니다.');
       addLoot(this.character, weapon);
       saveCharacter(this);
       return this.render(`유니크 직업 무기 「${equipmentDisplayName(weapon)}」을 획득했습니다!`);

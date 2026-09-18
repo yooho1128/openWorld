@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>에버글렌 관리자</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0; padding: 0;
+        background: #14100d;
+        color: #ecdfc2;
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+      }
+      body { padding: 18px; max-width: 880px; margin: 0 auto; }
+      h1 { font-size: 20px; color: #ffe3a1; margin: 0 0 4px; }
+      h2 { font-size: 15px; color: #ffe3a1; border-bottom: 1px solid #5b4327; padding-bottom: 6px; margin: 28px 0 12px; }
+      p.sub { color: #a99b7d; font-size: 12px; margin: 0 0 20px; }
+      section { background: #201812; border: 1px solid #4a3820; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+      label { display: block; font-size: 12px; color: #cbb98d; margin: 10px 0 4px; font-weight: 700; }
+      input, select, textarea {
+        width: 100%; box-sizing: border-box; padding: 8px; border-radius: 4px;
+        border: 1px solid #5b4327; background: #2b2115; color: #ecdfc2; font-size: 13px;
+      }
+      input[type="checkbox"] { width: auto; }
+      .checkbox-row { display: flex; align-items: center; gap: 6px; margin: 10px 0; }
+      .checkbox-row label { margin: 0; }
+      textarea { min-height: 60px; resize: vertical; }
+      button {
+        margin-top: 12px; padding: 9px 14px; border-radius: 4px; border: 1px solid #d1a858;
+        background: linear-gradient(#6d3f2d, #3d241d); color: #ffedbb; font-size: 13px; font-weight: 700;
+        cursor: pointer;
+      }
+      button:hover { filter: brightness(1.12); }
+      button.small { padding: 4px 8px; font-size: 11px; margin: 0; }
+      button.danger { background: linear-gradient(#7a3328, #4a1d16); border-color: #c1685a; }
+      table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+      th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #3a2c1a; }
+      th { color: #cbb98d; font-weight: 700; }
+      .msg { margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 12px; background: #2b2115; border: 1px solid #5b4327; }
+      .msg.ok { border-color: #6a8a5a; color: #bfe0a8; }
+      .msg.error { border-color: #a96d59; color: #e5c1ae; }
+      .empty { color: #7a6b4d; font-size: 12px; padding: 8px 0; }
+      #gate { max-width: 360px; margin: 80px auto; text-align: center; }
+      #gate p { color: #a99b7d; font-size: 12px; }
+      #dashboard { display: none; }
+      .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div id="gate">
+      <h1>에버글렌 관리자</h1>
+      <p>운영자 비밀번호를 입력하세요.</p>
+      <input id="gate-password" type="password" placeholder="운영자 비밀번호" autocomplete="current-password" />
+      <button id="gate-submit">입장</button>
+      <div id="gate-msg"></div>
+    </div>
+
+    <div id="dashboard">
+      <h1>에버글렌 관리자</h1>
+      <p class="sub">쿠폰, 확률표, 우편 발송을 관리합니다. 비밀번호는 이 탭에서만 기억됩니다.</p>
+
+      <section id="mail-section">
+        <h2>우편함으로 아이템/골드 보내기</h2>
+        <label for="mail-nickname">받는 사람 닉네임</label>
+        <input id="mail-nickname" placeholder="정확한 캐릭터 닉네임" autocomplete="off" />
+        <label for="mail-title">제목</label>
+        <input id="mail-title" placeholder="길드의 선물" autocomplete="off" />
+        <label for="mail-body">내용</label>
+        <textarea id="mail-body" placeholder="운영자가 보낸 선물입니다."></textarea>
+        <label for="mail-gold">골드 (선택)</label>
+        <input id="mail-gold" type="number" min="0" placeholder="예: 50000" />
+        <label for="mail-item">첨부 아이템</label>
+        <select id="mail-item">
+          <option value="none">없음</option>
+          <option value="gacha">무작위 장비 뽑기권 1개</option>
+          <option value="class-weapon">직업 전용 유니크 무기</option>
+          <option value="mythic-weapon">신화급 무기</option>
+          <option value="mythic-accessory">신화급 악세서리</option>
+        </select>
+        <button id="mail-send">우편 보내기</button>
+        <div id="mail-msg"></div>
+      </section>
+
+      <section id="coupon-section">
+        <h2>쿠폰 관리</h2>
+        <div id="coupon-table"><p class="empty">불러오는 중...</p></div>
+        <label for="coupon-code">쿠폰 코드</label>
+        <input id="coupon-code" placeholder="예: 황금바람의증표" autocomplete="off" />
+        <label for="coupon-effect">효과</label>
+        <select id="coupon-effect">
+          <option value="gold">골드 지급</option>
+          <option value="weapon">직업 유니크 무기 지급</option>
+          <option value="mythic-weapon">신화급 무기 지급</option>
+          <option value="mythic-accessory">신화급 악세서리 지급</option>
+          <option value="drain">골드 전부 삭제(장난용)</option>
+        </select>
+        <label for="coupon-amount">골드량 (골드 지급일 때만)</label>
+        <input id="coupon-amount" type="number" min="0" placeholder="예: 200000" />
+        <div class="checkbox-row"><input id="coupon-reusable" type="checkbox" /><label for="coupon-reusable">여러 번 사용 가능(재사용)</label></div>
+        <button id="coupon-submit">쿠폰 등록/수정</button>
+        <div id="coupon-msg"></div>
+      </section>
+
+      <div class="grid-2">
+        <section id="drop-section">
+          <h2>사냥 드랍 확률</h2>
+          <div id="drop-table"></div>
+        </section>
+        <section id="forge-section">
+          <h2>강화 확률</h2>
+          <div id="forge-table"></div>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="/src/admin/main.js"></script>
+  </body>
+</html>
