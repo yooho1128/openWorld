@@ -93,7 +93,12 @@ export function normalizeEquipmentStats(item) {
   const catalog = EQUIPMENT_BY_CATALOG_ID.get(item.catalogId);
   if (!catalog) return item;
   const level = Math.max(1, Math.min(999, Math.round(Number(item.level) || 1)));
-  const levelMultiplier = 1 + (level - 1) * 0.008;
+  // Uncapped, this grows without bound (level 999 -> ~9x) and, since every
+  // equipped item gets renormalized from this same catalog on every load,
+  // it silently reprices every live character's combat power the moment the
+  // curve changes. Capping it keeps the "higher item level is a little
+  // better" feel fusion relies on without that runaway effect.
+  const levelMultiplier = Math.min(1.5, 1 + (level - 1) * 0.008);
   const sourceMultiplier = String(item.source ?? '').startsWith('fallen-') ? 1.12 : 1;
   item.level = level;
   item.stats = Object.fromEntries(Object.entries(catalog.stats).map(([key, value]) => [key, Math.round(value * levelMultiplier * sourceMultiplier)]));
