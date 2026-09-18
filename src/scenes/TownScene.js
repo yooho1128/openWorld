@@ -51,11 +51,12 @@ export class TownScene extends Phaser.Scene {
     const title = getTitle(c.equippedTitle);
     addOrnatePanel(this, 240, 186, 432, 112, { color: 0x1b2d25, border: job.color, alpha: 0.96 });
     createEquippedHero(this, c, 74, 184, 1.35);
-    this.add.text(116, 145, `${title ? `[${title.name}] ` : ''}${c.name}  Lv.${c.level}  ${advancement?.name ?? job.name}  · 전투력 ${combatPower(c).toLocaleString()}`, { fontSize: title ? '11px' : '13px', fontStyle: 'bold', color: '#ffe6a7' });
+    const heroLine = `${title ? `[${title.name}] ` : ''}${c.name}  Lv.${c.level}  ${advancement?.name ?? job.name}  · 전투력 ${combatPower(c).toLocaleString()}`;
+    this.add.text(116, 145, heroLine, { fontSize: heroLine.length > 34 ? '9px' : title ? '11px' : '13px', fontStyle: 'bold', color: '#ffe6a7', fixedWidth: 328 });
     this.add.text(116, 174, `HP ${c.hp}/${stats.maxHp}   MP ${c.mp}/${stats.maxMp}   골드 ${c.gold.toLocaleString()}`, { fontSize: '11px', color: '#d9c9a6' });
     const xpText = c.level >= 999 ? 'MAX' : `${c.xp}/${xpForLevel(c.level)}`;
-    this.add.text(116, 198, `공격 ${stats.attack} · 방어 ${stats.defense} · 민첩 ${stats.agility}   경험치 ${xpText}`, { fontSize: '9px', color: '#9fc7a4' });
-    this.add.text(116, 219, companion ? `동료: ${companion.name} · ${companion.className}` : '동료: 아직 없음 — 여관에서 모집 가능', { fontSize: '10px', color: companion ? '#b8b0e5' : '#a99d89' });
+    this.add.text(116, 198, `공격 ${stats.attack} · 방어 ${stats.defense} · 민첩 ${stats.agility}   경험치 ${xpText}`, { fontSize: '9px', color: '#9fc7a4', fixedWidth: 328 });
+    this.add.text(116, 219, companion ? `동료: ${companion.name} · ${companion.className}` : '동료: 아직 없음 — 여관에서 모집 가능', { fontSize: '10px', color: companion ? '#b8b0e5' : '#a99d89', fixedWidth: 328 });
   }
 
   addHub(hub, index) {
@@ -68,8 +69,8 @@ export class TownScene extends Phaser.Scene {
     this.add.circle(x - 69, y + 3, 28, 0x0b1511, 0.32);
     this.add.circle(x - 69, y, 25, hub.color, 0.82).setStrokeStyle(2, 0xffe7ad, 0.28);
     this.add.text(x - 69, y, hub.icon, { fontFamily: 'Georgia, serif', fontSize: '22px', color: '#fff0c0' }).setOrigin(0.5);
-    this.add.text(x - 31, y - 20, hub.label, { fontSize: '14px', fontStyle: 'bold', color: '#f5dfac' });
-    this.add.text(x - 31, y + 8, hub.sub, { fontSize: '10px', color: '#b8aa8d' });
+    this.add.text(x - 31, y - 20, hub.label, { fontSize: hub.label.length > 8 ? '12px' : '14px', fontStyle: 'bold', color: '#f5dfac', fixedWidth: 116 });
+    this.add.text(x - 31, y + 8, hub.sub, { fontSize: hub.sub.length > 15 ? '9px' : '10px', color: '#b8aa8d', fixedWidth: 116, wordWrap: { width: 116 } });
     if (hub.badge) {
       const count = hub.badge === 'quest' ? claimableCount(this.character) : hub.badge === 'mail' ? this.character.mailbox.length : 0;
       if (count > 0) {
