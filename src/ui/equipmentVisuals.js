@@ -1,9 +1,111 @@
 import { ensureRpgCharacter, equippedItems } from '../state/rpgCharacter.js';
-import { getRarity } from '../data/equipment.js';
+import { equipmentSetBonus, getRarity } from '../data/equipment.js';
+
+export const FULL_SET_VISUALS = {
+  forest: { name: '숲의 완전 공명', color: 0x75c85c, secondary: 0xd6ef83, symbol: '☘', particle: 'leaf' },
+  frozen: { name: '설원의 완전 공명', color: 0x8ee8ff, secondary: 0xf1fdff, symbol: '❄', particle: 'crystal' },
+  blood: { name: '피빛 완전 공명', color: 0xe43f50, secondary: 0xffb07e, symbol: '✥', particle: 'blade' },
+  swamp: { name: '늪지의 완전 공명', color: 0xa7c957, secondary: 0x72559a, symbol: '☣', particle: 'spore' },
+  desert: { name: '사막의 완전 공명', color: 0xe9b95f, secondary: 0xffe3a1, symbol: '☀', particle: 'sand' },
+  volcanic: { name: '화염의 완전 공명', color: 0xff6038, secondary: 0xffd05a, symbol: '▲', particle: 'flame' },
+  storm: { name: '폭풍의 완전 공명', color: 0x75baff, secondary: 0xf5ef8b, symbol: 'ϟ', particle: 'bolt' },
+  abyss: { name: '심연의 완전 공명', color: 0x8c65d8, secondary: 0x54e1cf, symbol: '∅', particle: 'void' },
+  undead: { name: '망령의 완전 공명', color: 0x92e6ba, secondary: 0xd9fff0, symbol: '†', particle: 'soul' },
+  demonic: { name: '마계의 완전 공명', color: 0xd83f68, secondary: 0xff9a49, symbol: 'Ψ', particle: 'rune' },
+  celestial: { name: '성광의 완전 공명', color: 0xffdf72, secondary: 0xd3eeff, symbol: '✦', particle: 'star' },
+  crystal: { name: '수정의 완전 공명', color: 0xa98cff, secondary: 0x79f1ef, symbol: '◈', particle: 'shard' },
+};
+
+export function fullSetVisualProfile(character) {
+  const setBonus = equipmentSetBonus(equippedItems(character));
+  return setBonus.count >= 10 ? { ...FULL_SET_VISUALS[setBonus.biome], biome: setBonus.biome } : null;
+}
+
+function createFullSetEffect(scene, character) {
+  const profile = fullSetVisualProfile(character);
+  const back = scene.add.container(0, 0);
+  const front = scene.add.container(0, 0);
+  if (!profile) return { back, front };
+
+  const halo = scene.add.graphics();
+  halo.fillStyle(profile.color, 0.11).fillCircle(0, 0, 43);
+  halo.lineStyle(2.5, profile.color, 0.72).strokeCircle(0, 0, 39);
+  halo.lineStyle(1.5, profile.secondary, 0.58).strokeEllipse(0, 12, 92, 28);
+  halo.lineStyle(1, profile.color, 0.45).strokeEllipse(0, 12, 64, 72);
+  back.add(halo);
+  scene.tweens.add({ targets: halo, angle: 360, duration: 7200, repeat: -1, ease: 'Linear' });
+
+  const sigil = scene.add.text(0, -42, profile.symbol, {
+    fontFamily: 'Georgia, serif', fontSize: '19px', fontStyle: 'bold', color: `#${profile.secondary.toString(16).padStart(6, '0')}`,
+    stroke: '#1a1020', strokeThickness: 3,
+  }).setOrigin(0.5);
+  front.add(sigil);
+  scene.tweens.add({ targets: sigil, y: -47, scale: 1.18, alpha: 0.58, duration: 820, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+  if (['crystal', 'shard'].includes(profile.particle)) {
+    const crown = scene.add.graphics();
+    crown.fillStyle(profile.color, 0.34)
+      .fillTriangle(-48, 10, -34, -24, -24, 14)
+      .fillTriangle(48, 10, 34, -24, 24, 14)
+      .fillTriangle(-30, -18, -16, -43, -9, -9)
+      .fillTriangle(30, -18, 16, -43, 9, -9);
+    crown.lineStyle(1.5, profile.secondary, 0.7).lineBetween(-48, 10, -34, -24).lineBetween(48, 10, 34, -24);
+    back.add(crown);
+    scene.tweens.add({ targets: crown, alpha: 0.48, scaleY: 1.12, duration: 900, yoyo: true, repeat: -1 });
+  } else if (profile.particle === 'void') {
+    const rift = scene.add.graphics();
+    rift.fillStyle(0x090412, 0.48).fillEllipse(0, 4, 56, 78);
+    rift.lineStyle(3, profile.secondary, 0.58).strokeEllipse(0, 4, 58, 82);
+    back.add(rift);
+    scene.tweens.add({ targets: rift, scaleX: 0.82, alpha: 0.52, duration: 760, yoyo: true, repeat: -1 });
+  } else if (['flame', 'demonic'].includes(profile.particle)) {
+    const wings = scene.add.graphics();
+    wings.fillStyle(profile.color, 0.28).fillTriangle(-8, 7, -55, -18, -35, 30).fillTriangle(8, 7, 55, -18, 35, 30);
+    wings.lineStyle(2, profile.secondary, 0.55).lineBetween(-8, 7, -53, -17).lineBetween(8, 7, 53, -17);
+    back.add(wings);
+    scene.tweens.add({ targets: wings, scaleY: 1.16, alpha: 0.55, duration: 620, yoyo: true, repeat: -1 });
+  }
+
+  for (let index = 0; index < 8; index += 1) {
+    const angle = (Math.PI * 2 * index) / 8;
+    const startX = Math.cos(angle) * (32 + (index % 2) * 8);
+    const startY = Math.sin(angle) * 29 + 2;
+    let mote;
+    if (['bolt', 'rune', 'star', 'soul'].includes(profile.particle)) {
+      const marks = { bolt: 'ϟ', rune: index % 2 ? 'Ψ' : '◇', star: index % 2 ? '✦' : '·', soul: index % 2 ? '◌' : '†' };
+      mote = scene.add.text(startX, startY, marks[profile.particle], {
+        fontFamily: 'Georgia, serif', fontSize: `${6 + (index % 3) * 2}px`, color: `#${(index % 2 ? profile.color : profile.secondary).toString(16).padStart(6, '0')}`,
+      }).setOrigin(0.5);
+    } else if (['blade', 'leaf', 'shard', 'crystal', 'flame'].includes(profile.particle)) {
+      mote = scene.add.triangle(startX, startY, 0, 8, 3 + (index % 2) * 2, 0, 7, 8, index % 2 ? profile.color : profile.secondary, 0.86);
+      mote.setAngle(index * 45);
+    } else {
+      mote = scene.add.circle(startX, startY, 2 + (index % 3), index % 2 ? profile.color : profile.secondary, 0.82);
+    }
+    front.add(mote);
+    const rise = ['flame', 'spore', 'soul', 'void'].includes(profile.particle);
+    scene.tweens.add({
+      targets: mote,
+      x: Math.cos(angle + 0.7) * (43 + (index % 2) * 7),
+      y: rise ? startY - 28 : Math.sin(angle + 0.7) * 34,
+      angle: mote.angle + (index % 2 ? 180 : -180),
+      alpha: 0.18,
+      scale: 1.35,
+      duration: 900 + index * 95,
+      delay: index * 70,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  return { back, front };
+}
 
 export function createEquippedHero(scene, character, x, y, scale = 1) {
   ensureRpgCharacter(character);
   const container = scene.add.container(x, y).setScale(scale);
+  const fullSetEffect = createFullSetEffect(scene, character);
   const aura = scene.add.graphics();
   const ascension = scene.add.container(0, 0);
   const base = scene.add.sprite(0, 0, 'player');
@@ -100,6 +202,6 @@ export function createEquippedHero(scene, character, x, y, scale = 1) {
   if (equipment.necklace) gear.fillStyle(getRarity(equipment.necklace.rarity).color, 1).fillCircle(0, 2, 3);
   equipment.rings.filter(Boolean).forEach((item, index) => gear.lineStyle(2, getRarity(item.rarity).color, 1).strokeCircle(index ? 18 : -18, 11, 3));
   equipment.earrings.filter(Boolean).forEach((item, index) => gear.fillStyle(getRarity(item.rarity).color, 1).fillCircle(index ? 10 : -10, -9, 2));
-  container.add([aura, cape, ascension, base, gear]);
+  container.add([fullSetEffect.back, aura, cape, ascension, base, gear, fullSetEffect.front]);
   return container;
 }

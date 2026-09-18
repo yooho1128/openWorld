@@ -57,7 +57,9 @@ export class StatusScene extends Phaser.Scene {
       return `<div class="gear-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}${levelNote}</small><small>${statsText}</small></div><button id="equip-${index}" ${blocked ? 'disabled' : ''}>${blocked ? '타 직업' : '착용'}</button></div>`;
     }).join('') : '<p class="empty-state">착용할 장비가 없습니다.</p>';
     const setBonus = stats.setBonus;
-    const setBonusHtml = setBonus?.tier
+    const setBonusHtml = setBonus?.count >= 10
+      ? `<div class="relationship friendly set-awakened set-${setBonus.biome}">✦ ${BIOME_LABELS[setBonus.biome]} 완전 공명 ✦<small>10세트 전용 특수 외형 활성화 · 전체 스탯 +${Math.round(setBonus.tier.statMultiplier * 100)}%</small></div>`
+      : setBonus?.tier
       ? `<div class="relationship friendly">세트 효과 · ${BIOME_LABELS[setBonus.biome]} 계열 ${setBonus.count}종 · 전체 스탯 +${Math.round(setBonus.tier.statMultiplier * 100)}%</div>`
       : setBonus?.count > 0
         ? `<div class="relationship hostile">세트 효과 없음 · ${BIOME_LABELS[setBonus.biome]} 계열 ${setBonus.count}종 (3종부터 발동)</div>`

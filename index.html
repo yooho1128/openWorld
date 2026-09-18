@@ -161,6 +161,17 @@
       .relationship { margin: 0 0 10px; padding: 6px 9px; border-radius: 4px; font: 700 12px 'Malgun Gothic', sans-serif; text-align: center; }
       .relationship.friendly { background: #b7c99c; color: #30401f; border: 1px solid #72814f; }
       .relationship.hostile { background: #d6a49a; color: #671f1c; border: 1px solid #9c554c; }
+      .set-awakened { position: relative; overflow: hidden; color: #fff4c2 !important; background: linear-gradient(120deg, #231d3c, #49305d, #1e4a48) !important; border-color: #ffe18a !important; box-shadow: 0 0 16px #9c6dff88, inset 0 0 18px #65f0df33; animation: setAwakened 1.4s ease-in-out infinite alternate; }
+      .set-awakened::before { content: '✦  ◇  ✦  ◈  ✦'; position: absolute; inset: 0; display: grid; place-items: center; color: #fff1a9; opacity: .1; font-size: 22px; letter-spacing: 10px; pointer-events: none; }
+      .set-awakened small { position: relative; z-index: 1; display: block; margin-top: 3px; color: #e8dcff; font-size: 9px; }
+      .set-forest { background: linear-gradient(120deg, #183d27, #3e672e, #1e4d46) !important; }
+      .set-frozen { background: linear-gradient(120deg, #183852, #477b99, #604e91) !important; }
+      .set-blood { background: linear-gradient(120deg, #401421, #842c36, #3a183d) !important; }
+      .set-volcanic, .set-demonic { background: linear-gradient(120deg, #38131b, #8a3027, #4f1c44) !important; }
+      .set-storm { background: linear-gradient(120deg, #172b4d, #355c88, #5d4a77) !important; }
+      .set-celestial { background: linear-gradient(120deg, #4c4220, #80713b, #315a71) !important; }
+      .set-crystal { background: linear-gradient(120deg, #302658, #604e98, #287b7e) !important; }
+      @keyframes setAwakened { from { filter: brightness(.96); } to { filter: brightness(1.18) saturate(1.2); } }
       .gold-line { font-size: 13px; text-align: center; color: #5d452b; }
       .trade-message { background: #fff0c6; border: 1px solid #a9874f; padding: 7px; border-radius: 4px; font-size: 12px; }
       .inventory-list, .companion-list { display: flex; flex-direction: column; gap: 7px; margin: 10px 0; }
