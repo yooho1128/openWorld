@@ -30,6 +30,19 @@ function sortEquipmentEntries(entries, sortKey) {
   return sorted;
 }
 
+function groupedEquipmentHtml(entries, sortKey, renderCard) {
+  const groups = new Map();
+  entries.forEach((entry) => {
+    const rarity = entry.item.rarity ?? 'normal';
+    if (!groups.has(rarity)) groups.set(rarity, []);
+    groups.get(rarity).push(entry);
+  });
+  return [...groups.entries()]
+    .sort(([rarityA], [rarityB]) => getRarity(rarityB).order - getRarity(rarityA).order)
+    .map(([rarity, group]) => `<section class="rarity-group"><h4 class="rarity-heading rarity-${rarity}">${getRarity(rarity).name} 등급 <span>${group.length}개</span></h4>${sortEquipmentEntries(group, sortKey).map(renderCard).join('')}</section>`)
+    .join('');
+}
+
 function tabsHtml(prefix, activeTab) {
   return `<div class="filter-tabs">${Object.entries(CATEGORY_LABELS).map(([id, label]) => `<button id="${prefix}-tab-${id}" class="${activeTab === id ? '' : 'inactive'}">${label}</button>`).join('')}</div>`;
 }
@@ -61,12 +74,15 @@ export class InventoryScene extends Phaser.Scene {
 
     const bagEntries = c.inventory.map((item, index) => ({ item, index })).filter(({ item }) => itemCategory(item) === this.bagTab);
     const bagSorted = this.bagTab === 'equipment' ? sortEquipmentEntries(bagEntries, this.bagSort) : bagEntries;
-    const bagCardsHtml = bagSorted.map(({ item, index }) => {
+    const renderBagCard = ({ item, index }) => {
       const price = Math.max(1, Math.round(item.value * sellBonus));
       const rarity = item.type === 'equipment' ? getRarity(item.rarity).name : `${item.rarity}급`;
       const detail = item.type === 'equipment' ? `${rarity} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}` : `${rarity} · ${item.quantity}개`;
       return `<div class="inventory-row ${item.type === 'equipment' ? `rarity-${item.rarity} ${enhancementVisualClass(item)}` : ''}"><div><strong>${item.type === 'equipment' ? equipmentDisplayName(item) : item.name}</strong><small>${detail}</small></div><button id="sell-${index}">${price}G에 판매</button></div>`;
-    }).join('');
+    };
+    const bagCardsHtml = this.bagTab === 'equipment'
+      ? groupedEquipmentHtml(bagEntries, this.bagSort, renderBagCard)
+      : bagSorted.map(renderBagCard).join('');
     const ownedPotions = Object.entries(c.potions ?? {}).filter(([, qty]) => qty > 0);
     const bagPotionHtml = this.bagTab === 'consumable' ? ownedPotions.map(([id, qty]) => {
       const potion = getPotion(id);
@@ -78,16 +94,20 @@ export class InventoryScene extends Phaser.Scene {
     this.shopItems = shopEquipment(c.classId, c.level);
     const shopEntries = this.shopItems.map((item, index) => ({ item, index }));
     const shopSorted = this.shopTab === 'equipment' ? sortEquipmentEntries(shopEntries, this.shopSort) : [];
-    const shopCardsHtml = shopSorted.map(({ item, index }) => {
+    const renderShopCard = ({ item, index }) => {
       const price = Math.round(item.value * 1.8 * multiplier);
       const stats = Object.entries(item.stats).filter(([, value]) => value).map(([key, value]) => `${key.toUpperCase()} +${value}`).join(' · ');
       return `<div class="gear-card rarity-${item.rarity}"><div><strong>${item.name}</strong><small>${getRarity(item.rarity).name} · ${getSlot(item.slot).name}</small><small>${stats}</small></div><button id="buy-gear-${index}">${price.toLocaleString()}G</button></div>`;
-    }).join('');
+    };
+    const shopCardsHtml = this.shopTab === 'equipment' ? groupedEquipmentHtml(shopEntries, this.shopSort, renderShopCard) : '';
     const shopPotionHtml = this.shopTab === 'consumable' ? POTIONS.map((potion) => {
       const price = Math.round(potion.price * multiplier);
       return `<div class="gear-card"><div><strong>${potion.name}</strong><small>${potionDescription(potion)}</small></div><button id="buy-potion-${potion.id}">${price.toLocaleString()}G</button></div>`;
     }).join('') : '';
     const shopHtml = shopCardsHtml || shopPotionHtml || `<p class="empty-state">오늘 판매 중인 ${CATEGORY_LABELS[this.shopTab]} 아이템이 없습니다.</p>`;
+    const junkEntries = c.inventory.map((item, index) => ({ item, index })).filter(({ item }) => itemCategory(item) === 'junk');
+    const junkCount = junkEntries.reduce((sum, { item }) => sum + (item.quantity ?? 1), 0);
+    const junkValue = junkEntries.reduce((sum, { item }) => sum + Math.max(1, Math.round(item.value * sellBonus)) * (item.quantity ?? 1), 0);
 
     openPanel(`
       <div class="panel inventory-panel">
@@ -98,6 +118,7 @@ export class InventoryScene extends Phaser.Scene {
         <h3>내 가방</h3>
         ${tabsHtml('bag', this.bagTab)}
         ${this.bagTab === 'equipment' ? sortRowHtml('bag-sort', this.bagSort) : ''}
+        ${this.bagTab === 'junk' && junkCount > 0 ? `<button id="sell-all-junk" class="bulk-sell">잡템 ${junkCount}개 일괄판매 · ${junkValue.toLocaleString()}G</button>` : ''}
         <div class="inventory-list">${bagHtml}</div>
         <h3>오늘의 장비 · 노멀/레어</h3>
         ${tabsHtml('shop', this.shopTab)}
@@ -112,6 +133,7 @@ export class InventoryScene extends Phaser.Scene {
     });
     qs('bag-sort')?.addEventListener('change', (event) => { this.bagSort = event.target.value; this.render(); });
     qs('shop-sort')?.addEventListener('change', (event) => { this.shopSort = event.target.value; this.render(); });
+    qs('sell-all-junk')?.addEventListener('click', () => this.sellAllJunk(sellBonus));
     bagSorted.forEach(({ index }) => qs(`sell-${index}`)?.addEventListener('click', () => this.sell(index, sellBonus)));
     shopSorted.forEach(({ index }) => qs(`buy-gear-${index}`)?.addEventListener('click', () => this.buyGear(index, multiplier)));
     POTIONS.forEach((potion) => qs(`buy-potion-${potion.id}`)?.addEventListener('click', () => this.buyPotion(potion.id, Math.round(potion.price * multiplier))));
@@ -128,6 +150,18 @@ export class InventoryScene extends Phaser.Scene {
     adjustAffinity(this.character, 'merchant', 1);
     saveCharacter(this);
     this.render(`${item.name}을(를) ${price}G에 판매했습니다.`);
+  }
+
+  sellAllJunk(bonus) {
+    const junkItems = this.character.inventory.filter((item) => itemCategory(item) === 'junk');
+    if (!junkItems.length) return this.render('판매할 잡템이 없습니다.');
+    const count = junkItems.reduce((sum, item) => sum + (item.quantity ?? 1), 0);
+    const total = junkItems.reduce((sum, item) => sum + Math.max(1, Math.round(item.value * bonus)) * (item.quantity ?? 1), 0);
+    this.character.inventory = this.character.inventory.filter((item) => itemCategory(item) !== 'junk');
+    this.character.gold += total;
+    adjustAffinity(this.character, 'merchant', count);
+    saveCharacter(this);
+    this.render(`잡템 ${count}개를 모두 판매해 ${total.toLocaleString()}G를 획득했습니다.`);
   }
 
   buyPotion(potionId, price) {

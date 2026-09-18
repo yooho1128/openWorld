@@ -54,6 +54,10 @@
         box-sizing: border-box;
         box-shadow: 0 18px 55px #000a, inset 0 0 35px #76511d33;
         line-height: 1.45;
+        touch-action: pan-y;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-gutter: stable;
       }
       #overlay .panel::before,
       #overlay .panel::after {
@@ -153,6 +157,10 @@
       .gold-line { font-size: 13px; text-align: center; color: #5d452b; }
       .trade-message { background: #fff0c6; border: 1px solid #a9874f; padding: 7px; border-radius: 4px; font-size: 12px; }
       .inventory-list, .companion-list { display: flex; flex-direction: column; gap: 7px; margin: 10px 0; }
+      .rarity-group { display: flex; flex-direction: column; gap: 7px; margin: 0 0 11px; }
+      .rarity-heading { position: sticky; top: -1px; z-index: 2; display: flex; justify-content: space-between; margin: 0; padding: 6px 9px; border: 1px solid #92764d; border-radius: 5px; background: #ddc89e; color: #4c3522; font: 700 11px 'Malgun Gothic', sans-serif; box-shadow: 0 2px 5px #523a1e33; }
+      .rarity-heading span { font-weight: 400; opacity: .8; }
+      #overlay button.bulk-sell { margin-top: 7px; background: linear-gradient(#a14b35, #65291f); border-color: #e3a263; }
       .inventory-row, .companion-card { display: flex; align-items: center; gap: 9px; padding: 8px; background: #ead8b1; border: 1px solid #a78955; border-radius: 5px; font-family: 'Malgun Gothic', sans-serif; }
       .inventory-row > div, .companion-copy { flex: 1; min-width: 0; }
       .inventory-row small, .companion-copy small { display: block; color: #6c573b; font-size: 10px; margin-top: 2px; }
@@ -238,6 +246,7 @@
       .item-count { flex: 0 0 auto; font-size: 11px; font-weight: 700; color: #4c3420; padding: 0 4px; }
       .ranking-panel { width: min(430px, 100%) !important; }
       .rank-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; max-height: 55vh; overflow-y: auto; }
+      .rank-list, .mail-list, .chat-log { touch-action: pan-y; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-gutter: stable; }
       .rank-row { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #9d835c; border-radius: 5px; background: #ead8b1; font-family: 'Malgun Gothic', sans-serif; }
       .rank-num { flex: 0 0 24px; text-align: center; font-weight: 700; font-size: 13px; color: #5a432b; }
       .rank-name { flex: 1; min-width: 0; }
