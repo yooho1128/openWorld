@@ -591,7 +591,7 @@ export class BattleScene extends Phaser.Scene {
     const milestoneWeapon = !hadLevel200Reward && this.character.level200WeaponGranted
       ? this.character.inventory.find((item) => item.source === 'level-200-mythic')
       : null;
-    const companionLevels = this.companion ? grantCompanionXp(this.character, this.companion.id, Math.round(xp * 0.4)) : [];
+    const companionLevels = this.companion ? grantCompanionXp(this.character, this.companion.id, Math.round(xp * 0.1)) : [];
     advanceDailyQuests(this.character, { biome: this.monsterData.biome, isBoss: this.isBoss, goldEarned: gold });
     saveCharacter(this);
     if (this.eventType === 'reinforcement' && this.reinforcementId) {

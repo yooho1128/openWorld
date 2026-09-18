@@ -227,7 +227,7 @@ export function usePotion(character, potionId) {
   return potion;
 }
 
-// 동료는 모집 후에도 전투마다 유대 경험치를 얻어 성장한다 (5레벨마다 각성으로 위력 강화).
+// 동료는 플레이어를 보조하는 역할이며 플레이어 레벨을 추월해서 성장하지 않는다.
 export function companionBondXpForLevel(level) {
   return 40 + level * 20;
 }
@@ -248,17 +248,19 @@ export function companionStats(character, companionId) {
   if (!base) return null;
   const progress = ensureCompanionProgress(character, companionId);
   const bondLevel = progress.level;
-  const awakenings = Math.floor((bondLevel - 1) / 5);
+  const playerLevel = Math.max(1, Math.min(999, Math.floor(Number(character.level) || 1)));
+  const awakenings = Math.floor(bondLevel / 50);
   return {
     id: companionId,
     level: bondLevel,
     xp: progress.xp,
     xpToNext: bondLevel >= MAX_COMPANION_LEVEL ? 0 : companionBondXpForLevel(bondLevel),
-    attack: base.attack + Math.round((bondLevel - 1) * 2.2),
-    defense: base.defense + Math.round((bondLevel - 1) * 1.4),
-    hp: base.hp + Math.round((bondLevel - 1) * 8),
-    heal: base.heal ? base.heal + Math.round((bondLevel - 1) * 1.2) : undefined,
-    abilityMultiplier: 1 + awakenings * 0.15,
+    levelCappedByPlayer: bondLevel >= playerLevel && bondLevel < MAX_COMPANION_LEVEL,
+    attack: base.attack + Math.round((bondLevel - 1) * 0.8),
+    defense: base.defense + Math.round((bondLevel - 1) * 0.5),
+    hp: base.hp + Math.round((bondLevel - 1) * 3),
+    heal: base.heal ? base.heal + Math.round((bondLevel - 1) * 0.4) : undefined,
+    abilityMultiplier: 1 + Math.min(1, awakenings * 0.05),
     awakenings,
   };
 }
@@ -266,12 +268,16 @@ export function companionStats(character, companionId) {
 export function grantCompanionXp(character, companionId, amount) {
   const progress = ensureCompanionProgress(character, companionId);
   const levels = [];
-  if (progress.level >= MAX_COMPANION_LEVEL) return levels;
+  const levelCap = Math.max(1, Math.min(MAX_COMPANION_LEVEL, Math.floor(Number(character.level) || 1)));
+  if (progress.level >= levelCap) return levels;
   progress.xp += Math.max(0, amount);
-  while (progress.level < MAX_COMPANION_LEVEL && progress.xp >= companionBondXpForLevel(progress.level)) {
+  while (progress.level < levelCap && progress.xp >= companionBondXpForLevel(progress.level)) {
     progress.xp -= companionBondXpForLevel(progress.level);
     progress.level += 1;
     levels.push(progress.level);
+  }
+  if (progress.level >= levelCap && levelCap < MAX_COMPANION_LEVEL) {
+    progress.xp = Math.min(progress.xp, companionBondXpForLevel(progress.level) - 1);
   }
   if (progress.level >= MAX_COMPANION_LEVEL) progress.xp = 0;
   return levels;
