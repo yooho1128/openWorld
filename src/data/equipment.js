@@ -280,6 +280,14 @@ export function equipmentDisplayName(item) {
   return `${item.enhancement > 0 ? `+${item.enhancement} ` : ''}${item.name}`;
 }
 
+export function enhancementVisualClass(item) {
+  const level = item?.enhancement ?? 0;
+  if (level >= 20) return 'enhancement-max';
+  if (level >= 10) return 'enhancement-high';
+  if (level >= 5) return 'enhancement-mid';
+  return '';
+}
+
 export function catalogStats() {
   return { total: EQUIPMENT_COUNT, rarities: Object.keys(RARITIES).length, monsterFamilies: new Set(MONSTERS.map((monster) => monster.biome)).size };
 }

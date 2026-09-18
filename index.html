@@ -192,7 +192,13 @@
       .rarity-unique { border-color: #a447d2 !important; background: linear-gradient(105deg, #e8d5b0, #d9bee5) !important; box-shadow: inset 3px 0 #b45de0, 0 0 8px #a64ed455; }
       .rarity-legendary { border-color: #e78727 !important; background: linear-gradient(105deg, #ebd5a7, #edbf87) !important; box-shadow: inset 3px 0 #f09a38, 0 0 11px #e8792877; animation: rarityPulse 1.8s infinite alternate; }
       .rarity-mythic { border-color: #e8324a !important; background: linear-gradient(115deg, #ecc29b, #e9a9b2, #d9b9ea) !important; box-shadow: inset 3px 0 #ff4f5e, 0 0 14px #ff405e99; animation: rarityPulse 1s infinite alternate; }
+      .enhancement-mid { outline: 1px solid #d6b14f; box-shadow: inset 3px 0 #efc75e, 0 0 9px #e8bd5266 !important; }
+      .enhancement-high { position: relative; outline: 2px solid #ffd45f; box-shadow: inset 3px 0 #fff0a0, 0 0 16px #ff405eaa, 0 0 25px #ffd45f66 !important; animation: enhancedPulse .75s infinite alternate !important; }
+      .enhancement-high::after { content: '✦'; position: absolute; right: 5px; top: 2px; color: #fff2a2; font-size: 12px; text-shadow: 0 0 7px #ff425d; }
+      .enhancement-max { position: relative; outline: 2px solid #fff2a0; box-shadow: inset 3px 0 #ffffff, 0 0 20px #ff385cdd, 0 0 32px #ffe55fbb !important; animation: enhancedPulse .42s infinite alternate !important; }
+      .enhancement-max::after { content: '♛'; position: absolute; right: 5px; top: 1px; color: #fff5aa; font-size: 14px; text-shadow: 0 0 8px #ff334f; }
       @keyframes rarityPulse { from { filter: brightness(.96); } to { filter: brightness(1.12); } }
+      @keyframes enhancedPulse { from { filter: brightness(.98) saturate(1.05); } to { filter: brightness(1.22) saturate(1.35); } }
       .quest-panel { width: min(430px, 100%) !important; }
       .quest-list, .milestone-list { display: flex; flex-direction: column; gap: 7px; margin: 8px 0; }
       .quest-card, .milestone-card { padding: 8px; border: 1px solid #9d835c; border-radius: 5px; background: #ead8b1; font-family: 'Malgun Gothic', sans-serif; }
@@ -235,6 +241,23 @@
       .mail-attach { color: #8b5c1e !important; font-weight: 700; }
       #overlay .mail-row button { width: auto; margin: 0; padding: 7px 9px; flex: 0 0 auto; font-size: 11px; }
       #overlay button#claim-all { background: linear-gradient(#4d725f, #29483a); border-color: #8fc29f; }
+      .event-panel { width: min(430px, 100%) !important; }
+      .event-banner { padding: 14px 10px; margin-bottom: 12px; text-align: center; border: 1px solid #d18b55; border-radius: 7px; background: radial-gradient(circle at 50% 0%, #b6405266, transparent 60%), linear-gradient(135deg, #3a1722, #171526); color: #ffe8b0; box-shadow: inset 0 0 24px #ff4f5e33, 0 5px 14px #3e182944; }
+      .event-banner span { display: block; color: #ff8e72; font: 700 9px Georgia, serif; letter-spacing: .3em; }
+      .event-banner strong { display: block; margin: 4px 0; font-size: 20px; text-shadow: 0 0 10px #ff4f5e; }
+      .event-banner small, .event-reward small { display: block; font-size: 9px; color: #d8c19b; }
+      .attendance-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 10px 0; }
+      .attendance-day { min-height: 62px; padding: 6px 3px; box-sizing: border-box; text-align: center; border: 1px solid #9b815c; border-radius: 6px; background: #e2cea6; color: #725d3e; font-family: 'Malgun Gothic', sans-serif; }
+      .attendance-day span, .attendance-day small { display: block; font-size: 9px; }
+      .attendance-day strong { display: block; font: 700 21px Georgia, serif; color: #8c7451; line-height: 1.25; }
+      .attendance-day.done { background: linear-gradient(145deg, #becd9c, #e9d9ad); border-color: #657e4e; box-shadow: inset 0 0 9px #6e9a5266; }
+      .attendance-day.done strong { color: #3e6d39; }
+      .attendance-day.reward { grid-column: span 2; border-color: #d93651; background: linear-gradient(135deg, #e8c89d, #dba0b3); box-shadow: inset 0 0 13px #ff4f5e55, 0 0 10px #ff4f5e55; }
+      .attendance-day.reward strong { color: #b51f3d; text-shadow: 0 0 7px #fff1bb; }
+      .event-reward { padding: 10px; margin: 10px 0; text-align: center; border: 2px solid #e8324a; border-radius: 7px; }
+      .event-reward strong { display: block; color: #8d1830; font-size: 14px; }
+      .event-reward small { margin-top: 3px; color: #654358; }
+      .event-date { margin: 8px 0 0; text-align: center; color: #70593d; font-size: 10px; }
     </style>
   </head>
   <body>

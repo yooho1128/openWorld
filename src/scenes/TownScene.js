@@ -28,6 +28,10 @@ export class TownScene extends Phaser.Scene {
     addSceneTitle(this, '에버글렌 모험가 길드', '사냥을 준비하고 왕국의 인연을 쌓으세요');
     this.renderHeroCard();
     HUBS.forEach((hub, index) => this.addHub(hub, index));
+    const eventButton = this.add.rectangle(55, 105, 92, 30, 0x7e2938, 0.98).setStrokeStyle(1, 0xffc56b).setInteractive({ useHandCursor: true });
+    const eventText = this.add.text(55, 105, '✦ 이벤트', { fontSize: '11px', fontStyle: 'bold', color: '#ffe9ae' }).setOrigin(0.5);
+    this.tweens.add({ targets: [eventButton, eventText], alpha: 0.68, duration: 850, yoyo: true, repeat: -1 });
+    eventButton.on('pointerdown', () => this.scene.start('Event'));
     const settings = this.add.rectangle(425, 105, 82, 30, 0x213229, 0.96).setStrokeStyle(1, 0xe0c274).setInteractive({ useHandCursor: true });
     this.add.text(425, 105, '⚙ 설정', { fontSize: '11px', color: '#ffe5a5' }).setOrigin(0.5);
     settings.on('pointerdown', () => this.scene.start('Settings'));

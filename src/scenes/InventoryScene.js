@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { affinityPriceMultiplier } from '../data/rpg.js';
-import { EQUIPMENT_SLOTS, equipmentDisplayName, getRarity, getSlot, shopEquipment } from '../data/equipment.js';
+import { EQUIPMENT_SLOTS, enhancementVisualClass, equipmentDisplayName, getRarity, getSlot, shopEquipment } from '../data/equipment.js';
 import { getPotion, POTIONS, potionDescription } from '../data/potions.js';
 import { addLoot, addPotion, adjustAffinity, ensureRpgCharacter, saveCharacter, totalPotionCount } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
@@ -65,7 +65,7 @@ export class InventoryScene extends Phaser.Scene {
       const price = Math.max(1, Math.round(item.value * sellBonus));
       const rarity = item.type === 'equipment' ? getRarity(item.rarity).name : `${item.rarity}급`;
       const detail = item.type === 'equipment' ? `${rarity} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}` : `${rarity} · ${item.quantity}개`;
-      return `<div class="inventory-row ${item.type === 'equipment' ? `rarity-${item.rarity}` : ''}"><div><strong>${item.type === 'equipment' ? equipmentDisplayName(item) : item.name}</strong><small>${detail}</small></div><button id="sell-${index}">${price}G에 판매</button></div>`;
+      return `<div class="inventory-row ${item.type === 'equipment' ? `rarity-${item.rarity} ${enhancementVisualClass(item)}` : ''}"><div><strong>${item.type === 'equipment' ? equipmentDisplayName(item) : item.name}</strong><small>${detail}</small></div><button id="sell-${index}">${price}G에 판매</button></div>`;
     }).join('');
     const ownedPotions = Object.entries(c.potions ?? {}).filter(([, qty]) => qty > 0);
     const bagPotionHtml = this.bagTab === 'consumable' ? ownedPotions.map(([id, qty]) => {

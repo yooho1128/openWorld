@@ -402,6 +402,10 @@ function flushSaveQueue() {
   });
 }
 
+export async function waitForPendingSaves() {
+  while (activeSave) await activeSave;
+}
+
 export function saveCharacter(scene) {
   const nickname = scene.registry.get('nickname');
   const character = scene.registry.get('character');
