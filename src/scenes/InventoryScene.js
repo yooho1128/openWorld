@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { affinityPriceMultiplier } from '../data/rpg.js';
-import { EQUIPMENT_SLOTS, enhancementVisualClass, equipmentDisplayName, getRarity, getSlot, shopEquipment } from '../data/equipment.js';
+import { EQUIPMENT_SLOTS, baseItemPower, enhancementVisualClass, equipmentDisplayName, getRarity, getSlot, shopEquipment } from '../data/equipment.js';
 import { getPotion, POTIONS, potionDescription } from '../data/potions.js';
 import { addLoot, addPotion, adjustAffinity, ensureRpgCharacter, saveCharacter, totalPotionCount } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
@@ -43,6 +43,28 @@ function groupedEquipmentHtml(entries, sortKey, renderCard) {
     .join('');
 }
 
+// 강화 수치·내구도는 돈만 들이면 새 장비에도 똑같이 만들 수 있는 값이라 빼고,
+// 부위/희귀도/변형이 만드는 "타고난" 스탯만으로 착용 중인 장비와 비교한다.
+function compareToEquipped(item, equipment, characterLevel) {
+  const key = item.slot === 'ring' ? 'rings' : item.slot === 'earring' ? 'earrings' : item.slot;
+  const slotValue = equipment[key];
+  const equipped = (Array.isArray(slotValue) ? slotValue : [slotValue]).filter(Boolean);
+  const myPower = baseItemPower(item, characterLevel);
+  if (!equipped.length) return { status: 'empty', diff: myPower };
+  const weakest = equipped.reduce((min, cur) => (baseItemPower(cur, characterLevel) < baseItemPower(min, characterLevel) ? cur : min));
+  const diff = myPower - baseItemPower(weakest, characterLevel);
+  const status = diff > 0 ? 'stronger' : diff < 0 ? 'weaker' : 'equal';
+  return { status, diff, name: equipmentDisplayName(weakest) };
+}
+
+function compareBadgeHtml(item, equipment, characterLevel) {
+  const cmp = compareToEquipped(item, equipment, characterLevel);
+  if (cmp.status === 'empty') return `<small class="compare-badge compare-empty">빈 슬롯 · 바로 장착 가능</small>`;
+  if (cmp.status === 'stronger') return `<small class="compare-badge compare-up">▲ 착용 중인 ${cmp.name}보다 강함 (+${cmp.diff})</small>`;
+  if (cmp.status === 'weaker') return `<small class="compare-badge compare-down">▼ 착용 중인 ${cmp.name}보다 약함 (${cmp.diff})</small>`;
+  return `<small class="compare-badge compare-equal">≈ 착용 중인 ${cmp.name}과 비슷함</small>`;
+}
+
 function tabsHtml(prefix, activeTab) {
   return `<div class="filter-tabs">${Object.entries(CATEGORY_LABELS).map(([id, label]) => `<button id="${prefix}-tab-${id}" class="${activeTab === id ? '' : 'inactive'}">${label}</button>`).join('')}</div>`;
 }
@@ -78,7 +100,8 @@ export class InventoryScene extends Phaser.Scene {
       const price = Math.max(1, Math.round(item.value * sellBonus));
       const rarity = item.type === 'equipment' ? getRarity(item.rarity).name : `${item.rarity}급`;
       const detail = item.type === 'equipment' ? `${rarity} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}` : `${rarity} · ${item.quantity}개`;
-      return `<div class="inventory-row ${item.type === 'equipment' ? `rarity-${item.rarity} ${enhancementVisualClass(item)}` : ''}"><div><strong>${item.type === 'equipment' ? equipmentDisplayName(item) : item.name}</strong><small>${detail}</small></div><button id="sell-${index}">${price}G에 판매</button></div>`;
+      const compareHtml = item.type === 'equipment' ? compareBadgeHtml(item, c.equipment, c.level) : '';
+      return `<div class="inventory-row ${item.type === 'equipment' ? `rarity-${item.rarity} ${enhancementVisualClass(item)}` : ''}"><div><strong>${item.type === 'equipment' ? equipmentDisplayName(item) : item.name}</strong><small>${detail}</small>${compareHtml}</div><button id="sell-${index}">${price}G에 판매</button></div>`;
     };
     const bagCardsHtml = this.bagTab === 'equipment'
       ? groupedEquipmentHtml(bagEntries, this.bagSort, renderBagCard)

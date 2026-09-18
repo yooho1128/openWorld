@@ -288,6 +288,17 @@ export function levelEffectiveness(itemLevel, characterLevel) {
   return 1 - Math.min(0.8, (gap - 20) * 0.01);
 }
 
+// 장비 자체의 "타고난" 값어치 - 강화 수치와 내구도는 나중에 돈을 들이면 얼마든지
+// 같아질 수 있는 값이라 빼고, 부위/희귀도/변형에서 오는 순수 스탯만으로 비교한다.
+// combatPower()와 같은 가중치를 써서 캐릭터 종합 전투력과 같은 척도로 비교 가능하다.
+export function baseItemPower(item, characterLevel = null) {
+  if (!item || item.type !== 'equipment') return 0;
+  const stats = item.stats ?? {};
+  const raw = (stats.attack ?? 0) * 5 + (stats.defense ?? 0) * 4 + (stats.agility ?? 0) * 2 + (stats.hp ?? 0) * 0.35 + (stats.mp ?? 0) * 0.1;
+  const levelFactor = characterLevel != null ? levelEffectiveness(item.level ?? 1, characterLevel) : 1;
+  return Math.round(raw * levelFactor);
+}
+
 export function enhancementStats(item, characterLevel = null) {
   const multiplier = 1 + (item.enhancement ?? 0) * 0.11 + Math.max(0, (item.enhancement ?? 0) - 10) * 0.025;
   const durability = durabilityMultiplier(item);
