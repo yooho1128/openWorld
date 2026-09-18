@@ -1,7 +1,7 @@
 import { DAILY_QUEST_POOL, MILESTONE_QUESTS, BIOME_IDS } from '../data/quests.js';
 import { BIOME_LABELS } from '../data/monsters.js';
 import { DEFAULT_POTION_ID } from '../data/potions.js';
-import { addPotion, addXp } from './rpgCharacter.js';
+import { addPotion, addXp, adjustAffinity } from './rpgCharacter.js';
 
 function todayKey() {
   const d = new Date();
@@ -71,6 +71,7 @@ export function claimDailyQuest(character, questId) {
   character.gold += quest.rewardGold;
   character.goldEarnedTotal = (character.goldEarnedTotal ?? 0) + quest.rewardGold;
   addPotion(character, DEFAULT_POTION_ID, quest.rewardPotions ?? 0);
+  adjustAffinity(character, 'guildmaster', 1);
   const levels = addXp(character, quest.rewardXp);
   return { quest, levels };
 }
@@ -100,6 +101,7 @@ export function claimMilestone(character, id) {
   character.gold += entry.rewardGold ?? 0;
   character.goldEarnedTotal = (character.goldEarnedTotal ?? 0) + (entry.rewardGold ?? 0);
   addPotion(character, DEFAULT_POTION_ID, entry.rewardPotions ?? 0);
+  adjustAffinity(character, 'guildmaster', 2);
   const levels = addXp(character, entry.rewardXp ?? 0);
   return { entry, levels };
 }

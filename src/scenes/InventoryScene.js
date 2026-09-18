@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { affinityPriceMultiplier } from '../data/rpg.js';
 import { EQUIPMENT_SLOTS, equipmentDisplayName, getRarity, getSlot, shopEquipment } from '../data/equipment.js';
 import { getPotion, POTIONS, potionDescription } from '../data/potions.js';
-import { addLoot, addPotion, ensureRpgCharacter, saveCharacter, totalPotionCount } from '../state/rpgCharacter.js';
+import { addLoot, addPotion, adjustAffinity, ensureRpgCharacter, saveCharacter, totalPotionCount } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
@@ -125,6 +125,7 @@ export class InventoryScene extends Phaser.Scene {
     this.character.gold += price;
     item.quantity -= 1;
     if (item.quantity <= 0) this.character.inventory.splice(index, 1);
+    adjustAffinity(this.character, 'merchant', 1);
     saveCharacter(this);
     this.render(`${item.name}을(를) ${price}G에 판매했습니다.`);
   }
@@ -133,6 +134,7 @@ export class InventoryScene extends Phaser.Scene {
     if (this.character.gold < price) return this.render('골드가 부족합니다.');
     this.character.gold -= price;
     addPotion(this.character, potionId, 1);
+    adjustAffinity(this.character, 'merchant', 1);
     saveCharacter(this);
     this.render(`${getPotion(potionId).name}을(를) ${price.toLocaleString()}G에 구매했습니다.`);
   }
@@ -144,6 +146,7 @@ export class InventoryScene extends Phaser.Scene {
     if (this.character.gold < price) return this.render('골드가 부족합니다.');
     this.character.gold -= price;
     addLoot(this.character, item);
+    adjustAffinity(this.character, 'merchant', 1);
     saveCharacter(this);
     this.render(`${item.name}을(를) ${price.toLocaleString()}G에 구매했습니다.`);
   }

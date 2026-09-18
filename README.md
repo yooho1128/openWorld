@@ -2,9 +2,9 @@
 
 턴제 전투 판타지 몬스터 사냥 RPG입니다. 직업을 골라 왕국의 27개 지역(레벨 1~999)을
 돌아다니며 몬스터를 사냥하고, 장비를 모아 강화하고, 동료와 함께 성장합니다.
-Phaser 3(클라이언트) + Vercel 서버리스 함수(캐릭터 저장 `api/character.js`,
-NPC 대화 생성 `api/npc-dialogue.js`)로 구성되어 있습니다. PC/모바일 웹 모두 지원하며,
-그래픽은 전부 코드로 절차적 생성되는 텍스처라 별도 이미지 에셋이 없습니다.
+Phaser 3(클라이언트) + Vercel 서버리스 함수(캐릭터 저장 `api/character.js` 등)로
+구성되어 있습니다. PC/모바일 웹 모두 지원하며, 그래픽은 전부 코드로 절차적 생성되는
+텍스처라 별도 이미지 에셋이 없습니다.
 
 ## 게임 구조
 
@@ -23,9 +23,9 @@ NPC 대화 생성 `api/npc-dialogue.js`)로 구성되어 있습니다. PC/모바
    수리해야 합니다.
 6. **동료**: 여관에서 골드로 동료를 모집해 파티에 합류시킵니다. 전투를 치를 때마다 동료도
    유대 경험치를 얻어 레벨업하며, 5레벨마다 각성해 능력 위력이 강해집니다.
-7. **NPC 대화**: 상인·길드장·여관주인 등 NPC와 대화하면 Claude(Haiku 4.5)가 그 자리에서
-   대사와 선택지를 생성합니다. 대화 선택에 따라 우호도가 오르내리고, 우호도는 상점 가격에
-   반영됩니다.
+7. **NPC 우호도**: 상인·길드장·대장장이·여관주인과는 대화창이 아니라 실제로 그 NPC의
+   서비스를 이용할 때마다(상점 거래, 의뢰 완료, 강화/수리, 휴식) 우호도가 조금씩 쌓입니다.
+   우호도는 상점·대장간 가격에 반영됩니다.
 8. **의뢰소**: 매일 자정 갱신되는 **일일 의뢰**(사냥/특정 지역 토벌/수금/우두머리 처치) 3개와,
    누적 기록(처치 수·승리 수·레벨·누적 획득 골드)에 따라 한 번씩 청구할 수 있는 **업적** 의뢰가
    있습니다. 완료하면 골드·경험치·물약을 받습니다.
@@ -59,20 +59,9 @@ npm run dev
 ```
 
 기본 포트(`vercel dev`가 안내하는 주소)로 접속합니다. 서버 없이 `npm run build && npm run preview`로
-클라이언트만 띄워도 플레이는 가능하지만, 캐릭터 저장과 NPC 대화 생성은 동작하지 않고
-각각 안내 문구/고정 선택지로 대체됩니다.
+클라이언트만 띄워도 플레이는 가능하지만, 캐릭터 저장은 동작하지 않습니다.
 
-### 2. NPC 대화 생성용 Claude API 키 설정 (선택)
-
-키가 없어도 게임 플레이는 전부 정상 동작하고, NPC 대화만 미리 정해진 기본 선택지로
-대체됩니다.
-
-```bash
-cp .env.example .env.local
-# .env.local 파일을 열어 ANTHROPIC_API_KEY 값을 채워주세요
-```
-
-### 3. 캐릭터 저장 설정 (Neon Postgres)
+### 2. 캐릭터 저장 설정 (Neon Postgres)
 
 `api/character.js`는 [`@neondatabase/serverless`](https://www.npmjs.com/package/@neondatabase/serverless)로
 별명별 캐릭터 데이터를 Postgres 테이블(`characters`, 최초 요청 시 자동 생성)에 저장합니다.
@@ -86,13 +75,13 @@ DB 연동이 없으면 매번 새 캐릭터로 시작하게 될 뿐 게임 자�
 ### 마스터(테스트) 계정
 
 로그인 화면에서 `마스터_전사` / `마스터_마법사` / `마스터_궁수` / `마스터_성직자` / `마스터_도적`
-별명으로 입장하면, 캐릭터 생성 과정 없이 레벨 999 · 전 부위 신화 등급 +20 장비를 갖춘
-테스트용 캐릭터로 바로 마을에 입장합니다.
+별명으로 입장하고 `ADMIN_PASSWORD` 환경변수와 같은 비밀번호를 입력하면, 캐릭터 생성 과정
+없이 레벨 999 · 전 부위 신화 등급 +20 장비를 갖춘 테스트용 캐릭터로 바로 마을에 입장합니다.
 
 ## 배포 (Vercel)
 
 이 저장소를 Vercel 프로젝트로 그대로 import하면 됩니다 (Framework: Vite 자동 감지).
-배포 전에 Vercel 프로젝트 설정 → Environment Variables에 `ANTHROPIC_API_KEY`, `DATABASE_URL`을
+배포 전에 Vercel 프로젝트 설정 → Environment Variables에 `DATABASE_URL`, `ADMIN_PASSWORD`를
 등록해주세요.
 
 ## 코드 구조
@@ -108,7 +97,8 @@ src/
   ui/        판타지 배경/타이틀(fantasyTheme.js), 장비 반영 캐릭터 그래픽
              (equipmentVisuals.js), 몬스터 텍스처 생성(monsterTextures.js),
              DOM 오버레이 패널 헬퍼(domForms.js)
-api/         character.js(저장), npc-dialogue.js(AI 대화)
+api/         character.js(저장), admin-login.js/admin-coupon.js(운영자 인증·쿠폰 관리),
+             redeem-coupon.js(쿠폰 사용), leaderboard.js(랭킹)
 ```
 
 ## 다음 단계 후보
