@@ -32,6 +32,10 @@ export class TownScene extends Phaser.Scene {
     const eventText = this.add.text(55, 105, '✦ 이벤트', { fontSize: '11px', fontStyle: 'bold', color: '#ffe9ae' }).setOrigin(0.5);
     this.tweens.add({ targets: [eventButton, eventText], alpha: 0.68, duration: 850, yoyo: true, repeat: -1 });
     eventButton.on('pointerdown', () => this.scene.start('Event'));
+    const astrologer = this.add.rectangle(240, 105, 104, 30, 0x44316f, 0.98).setStrokeStyle(1, 0xdab8ff).setInteractive({ useHandCursor: true });
+    const astrologerText = this.add.text(240, 105, '✧ 점성술사', { fontSize: '11px', fontStyle: 'bold', color: '#f1ddff' }).setOrigin(0.5);
+    this.tweens.add({ targets: [astrologer, astrologerText], scaleX: 1.035, scaleY: 1.035, duration: 1200, yoyo: true, repeat: -1 });
+    astrologer.on('pointerdown', () => this.scene.start('Astrologer'));
     const settings = this.add.rectangle(425, 105, 82, 30, 0x213229, 0.96).setStrokeStyle(1, 0xe0c274).setInteractive({ useHandCursor: true });
     this.add.text(425, 105, '⚙ 설정', { fontSize: '11px', color: '#ffe5a5' }).setOrigin(0.5);
     settings.on('pointerdown', () => this.scene.start('Settings'));

@@ -288,6 +288,25 @@ export function enhancementVisualClass(item) {
   return '';
 }
 
+// +10까지는 성장 구간으로 보고 높은 성공률과 실패 안전장치를 적용한다.
+// +10 이후부터는 기존의 고위험 강화 곡선을 그대로 사용한다.
+export const ENHANCEMENT_SUCCESS_RATES = [100, 100, 98, 96, 93, 90, 86, 82, 76, 70, 28, 22, 17, 13, 10, 7, 5, 3, 2, 1];
+
+export const ENHANCEMENT_BLESSINGS = {
+  small: { name: '작은 축복', bonus: 10, symbol: '✧' },
+  normal: { name: '별의 축복', bonus: 20, symbol: '✦' },
+  great: { name: '대축복', bonus: 30, symbol: '★' },
+};
+
+export function enhancementSuccessRate(level, blessingBonus = 0) {
+  const base = ENHANCEMENT_SUCCESS_RATES[Math.max(0, Math.min(19, level))] ?? 0;
+  return Math.min(100, base + Math.max(0, Math.min(30, blessingBonus)));
+}
+
+export function isSafeEnhancement(level) {
+  return level < 10;
+}
+
 export function catalogStats() {
   return { total: EQUIPMENT_COUNT, rarities: Object.keys(RARITIES).length, monsterFamilies: new Set(MONSTERS.map((monster) => monster.biome)).size };
 }

@@ -19,6 +19,16 @@ export function ensureRpgCharacter(character) {
   character.equipment.rings ??= [null, null];
   character.equipment.earrings ??= [null, null];
   character.redeemedCoupons ??= [];
+  character.enhancementBlessings ??= { small: 0, normal: 0, great: 0 };
+  for (const key of ['small', 'normal', 'great']) character.enhancementBlessings[key] = Math.max(0, Math.floor(Number(character.enhancementBlessings[key]) || 0));
+  character.activeEnhancementBlessing = ['small', 'normal', 'great'].includes(character.activeEnhancementBlessing) ? character.activeEnhancementBlessing : null;
+  // 짧게 사용됐던 숫자형 축복 저장값도 새 소모품 구조로 안전하게 옮긴다.
+  if (Number(character.enhancementBlessing) > 0) {
+    const migratedKey = Number(character.enhancementBlessing) >= 30 ? 'great' : Number(character.enhancementBlessing) >= 20 ? 'normal' : 'small';
+    character.enhancementBlessings[migratedKey] += 1;
+    delete character.enhancementBlessing;
+  }
+  character.astrologerDaily ??= { date: '', answered: 0, correct: 0 };
   character.advancementId ??= null;
   if (!Array.isArray(character.advancementHistory)) character.advancementHistory = [];
   const classAdvancementIds = new Set((ADVANCEMENTS[character.classId] ?? []).map((entry) => entry.id));
@@ -109,6 +119,8 @@ export function createRpgCharacter({ nickname, name, gender }) {
     inventory: [], companions: [], activeCompanionId: null,
     affinity: { merchant: 0, guildmaster: 0, innkeeper: 0, blacksmith: 0 },
     dialogueHistory: {}, victories: 0, defeats: 0, hunted: {}, createdAt: Date.now(),
+    enhancementBlessings: { small: 0, normal: 0, great: 0 }, activeEnhancementBlessing: null,
+    astrologerDaily: { date: '', answered: 0, correct: 0 },
   });
 }
 

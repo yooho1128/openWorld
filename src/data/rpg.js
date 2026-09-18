@@ -113,6 +113,7 @@ export const NPCS = [
   { id: 'guildmaster', name: '길드장 브란', role: '모험가 길드장', persona: '수많은 전장을 겪은 노련한 전사. 용기와 책임감을 중시하고 허풍을 싫어한다.', color: 0x9a4c3b },
   { id: 'innkeeper', name: '여관주인 미엘', role: '달빛 여관주인', persona: '소문에 밝고 따뜻한 성격. 모험가들의 고민을 잘 들어주며 장난기도 있다.', color: 0x6c8b62 },
   { id: 'blacksmith', name: '대장장이 토르간', role: '드워프 대장장이', persona: '말은 거칠지만 장비와 노력에 진심인 드워프. 성실한 모험가를 인정한다.', color: 0x7b5c50 },
+  { id: 'astrologer', name: '점성술사 셀레네', role: '별의 시련을 내는 예언가', persona: '별의 흐름을 읽고 지혜를 증명한 모험가의 다음 강화에 축복을 내린다.', color: 0x7660a8 },
 ];
 
 export const COMPANIONS = [
