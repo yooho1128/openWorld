@@ -5,7 +5,8 @@ import { checkRateLimit, clientIp, rejectRateLimited } from '../lib/rateLimit.js
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
 
-const VALID_EFFECTS = ['gold', 'weapon', 'mythic-weapon', 'mythic-accessory', 'drain'];
+const VALID_EFFECTS = ['gold', 'weapon', 'mythic-weapon', 'mythic-accessory', 'drain', 'enhance', 'levelup'];
+const AMOUNT_REQUIRED_EFFECTS = ['gold', 'enhance', 'levelup'];
 
 async function ensureTable() {
   await sql`
@@ -65,7 +66,7 @@ export default async function handler(req, res) {
   const amount = req.body?.amount != null && req.body.amount !== '' ? Math.max(0, Math.round(Number(req.body.amount))) : null;
   const reusable = req.body?.reusable === true;
   if (!code || !VALID_EFFECTS.includes(effect)) return res.status(400).json({ ok: false, error: 'invalid_request' });
-  if (effect === 'gold' && !(amount > 0)) return res.status(400).json({ ok: false, error: 'gold_amount_required' });
+  if (AMOUNT_REQUIRED_EFFECTS.includes(effect) && !(amount > 0)) return res.status(400).json({ ok: false, error: 'amount_required' });
 
   await sql`
     INSERT INTO coupons (code, effect, amount, reusable, enabled)

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { classCouponWeapon, equipmentDisplayName, mythicAccessoryCoupon, mythicWeaponCoupon } from '../data/equipment.js';
 import { ADVANCEMENTS } from '../data/rpg.js';
-import { addLoot, ensureRpgCharacter, saveCharacter } from '../state/rpgCharacter.js';
+import { addLoot, ensureRpgCharacter, grantLevels, saveCharacter, strongestEquippedItem } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
@@ -26,9 +26,11 @@ export class SettingsScene extends Phaser.Scene {
           <option value="weapon">직업 유니크 무기 지급</option>
           <option value="mythic-weapon">신화급 무기 지급</option>
           <option value="mythic-accessory">신화급 악세서리 지급</option>
+          <option value="enhance">강화 주문서 (현재 강화 수치에서 +N, 최대 +20)</option>
+          <option value="levelup">레벨업 주문서 (현재 레벨에서 +N)</option>
           <option value="drain">골드 전부 삭제(장난용)</option>
         </select>
-        <label for="admin-coupon-amount">골드량 (골드 지급일 때만)</label><input id="admin-coupon-amount" type="number" min="0" placeholder="예: 200000" />
+        <label for="admin-coupon-amount">수량 (골드/강화/레벨 지급일 때 필수)</label><input id="admin-coupon-amount" type="number" min="0" placeholder="예: 골드=200000, 강화=3, 레벨=10" />
         <label style="display:flex;align-items:center;gap:6px;"><input id="admin-coupon-reusable" type="checkbox" style="width:auto;" />여러 번 사용 가능(재사용)</label>
         <button id="admin-coupon-submit" class="secondary">쿠폰 등록/수정</button>
         <button id="admin-coupon-list" class="secondary">등록된 쿠폰 목록 보기</button>
@@ -105,6 +107,24 @@ export class SettingsScene extends Phaser.Scene {
       this.character.goldEarnedTotal = (this.character.goldEarnedTotal ?? 0) + amount;
       saveCharacter(this);
       return this.render(`쿠폰의 힘으로 골드 ${amount.toLocaleString()}이 쏟아졌습니다!`);
+    }
+    if (result.effect === 'enhance') {
+      const amount = Math.max(1, Math.floor(Number(result.amount) || 1));
+      const target = strongestEquippedItem(this.character);
+      if (!target) return this.render('강화할 장비가 없습니다. 먼저 장비를 착용해주세요.');
+      const before = target.enhancement ?? 0;
+      // 대장간과 동일하게 +20이 상한이다.
+      target.enhancement = Math.min(20, before + amount);
+      this.character.highestEnhancement = Math.max(this.character.highestEnhancement ?? 0, target.enhancement);
+      saveCharacter(this);
+      return this.render(`주문서의 힘으로 「${target.name}」이(가) +${before} → +${target.enhancement}(으)로 강화되었습니다!`);
+    }
+    if (result.effect === 'levelup') {
+      const amount = Math.max(1, Math.floor(Number(result.amount) || 1));
+      const before = this.character.level;
+      const gained = grantLevels(this.character, amount);
+      saveCharacter(this);
+      return this.render(gained.length ? `주문서의 힘으로 Lv.${before} → Lv.${this.character.level}(으)로 레벨업했습니다!` : '이미 최대 레벨(999)입니다.');
     }
     this.character.gold = 0;
     saveCharacter(this);

@@ -1,4 +1,4 @@
-import { ensureRpgCharacter, equippedItems } from '../state/rpgCharacter.js';
+import { ensureRpgCharacter, equippedItems, strongestEquippedItem } from '../state/rpgCharacter.js';
 import { equipmentSetBonus, getRarity } from '../data/equipment.js';
 
 export const FULL_SET_VISUALS = {
@@ -111,11 +111,7 @@ export function createEquippedHero(scene, character, x, y, scale = 1) {
   const base = scene.add.sprite(0, 0, 'player');
   const gear = scene.add.graphics();
   const equipment = character.equipment;
-  const strongest = equippedItems(character).sort((a, b) => {
-    const aScore = getRarity(a.rarity).order * 100 + (a.enhancement ?? 0);
-    const bScore = getRarity(b.rarity).order * 100 + (b.enhancement ?? 0);
-    return bScore - aScore;
-  })[0];
+  const strongest = strongestEquippedItem(character);
   const classMarks = { warrior: '⚔', mage: '✦', ranger: '➶', cleric: '✚', rogue: '◆' };
   const classColors = { warrior: 0xd87055, mage: 0x8f7fe3, ranger: 0x72a95a, cleric: 0xf0cf75, rogue: 0x73629b };
   const classColor = classColors[character.classId] ?? 0x8fb493;

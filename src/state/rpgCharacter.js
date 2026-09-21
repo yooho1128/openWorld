@@ -1,5 +1,5 @@
 import { ADVANCEMENTS, advancementStageForLevel, getAdvancement, getAdvancementOptions, getClass, getCompanion, xpForLevel } from '../data/rpg.js';
-import { enhancementStats, masterEquipmentSet, equipmentSetBonus, level200MythicWeapon, normalizeEquipmentStats, rollGachaEquipment } from '../data/equipment.js';
+import { enhancementStats, getRarity, masterEquipmentSet, equipmentSetBonus, level200MythicWeapon, normalizeEquipmentStats, rollGachaEquipment } from '../data/equipment.js';
 import { DEFAULT_POTION_ID, getPotion } from '../data/potions.js';
 
 const GLOBAL_BOSS_TITLE_ID = 'lucky-lottery';
@@ -160,20 +160,16 @@ export function chooseClass(character, classId) {
   character.agility = job.agility;
 }
 
-export function addXp(character, amount) {
-  if (character.level >= 999) { character.level = 999; character.xp = 0; return []; }
-  character.xp += amount;
-  const levels = [];
-  while (character.level < 999 && character.xp >= xpForLevel(character.level)) {
-    character.xp -= xpForLevel(character.level);
-    character.level += 1;
-    character.maxHp += 12;
-    character.maxMp += 5;
-    character.attack += 3;
-    character.defense += 2;
-    levels.push(character.level);
-  }
-  if (levels.length) {
+function growOneLevel(character) {
+  character.level += 1;
+  character.maxHp += 12;
+  character.maxMp += 5;
+  character.attack += 3;
+  character.defense += 2;
+}
+
+function finishLevelGain(character, gainedAny) {
+  if (gainedAny) {
     // character.maxHp/maxMp are base-only; heal to the equipment-inclusive
     // max (combatStats) instead, or a geared character's HP bar looks like
     // it barely filled after "leveling up to full HP".
@@ -181,12 +177,37 @@ export function addXp(character, amount) {
     character.hp = stats.maxHp;
     character.mp = stats.maxMp;
   }
-  if (character.level >= 999) character.xp = 0;
   if (character.level >= 200 && character.classId && !character.level200WeaponGranted) {
     character.level200WeaponGranted = true;
     const reward = level200MythicWeapon(character.classId);
     if (reward) character.inventory.unshift(reward);
   }
+}
+
+export function addXp(character, amount) {
+  if (character.level >= 999) { character.level = 999; character.xp = 0; return []; }
+  character.xp += amount;
+  const levels = [];
+  while (character.level < 999 && character.xp >= xpForLevel(character.level)) {
+    character.xp -= xpForLevel(character.level);
+    growOneLevel(character);
+    levels.push(character.level);
+  }
+  finishLevelGain(character, levels.length > 0);
+  if (character.level >= 999) character.xp = 0;
+  return levels;
+}
+
+// Grants levels directly, bypassing xp (e.g. a coupon's guaranteed
+// level-up scroll) - same per-level growth and level-200 weapon grant as
+// addXp, just not gated behind an xp threshold.
+export function grantLevels(character, amount) {
+  const levels = [];
+  while (levels.length < amount && character.level < 999) {
+    growOneLevel(character);
+    levels.push(character.level);
+  }
+  finishLevelGain(character, levels.length > 0);
   return levels;
 }
 
@@ -201,6 +222,18 @@ export function equippedItems(character) {
   ensureRpgCharacter(character);
   const equipment = character.equipment;
   return [equipment.helmet, equipment.armor, equipment.gloves, equipment.boots, equipment.weapon, equipment.necklace, ...equipment.rings, ...equipment.earrings].filter(Boolean);
+}
+
+// The single most valuable piece currently worn - highest rarity, ties
+// broken by enhancement. Used for the ascension visual effect and as the
+// default target for effects that enhance "your gear" without the player
+// picking a specific slot (e.g. a guaranteed-enhance coupon).
+export function strongestEquippedItem(character) {
+  return equippedItems(character).sort((a, b) => {
+    const aScore = getRarity(a.rarity).order * 100 + (a.enhancement ?? 0);
+    const bScore = getRarity(b.rarity).order * 100 + (b.enhancement ?? 0);
+    return bScore - aScore;
+  })[0] ?? null;
 }
 
 export function potionCount(character, potionId) {

@@ -95,10 +95,12 @@
           <option value="weapon">직업 유니크 무기 지급</option>
           <option value="mythic-weapon">신화급 무기 지급</option>
           <option value="mythic-accessory">신화급 악세서리 지급</option>
+          <option value="enhance">강화 주문서 (현재 강화 수치에서 +N, 최대 +20)</option>
+          <option value="levelup">레벨업 주문서 (현재 레벨에서 +N)</option>
           <option value="drain">골드 전부 삭제(장난용)</option>
         </select>
-        <label for="coupon-amount">골드량 (골드 지급일 때만)</label>
-        <input id="coupon-amount" type="number" min="0" placeholder="예: 200000" />
+        <label for="coupon-amount">수량 (골드/강화/레벨 지급일 때 필수)</label>
+        <input id="coupon-amount" type="number" min="0" placeholder="예: 골드=200000, 강화=3, 레벨=10" />
         <div class="checkbox-row"><input id="coupon-reusable" type="checkbox" /><label for="coupon-reusable">여러 번 사용 가능(재사용)</label></div>
         <button id="coupon-submit">쿠폰 등록/수정</button>
         <div id="coupon-msg"></div>
