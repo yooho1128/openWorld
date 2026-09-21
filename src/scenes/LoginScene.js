@@ -80,7 +80,7 @@ export class LoginScene extends Phaser.Scene {
     try {
       const response = await fetch(`/api/character?nickname=${encodeURIComponent(nickname)}`);
       if (response.ok) {
-        const { character } = await response.json();
+        const { character, saveVersion } = await response.json();
         if (character?.version === 'rpg-1') {
           const loaded = ensureRpgCharacter(character);
           const stats = combatStats(loaded);
@@ -88,6 +88,7 @@ export class LoginScene extends Phaser.Scene {
           loaded.mp = Math.min(loaded.mp, stats.maxMp);
           this.registry.set('nickname', nickname);
           this.registry.set('character', loaded);
+          if (Number.isInteger(saveVersion)) this.registry.set('saveVersion', saveVersion);
           saveCharacter(this);
           closePanel();
           this.scene.start(character.classId ? 'Town' : 'ClassSelect');

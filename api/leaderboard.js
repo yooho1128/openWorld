@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless';
+import { checkRateLimit, clientIp, rejectRateLimited } from '../lib/rateLimit.js';
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
@@ -12,6 +13,8 @@ export default async function handler(req, res) {
   if (!sql) {
     return res.status(503).json({ error: 'Leaderboard database is not configured (DATABASE_URL missing)' });
   }
+  const limit = await checkRateLimit({ bucket: 'leaderboard', key: clientIp(req), limit: 30, windowSeconds: 60 });
+  if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
 
   try {
     await sql`

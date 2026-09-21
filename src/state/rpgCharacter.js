@@ -434,17 +434,36 @@ export function adjustAffinity(character, npcId, delta) {
 // - queueing the latest snapshot and only sending the next one once the
 // in-flight request settles - guarantees the DB always ends up with the
 // most recent state instead of whichever request happened to finish last.
+//
+// That only protects ordering within this one tab/session, though. Each
+// queued send also carries saveVersion, the character row's compare-and-swap
+// counter from the server (see api/character.js) - not to be confused with
+// character.version, which is just the save-schema tag ('rpg-1'). Sending
+// back the version we last saw lets the server detect a second tab (or a
+// stale reload) autosaving the same character and reject the losing write
+// with a 409 instead of silently overwriting newer progress; once that
+// happens further saves are stopped, since they'd only fail the same way.
 let activeSave = null;
 let queuedSaveBody = null;
+let saveConflicted = false;
 
-function flushSaveQueue() {
+function flushSaveQueue(scene) {
   const body = queuedSaveBody;
   queuedSaveBody = null;
   activeSave = fetch('/api/character', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body,
+  }).then(async (res) => {
+    if (res.status === 409) {
+      saveConflicted = true;
+      alert('다른 곳에서 이 캐릭터로 접속 중이라 저장이 중단되었습니다. 페이지를 새로고침해주세요.');
+      return;
+    }
+    if (!res.ok) return;
+    const { saveVersion } = await res.json();
+    if (Number.isInteger(saveVersion)) scene.registry.set('saveVersion', saveVersion);
   }).catch(() => {}).finally(() => {
     activeSave = null;
-    if (queuedSaveBody) flushSaveQueue();
+    if (queuedSaveBody && !saveConflicted) flushSaveQueue(scene);
   });
 }
 
@@ -455,8 +474,9 @@ export async function waitForPendingSaves() {
 export function saveCharacter(scene) {
   const nickname = scene.registry.get('nickname');
   const character = scene.registry.get('character');
-  if (!nickname || !character) return;
+  if (!nickname || !character || saveConflicted) return;
   ensureRpgCharacter(character);
-  queuedSaveBody = JSON.stringify({ nickname, character });
-  if (!activeSave) flushSaveQueue();
+  const saveVersion = scene.registry.get('saveVersion') ?? null;
+  queuedSaveBody = JSON.stringify({ nickname, character, saveVersion });
+  if (!activeSave) flushSaveQueue(scene);
 }

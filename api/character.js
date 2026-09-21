@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import { hasValidAdminSession, isMasterNickname } from '../lib/adminAuth.js';
+import { checkRateLimit, clientIp, rejectRateLimited } from '../lib/rateLimit.js';
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
@@ -15,9 +16,42 @@ async function ensureTable() {
     CREATE TABLE IF NOT EXISTS characters (
       nickname TEXT PRIMARY KEY,
       data JSONB NOT NULL,
+      save_version INTEGER NOT NULL DEFAULT 1,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
+  // Kept separate from the CREATE above so installs from before save_version
+  // existed still pick up the column (CREATE TABLE IF NOT EXISTS is a no-op
+  // against an existing table).
+  await sql`ALTER TABLE characters ADD COLUMN IF NOT EXISTS save_version INTEGER NOT NULL DEFAULT 1`;
+}
+
+// Compare-and-swap write: a save only applies if the client's last-known
+// save_version still matches what's stored, so two tabs autosaving the same
+// character can't silently clobber each other - the loser gets a 409 with
+// the current version instead. A null clientVersion (nothing loaded yet, ie.
+// a brand-new character) always writes unconditionally.
+async function saveWithVersion(nickname, data, clientVersion) {
+  const payload = JSON.stringify(data);
+  if (clientVersion !== null) {
+    const updated = await sql`
+      UPDATE characters SET data = ${payload}, save_version = save_version + 1, updated_at = now()
+      WHERE nickname = ${nickname} AND save_version = ${clientVersion}
+      RETURNING save_version
+    `;
+    if (updated.length) return { ok: true, version: updated[0].save_version };
+    const existing = await sql`SELECT save_version FROM characters WHERE nickname = ${nickname}`;
+    if (existing.length) return { ok: false, currentVersion: existing[0].save_version };
+    // Row vanished between load and save (shouldn't normally happen) - fall
+    // through to an unconditional insert rather than stranding the client.
+  }
+  const inserted = await sql`
+    INSERT INTO characters (nickname, data, save_version, updated_at)
+    VALUES (${nickname}, ${payload}, 1, now())
+    ON CONFLICT (nickname) DO UPDATE SET data = excluded.data, save_version = characters.save_version + 1, updated_at = now()
+    RETURNING save_version
+  `;
+  return { ok: true, version: inserted[0].save_version };
 }
 
 function safeNickname(value) {
@@ -170,18 +204,22 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'Save database is not configured (DATABASE_URL missing)' });
   }
 
+  const ip = clientIp(req);
+
   if (req.method === 'GET') {
     const nickname = safeNickname(req.query.nickname);
     if (!nickname) return res.status(400).json({ error: 'nickname is required' });
     if (isMasterNickname(nickname) && !hasValidAdminSession(req, nickname)) {
       return res.status(401).json({ error: 'admin_auth_required' });
     }
+    const limit = await checkRateLimit({ bucket: 'character-get', key: ip, limit: 30, windowSeconds: 60 });
+    if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
 
     try {
       await ensureTable();
-      const rows = await sql`SELECT data FROM characters WHERE nickname = ${nickname}`;
+      const rows = await sql`SELECT data, save_version FROM characters WHERE nickname = ${nickname}`;
       if (!rows.length) return res.status(404).json({ error: 'not_found' });
-      return res.json({ character: rows[0].data });
+      return res.json({ character: rows[0].data, saveVersion: rows[0].save_version });
     } catch (err) {
       console.error('Character GET failed:', err);
       return res.status(502).json({ error: 'Save unavailable' });
@@ -189,7 +227,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { nickname: rawNickname, character } = req.body ?? {};
+    const { nickname: rawNickname, character, saveVersion } = req.body ?? {};
     const nickname = safeNickname(rawNickname);
     if (!nickname) return res.status(400).json({ error: 'nickname is required' });
     if (isMasterNickname(nickname) && !hasValidAdminSession(req, nickname)) {
@@ -198,16 +236,21 @@ export default async function handler(req, res) {
     if (!character || typeof character !== 'object') {
       return res.status(400).json({ error: 'character is required' });
     }
+    // Autosaves fire on nearly every player action (each battle turn, gear
+    // change, dialogue choice...), so this stays generous - it's here to
+    // stop scripted abuse, not to throttle normal play.
+    const limit = await checkRateLimit({ bucket: 'character-post', key: `${ip}:${nickname}`, limit: 120, windowSeconds: 60 });
+    if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
     const safeCharacter = sanitizeCharacter(character, nickname);
+    const clientVersion = Number.isInteger(saveVersion) ? saveVersion : null;
 
     try {
       await ensureTable();
-      await sql`
-        INSERT INTO characters (nickname, data, updated_at)
-        VALUES (${nickname}, ${JSON.stringify(safeCharacter)}, now())
-        ON CONFLICT (nickname) DO UPDATE SET data = excluded.data, updated_at = now()
-      `;
-      return res.json({ ok: true });
+      const result = await saveWithVersion(nickname, safeCharacter, clientVersion);
+      if (!result.ok) {
+        return res.status(409).json({ error: 'save_conflict', saveVersion: result.currentVersion });
+      }
+      return res.json({ ok: true, saveVersion: result.version });
     } catch (err) {
       console.error('Character POST failed:', err);
       return res.status(502).json({ error: 'Failed to save character' });
