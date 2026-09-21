@@ -126,9 +126,19 @@ export class SettingsScene extends Phaser.Scene {
       saveCharacter(this);
       return this.render(gained.length ? `주문서의 힘으로 Lv.${before} → Lv.${this.character.level}(으)로 레벨업했습니다!` : '이미 최대 레벨(999)입니다.');
     }
-    this.character.gold = 0;
+    if (result.effect === 'drain') {
+      this.character.gold = 0;
+      saveCharacter(this);
+      return this.render('쿠폰의 악마 같은 힘으로 보유 골드가 모두 사라졌습니다.');
+    }
+    // Falling through here used to mean "drain" by default, so any effect
+    // this client doesn't recognize yet (a new one added server-side while
+    // an old cached bundle is still running, a typo, ...) silently wiped the
+    // player's gold instead of failing safely. Do nothing destructive and
+    // ask for a refresh instead.
+    this.character.redeemedCoupons.pop();
     saveCharacter(this);
-    this.render('쿠폰의 악마 같은 힘으로 보유 골드가 모두 사라졌습니다.');
+    this.render('알 수 없는 쿠폰 효과입니다. 페이지를 새로고침한 뒤 다시 시도해주세요.');
   }
 
   // Admin-only: create or update a coupon directly in the coupons table, no
