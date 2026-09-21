@@ -99,14 +99,21 @@ export function normalizeEquipmentStats(item) {
   // curve changes. Capping it keeps the "higher item level is a little
   // better" feel fusion relies on without that runaway effect.
   //
-  // The per-level rate has to be small enough that the 1.5x cap isn't hit
-  // well before level 999 - it previously used 0.008, which reaches 1.5x
-  // already at level 64, so every unique from level 64 up through 999 (the
-  // large majority of the game) rolled byte-for-byte identical stats and a
-  // higher-level dungeon never actually dropped anything better. Scaling
-  // the rate so the cap lands at level 999 instead keeps the same bound but
-  // spreads it across the whole range.
-  const levelMultiplier = Math.min(1.5, 1 + (level - 1) * (0.5 / 998));
+  // Levels 1-64 use the original 0.008-per-level ramp untouched, so nothing
+  // any live character already has gets recalculated to a lower value than
+  // before. It used to flatly cap at 1.5x there (reached at level 64) and
+  // stay 1.5x all the way to 999 - meaning every unique from level 64 up
+  // (the large majority of the game) rolled byte-for-byte identical stats,
+  // so a higher-level dungeon never actually dropped anything better than a
+  // level ~64 unique. Past level 64 the multiplier keeps climbing, slower,
+  // up to 2.5x at level 999, so there's still real, ever-increasing
+  // headroom the whole way to the level cap instead of flattening out
+  // two-thirds of the way through level 1.
+  const RAMP_LEVEL = 64;
+  const RAMP_CAP = 1.5;
+  const levelMultiplier = level <= RAMP_LEVEL
+    ? 1 + (level - 1) * 0.008
+    : RAMP_CAP + (level - RAMP_LEVEL) * ((2.5 - RAMP_CAP) / (999 - RAMP_LEVEL));
   const sourceMultiplier = String(item.source ?? '').startsWith('fallen-') ? 1.12 : 1;
   item.level = level;
   item.stats = Object.fromEntries(Object.entries(catalog.stats).map(([key, value]) => [key, Math.round(value * levelMultiplier * sourceMultiplier)]));
