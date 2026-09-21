@@ -7,16 +7,19 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Tight brute-force guard, shared with every other endpoint that checks
-  // this same admin password (admin-coupon/admin-mail/admin-title-mail) -
-  // otherwise guessing could just move to whichever of those isn't limited.
-  const limit = await checkRateLimit({ bucket: 'admin-password', key: clientIp(req), limit: 5, windowSeconds: 600 });
-  if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
-
   const nickname = typeof req.body?.nickname === 'string' ? req.body.nickname.trim() : '';
   if (!isMasterNickname(nickname)) return res.status(403).json({ error: 'forbidden' });
   if (!adminPasswordConfigured()) return res.status(503).json({ error: 'Admin password is not configured' });
-  if (!verifyAdminPassword(req.body?.password)) return res.status(401).json({ error: 'invalid_password' });
+  if (!verifyAdminPassword(req.body?.password)) {
+    // Tight brute-force guard, shared with every other endpoint that checks
+    // this same admin password (admin-coupon/admin-mail/admin-title-mail) -
+    // otherwise guessing could just move to whichever of those isn't
+    // limited. Only spent on a wrong password: the right one is unlimited,
+    // since admin.html resends it on every single action.
+    const limit = await checkRateLimit({ bucket: 'admin-password', key: clientIp(req), limit: 5, windowSeconds: 600 });
+    if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
+    return res.status(401).json({ error: 'invalid_password' });
+  }
 
   res.setHeader('Set-Cookie', createAdminCookie(nickname));
   return res.json({ ok: true, classId: masterClassId(nickname) });

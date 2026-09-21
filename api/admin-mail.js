@@ -33,13 +33,18 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'method_not_allowed' });
   }
   if (!sql) return res.status(503).json({ ok: false, error: 'database_not_configured' });
-  // This checks the admin password directly (no session cookie shortcut),
-  // so it shares admin-login's brute-force budget rather than opening a
-  // second, unguarded way to guess it.
-  const limit = await checkRateLimit({ bucket: 'admin-password', key: clientIp(req), limit: 5, windowSeconds: 600 });
-  if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
   if (!adminPasswordConfigured()) return res.status(503).json({ ok: false, error: 'admin_password_not_configured' });
-  if (!verifyAdminPassword(req.body?.password)) return res.status(401).json({ ok: false, error: 'invalid_password' });
+  if (!verifyAdminPassword(req.body?.password)) {
+    // This checks the admin password directly (no session cookie shortcut),
+    // so it shares admin-login's brute-force budget rather than opening a
+    // second, unguarded way to guess it. Only spent on a wrong password -
+    // admin.html resends the (correct) password on every action, so
+    // limiting successes too would lock legitimate use out almost
+    // immediately.
+    const limit = await checkRateLimit({ bucket: 'admin-password', key: clientIp(req), limit: 5, windowSeconds: 600 });
+    if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
+    return res.status(401).json({ ok: false, error: 'invalid_password' });
+  }
 
   const nickname = safeNickname(req.body?.nickname);
   if (!nickname) return res.status(400).json({ ok: false, error: 'invalid_request' });

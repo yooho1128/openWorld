@@ -13,10 +13,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'method_not_allowed' });
   }
   if (!sql) return res.status(503).json({ ok: false, error: 'database_not_configured' });
-  // Shares admin-login's brute-force budget - see admin-mail.js.
-  const limit = await checkRateLimit({ bucket: 'admin-password', key: clientIp(req), limit: 5, windowSeconds: 600 });
-  if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
-  if (!adminPasswordConfigured() || !verifyAdminPassword(req.body?.password)) return res.status(401).json({ ok: false, error: 'unauthorized' });
+  if (!adminPasswordConfigured() || !verifyAdminPassword(req.body?.password)) {
+    // Shares admin-login's brute-force budget - see admin-mail.js. Only
+    // spent on a wrong password, not every call.
+    const limit = await checkRateLimit({ bucket: 'admin-password', key: clientIp(req), limit: 5, windowSeconds: 600 });
+    if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
+    return res.status(401).json({ ok: false, error: 'unauthorized' });
+  }
 
   const target = typeof req.body?.target === 'string' ? req.body.target.trim().slice(0, 20) : '';
   if (!target) return res.status(400).json({ ok: false, error: 'target_required' });

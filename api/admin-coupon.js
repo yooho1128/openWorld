@@ -35,15 +35,16 @@ export default async function handler(req, res) {
 
   const nickname = typeof req.body?.nickname === 'string' ? req.body.nickname.trim() : '';
   const hasSession = nickname && isMasterNickname(nickname) && hasValidAdminSession(req, nickname);
-  // Only the raw-password path can be brute-forced, so only it spends budget
-  // from the shared admin-login limiter - a logged-in admin managing coupons
-  // through the session cookie isn't throttled by this.
-  if (!hasSession) {
+  const hasPassword = adminPasswordConfigured() && verifyAdminPassword(req.body?.password);
+  if (!hasSession && !hasPassword) {
+    // Only a failed/absent credential spends the shared admin-login budget -
+    // admin.html resends the (correct) password on every single action
+    // (list/create/disable/...), so limiting successes too would lock
+    // legitimate use out after a handful of clicks.
     const limit = await checkRateLimit({ bucket: 'admin-password', key: clientIp(req), limit: 5, windowSeconds: 600 });
     if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
+    return res.status(401).json({ ok: false, error: 'unauthorized' });
   }
-  const hasPassword = adminPasswordConfigured() && verifyAdminPassword(req.body?.password);
-  if (!hasSession && !hasPassword) return res.status(401).json({ ok: false, error: 'unauthorized' });
 
   await ensureTable();
   const action = typeof req.body?.action === 'string' ? req.body.action : 'create';
