@@ -98,7 +98,15 @@ export function normalizeEquipmentStats(item) {
   // it silently reprices every live character's combat power the moment the
   // curve changes. Capping it keeps the "higher item level is a little
   // better" feel fusion relies on without that runaway effect.
-  const levelMultiplier = Math.min(1.5, 1 + (level - 1) * 0.008);
+  //
+  // The per-level rate has to be small enough that the 1.5x cap isn't hit
+  // well before level 999 - it previously used 0.008, which reaches 1.5x
+  // already at level 64, so every unique from level 64 up through 999 (the
+  // large majority of the game) rolled byte-for-byte identical stats and a
+  // higher-level dungeon never actually dropped anything better. Scaling
+  // the rate so the cap lands at level 999 instead keeps the same bound but
+  // spreads it across the whole range.
+  const levelMultiplier = Math.min(1.5, 1 + (level - 1) * (0.5 / 998));
   const sourceMultiplier = String(item.source ?? '').startsWith('fallen-') ? 1.12 : 1;
   item.level = level;
   item.stats = Object.fromEntries(Object.entries(catalog.stats).map(([key, value]) => [key, Math.round(value * levelMultiplier * sourceMultiplier)]));
