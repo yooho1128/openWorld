@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { getClass, getAdvancement } from '../data/rpg.js';
-import { getRarity, getSlot, equipmentDisplayName, enhancementStats, enhancementVisualClass, levelEffectiveness, rollGachaEquipment } from '../data/equipment.js';
+import { compareBadgeHtml, getRarity, getSlot, equipmentDisplayName, enhancementStats, enhancementVisualClass, levelEffectiveness, rollGachaEquipment } from '../data/equipment.js';
 import { BIOME_LABELS } from '../data/monsters.js';
 import { getTitle } from '../data/quests.js';
 import { addLoot, combatPower, combatStats, ensureRpgCharacter, equipItem, unequipItem, saveCharacter } from '../state/rpgCharacter.js';
@@ -54,7 +54,8 @@ export class StatusScene extends Phaser.Scene {
       const blocked = item.classId && item.classId !== c.classId;
       const eff = levelEffectiveness(item.level ?? 1, c.level);
       const levelNote = eff < 1 ? ` · Lv.${item.level ?? 1} (효과 ${Math.round(eff * 100)}%)` : '';
-      return `<div class="gear-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}${levelNote}</small><small>${statsText}</small></div><button id="equip-${index}" ${blocked ? 'disabled' : ''}>${blocked ? '타 직업' : '착용'}</button></div>`;
+      const compareHtml = compareBadgeHtml(item, c.equipment, c.level);
+      return `<div class="gear-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${getSlot(item.slot).name} · 내구도 ${item.durability}/${item.maxDurability}${levelNote}</small><small>${statsText}</small>${compareHtml}</div><button id="equip-${index}" ${blocked ? 'disabled' : ''}>${blocked ? '타 직업' : '착용'}</button></div>`;
     }).join('') : '<p class="empty-state">착용할 장비가 없습니다.</p>';
     const setBonus = stats.setBonus;
     const setBonusHtml = setBonus?.count >= 10

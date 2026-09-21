@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { affinityPriceMultiplier } from '../data/rpg.js';
-import { EQUIPMENT_SLOTS, baseItemPower, enhancementVisualClass, equipmentDisplayName, getRarity, getSlot, shopEquipment } from '../data/equipment.js';
+import { EQUIPMENT_SLOTS, compareBadgeHtml, enhancementVisualClass, equipmentDisplayName, getRarity, getSlot, shopEquipment } from '../data/equipment.js';
 import { getPotion, POTIONS, potionDescription } from '../data/potions.js';
 import { addLoot, addPotion, adjustAffinity, ensureRpgCharacter, saveCharacter, totalPotionCount } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
@@ -41,28 +41,6 @@ function groupedEquipmentHtml(entries, sortKey, renderCard) {
     .sort(([rarityA], [rarityB]) => getRarity(rarityB).order - getRarity(rarityA).order)
     .map(([rarity, group]) => `<section class="rarity-group"><h4 class="rarity-heading rarity-${rarity}">${getRarity(rarity).name} 등급 <span>${group.length}개</span></h4>${sortEquipmentEntries(group, sortKey).map(renderCard).join('')}</section>`)
     .join('');
-}
-
-// 강화 수치·내구도는 돈만 들이면 새 장비에도 똑같이 만들 수 있는 값이라 빼고,
-// 부위/희귀도/변형이 만드는 "타고난" 스탯만으로 착용 중인 장비와 비교한다.
-function compareToEquipped(item, equipment, characterLevel) {
-  const key = item.slot === 'ring' ? 'rings' : item.slot === 'earring' ? 'earrings' : item.slot;
-  const slotValue = equipment[key];
-  const equipped = (Array.isArray(slotValue) ? slotValue : [slotValue]).filter(Boolean);
-  const myPower = baseItemPower(item, characterLevel);
-  if (!equipped.length) return { status: 'empty', diff: myPower };
-  const weakest = equipped.reduce((min, cur) => (baseItemPower(cur, characterLevel) < baseItemPower(min, characterLevel) ? cur : min));
-  const diff = myPower - baseItemPower(weakest, characterLevel);
-  const status = diff > 0 ? 'stronger' : diff < 0 ? 'weaker' : 'equal';
-  return { status, diff, name: equipmentDisplayName(weakest) };
-}
-
-function compareBadgeHtml(item, equipment, characterLevel) {
-  const cmp = compareToEquipped(item, equipment, characterLevel);
-  if (cmp.status === 'empty') return `<small class="compare-badge compare-empty">빈 슬롯 · 바로 장착 가능</small>`;
-  if (cmp.status === 'stronger') return `<small class="compare-badge compare-up">▲ 착용 중인 ${cmp.name}보다 강함 (+${cmp.diff})</small>`;
-  if (cmp.status === 'weaker') return `<small class="compare-badge compare-down">▼ 착용 중인 ${cmp.name}보다 약함 (${cmp.diff})</small>`;
-  return `<small class="compare-badge compare-equal">- 착용 중인 ${cmp.name}과 동일함</small>`;
 }
 
 function tabsHtml(prefix, activeTab) {

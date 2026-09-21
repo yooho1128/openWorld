@@ -319,6 +319,42 @@ export function baseItemPower(item, characterLevel = null) {
   return Math.round(raw * levelFactor);
 }
 
+// Compares an item to whatever's currently worn in its slot, using
+// baseItemPower (innate stats only, no enhancement/durability) so the badge
+// reflects the item itself rather than money either item could catch up on.
+// Shared by every screen that lists unequipped gear next to a slot (bag,
+// shop, status) so "would this be an upgrade" always means the same thing.
+export function compareToEquipped(item, equipment, characterLevel) {
+  const key = item.slot === 'ring' ? 'rings' : item.slot === 'earring' ? 'earrings' : item.slot;
+  const slotValue = equipment[key];
+  const equipped = (Array.isArray(slotValue) ? slotValue : [slotValue]).filter(Boolean);
+  const myPower = baseItemPower(item, characterLevel);
+  if (!equipped.length) return { status: 'empty', diff: myPower };
+  const weakest = equipped.reduce((min, cur) => (baseItemPower(cur, characterLevel) < baseItemPower(min, characterLevel) ? cur : min));
+  const diff = myPower - baseItemPower(weakest, characterLevel);
+  const status = diff > 0 ? 'stronger' : diff < 0 ? 'weaker' : 'equal';
+  return { status, diff, name: equipmentDisplayName(weakest) };
+}
+
+export function compareBadgeHtml(item, equipment, characterLevel) {
+  const cmp = compareToEquipped(item, equipment, characterLevel);
+  if (cmp.status === 'empty') return `<small class="compare-badge compare-empty">빈 슬롯 · 바로 장착 가능</small>`;
+  if (cmp.status === 'stronger') return `<small class="compare-badge compare-up">▲ 착용 중인 ${cmp.name}보다 강함 (+${cmp.diff})</small>`;
+  if (cmp.status === 'weaker') return `<small class="compare-badge compare-down">▼ 착용 중인 ${cmp.name}보다 약함 (${cmp.diff})</small>`;
+  return `<small class="compare-badge compare-equal">- 착용 중인 ${cmp.name}과 동일함</small>`;
+}
+
+// Reverse direction for the forge: given a currently-equipped item, is there
+// something already sitting unused in the bag for the same slot that beats
+// it? Surfaced so a player doesn't sink enhancement gold into a piece
+// they're about to replace anyway.
+export function strongerBagAlternative(item, character, characterLevel) {
+  const candidates = (character.inventory ?? []).filter((entry) => entry?.type === 'equipment' && entry.slot === item.slot);
+  if (!candidates.length) return null;
+  const best = candidates.reduce((max, cur) => (baseItemPower(cur, characterLevel) > baseItemPower(max, characterLevel) ? cur : max));
+  return baseItemPower(best, characterLevel) > baseItemPower(item, characterLevel) ? best : null;
+}
+
 export function enhancementStats(item, characterLevel = null) {
   const multiplier = 1 + (item.enhancement ?? 0) * 0.11 + Math.max(0, (item.enhancement ?? 0) - 10) * 0.025;
   const durability = durabilityMultiplier(item);

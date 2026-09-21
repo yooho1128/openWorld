@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ENHANCEMENT_BLESSINGS, ENHANCEMENT_DESTROY_RATES as DESTROY_RATES, getRarity, equipmentDisplayName, enhancementStats, enhancementVisualClass, enhancementSuccessRate, isSafeEnhancement, levelEffectiveness } from '../data/equipment.js';
+import { ENHANCEMENT_BLESSINGS, ENHANCEMENT_DESTROY_RATES as DESTROY_RATES, baseItemPower, getRarity, equipmentDisplayName, enhancementStats, enhancementVisualClass, enhancementSuccessRate, isSafeEnhancement, levelEffectiveness, strongerBagAlternative } from '../data/equipment.js';
 import { affinityPriceMultiplier } from '../data/rpg.js';
 import { adjustAffinity, ensureRpgCharacter, equippedItems, saveCharacter } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
@@ -36,7 +36,10 @@ export class BlacksmithScene extends Phaser.Scene {
       const levelNote = effectiveness < 1 ? `<small class="forge-risk">아이템 Lv.${item.level ?? 1} · 레벨 차이로 효과 ${Math.round(effectiveness * 100)}%</small>` : '';
       const blessingText = activeBlessing ? ` · ${activeBlessing.name} +${activeBlessing.bonus}%` : '';
       const failText = isSafeEnhancement(level) ? ' · 실패 시 유지' : ' · 실패 시 -1';
-      return `<div class="forge-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${statText}</small><small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<small class="forge-risk">성공 ${rate}%${blessingText}${destroy ? ` · 파괴 ${destroy}%` : ''}${failText}</small></div><div class="forge-actions"><button id="forge-${index}" ${level >= 20 ? 'disabled' : ''}>${level >= 20 ? '최대 강화' : `강화 ${cost.toLocaleString()}G`}</button><button id="repair-${index}" class="repair" ${repairCost <= 0 ? 'disabled' : ''}>${repairCost > 0 ? `수리 ${repairCost.toLocaleString()}G` : '내구도 최대'}</button></div></div>`;
+      const alt = strongerBagAlternative(item, this.character, this.character.level);
+      const altDiff = alt ? baseItemPower(alt, this.character.level) - baseItemPower(item, this.character.level) : 0;
+      const altHtml = alt ? `<small class="compare-badge compare-down">▼ 가방의 ${equipmentDisplayName(alt)}이(가) 더 강함 (+${altDiff}) · 여기 강화하기 전에 상태창에서 교체를 고려하세요</small>` : '';
+      return `<div class="forge-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${statText}</small><small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<small class="forge-risk">성공 ${rate}%${blessingText}${destroy ? ` · 파괴 ${destroy}%` : ''}${failText}</small>${altHtml}</div><div class="forge-actions"><button id="forge-${index}" ${level >= 20 ? 'disabled' : ''}>${level >= 20 ? '최대 강화' : `강화 ${cost.toLocaleString()}G`}</button><button id="repair-${index}" class="repair" ${repairCost <= 0 ? 'disabled' : ''}>${repairCost > 0 ? `수리 ${repairCost.toLocaleString()}G` : '내구도 최대'}</button></div></div>`;
     }).join('') : '<p class="empty-state">착용 중인 장비가 없습니다. 상태창에서 먼저 장비를 착용해주세요.</p>';
     const affinity = this.character.affinity.blacksmith ?? 0;
     const blessingButtons = Object.entries(ENHANCEMENT_BLESSINGS).map(([key, blessing]) => {
