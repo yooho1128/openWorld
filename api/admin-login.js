@@ -7,9 +7,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Tight brute-force guard: only 5 nicknames exist and this endpoint is the
-  // one place their password gets checked.
-  const limit = await checkRateLimit({ bucket: 'admin-login', key: clientIp(req), limit: 5, windowSeconds: 600 });
+  // Tight brute-force guard, shared with every other endpoint that checks
+  // this same admin password (admin-coupon/admin-mail/admin-title-mail) -
+  // otherwise guessing could just move to whichever of those isn't limited.
+  const limit = await checkRateLimit({ bucket: 'admin-password', key: clientIp(req), limit: 5, windowSeconds: 600 });
   if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
 
   const nickname = typeof req.body?.nickname === 'string' ? req.body.nickname.trim() : '';

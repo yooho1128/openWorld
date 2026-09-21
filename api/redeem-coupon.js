@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless';
+import { checkRateLimit, clientIp, rejectRateLimited } from '../lib/rateLimit.js';
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
@@ -55,6 +56,10 @@ export default async function handler(req, res) {
   const nickname = safeNickname(req.body?.nickname);
   const code = typeof req.body?.code === 'string' ? req.body.code.trim().slice(0, 60) : '';
   if (!nickname || !code) return res.status(400).json({ ok: false, reason: 'invalid_request' });
+  // Coupon codes are secret strings redeemable for gold/gear, so this guards
+  // against guessing them by brute force.
+  const limit = await checkRateLimit({ bucket: 'redeem-coupon', key: `${clientIp(req)}:${nickname}`, limit: 20, windowSeconds: 60 });
+  if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
 
   try {
     await ensureTables();

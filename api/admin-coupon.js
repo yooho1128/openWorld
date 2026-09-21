@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import { adminPasswordConfigured, hasValidAdminSession, isMasterNickname, verifyAdminPassword } from '../lib/adminAuth.js';
+import { checkRateLimit, clientIp, rejectRateLimited } from '../lib/rateLimit.js';
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
@@ -33,6 +34,13 @@ export default async function handler(req, res) {
 
   const nickname = typeof req.body?.nickname === 'string' ? req.body.nickname.trim() : '';
   const hasSession = nickname && isMasterNickname(nickname) && hasValidAdminSession(req, nickname);
+  // Only the raw-password path can be brute-forced, so only it spends budget
+  // from the shared admin-login limiter - a logged-in admin managing coupons
+  // through the session cookie isn't throttled by this.
+  if (!hasSession) {
+    const limit = await checkRateLimit({ bucket: 'admin-password', key: clientIp(req), limit: 5, windowSeconds: 600 });
+    if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
+  }
   const hasPassword = adminPasswordConfigured() && verifyAdminPassword(req.body?.password);
   if (!hasSession && !hasPassword) return res.status(401).json({ ok: false, error: 'unauthorized' });
 

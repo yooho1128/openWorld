@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import { adminPasswordConfigured, verifyAdminPassword } from '../lib/adminAuth.js';
+import { checkRateLimit, clientIp, rejectRateLimited } from '../lib/rateLimit.js';
 import { classCouponWeapon, mythicAccessoryCoupon, mythicWeaponCoupon } from '../src/data/equipment.js';
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
@@ -32,6 +33,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'method_not_allowed' });
   }
   if (!sql) return res.status(503).json({ ok: false, error: 'database_not_configured' });
+  // This checks the admin password directly (no session cookie shortcut),
+  // so it shares admin-login's brute-force budget rather than opening a
+  // second, unguarded way to guess it.
+  const limit = await checkRateLimit({ bucket: 'admin-password', key: clientIp(req), limit: 5, windowSeconds: 600 });
+  if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
   if (!adminPasswordConfigured()) return res.status(503).json({ ok: false, error: 'admin_password_not_configured' });
   if (!verifyAdminPassword(req.body?.password)) return res.status(401).json({ ok: false, error: 'invalid_password' });
 

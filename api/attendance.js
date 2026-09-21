@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import { hasValidAdminSession, isMasterNickname } from '../lib/adminAuth.js';
+import { checkRateLimit, clientIp, rejectRateLimited } from '../lib/rateLimit.js';
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
@@ -73,6 +74,8 @@ export default async function handler(req, res) {
   const nickname = safeNickname(req.method === 'GET' ? req.query.nickname : req.body?.nickname);
   if (!nickname) return res.status(400).json({ error: 'nickname is required' });
   if (isMasterNickname(nickname) && !hasValidAdminSession(req, nickname)) return res.status(401).json({ error: 'admin_auth_required' });
+  const limit = await checkRateLimit({ bucket: 'attendance', key: `${clientIp(req)}:${nickname}`, limit: 20, windowSeconds: 60 });
+  if (!limit.allowed) return rejectRateLimited(res, limit.retryAfter);
 
   try {
     await ensureTables();
