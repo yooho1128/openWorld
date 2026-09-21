@@ -443,15 +443,25 @@ export function adjustAffinity(character, npcId, delta) {
 // stale reload) autosaving the same character and reject the losing write
 // with a 409 instead of silently overwriting newer progress; once that
 // happens further saves are stopped, since they'd only fail the same way.
+//
+// saveVersion has to be read fresh right when a request actually goes out,
+// not when it's queued: a save queued while the previous one is still in
+// flight would otherwise capture the version that's about to be superseded
+// by that in-flight request's response, so it always sends slightly stale -
+// and gets a false 409 the moment the earlier save's response lands, even
+// solo in a single tab. So the queue holds the nickname/character to send,
+// and the request body (version included) is only built at send time.
 let activeSave = null;
-let queuedSaveBody = null;
+let queuedSave = null;
 let saveConflicted = false;
 
 function flushSaveQueue(scene) {
-  const body = queuedSaveBody;
-  queuedSaveBody = null;
+  const { nickname, character } = queuedSave;
+  queuedSave = null;
+  const saveVersion = scene.registry.get('saveVersion') ?? null;
   activeSave = fetch('/api/character', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body,
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nickname, character, saveVersion }),
   }).then(async (res) => {
     if (res.status === 409) {
       saveConflicted = true;
@@ -459,11 +469,11 @@ function flushSaveQueue(scene) {
       return;
     }
     if (!res.ok) return;
-    const { saveVersion } = await res.json();
-    if (Number.isInteger(saveVersion)) scene.registry.set('saveVersion', saveVersion);
+    const { saveVersion: nextVersion } = await res.json();
+    if (Number.isInteger(nextVersion)) scene.registry.set('saveVersion', nextVersion);
   }).catch(() => {}).finally(() => {
     activeSave = null;
-    if (queuedSaveBody && !saveConflicted) flushSaveQueue(scene);
+    if (queuedSave && !saveConflicted) flushSaveQueue(scene);
   });
 }
 
@@ -476,7 +486,6 @@ export function saveCharacter(scene) {
   const character = scene.registry.get('character');
   if (!nickname || !character || saveConflicted) return;
   ensureRpgCharacter(character);
-  const saveVersion = scene.registry.get('saveVersion') ?? null;
-  queuedSaveBody = JSON.stringify({ nickname, character, saveVersion });
+  queuedSave = { nickname, character };
   if (!activeSave) flushSaveQueue(scene);
 }
