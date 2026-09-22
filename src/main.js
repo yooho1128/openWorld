@@ -19,6 +19,7 @@ import { MailboxScene } from './scenes/MailboxScene.js';
 import { EventScene } from './scenes/EventScene.js';
 import { AstrologerScene } from './scenes/AstrologerScene.js';
 import { FusionScene } from './scenes/FusionScene.js';
+import { WorldBossScene } from './scenes/WorldBossScene.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -34,7 +35,7 @@ const config = {
     // 2 so a thumb can hold a d-pad direction while the other taps interact.
     activePointers: 2,
   },
-  scene: [BootScene, LoginScene, CreateScene, ClassScene, TownScene, HuntScene, BattleScene, InventoryScene, TavernScene, NPCScene, StatusScene, BlacksmithScene, SettingsScene, AdvancementScene, QuestScene, RankingScene, MailboxScene, EventScene, AstrologerScene, FusionScene],
+  scene: [BootScene, LoginScene, CreateScene, ClassScene, TownScene, HuntScene, BattleScene, WorldBossScene, InventoryScene, TavernScene, NPCScene, StatusScene, BlacksmithScene, SettingsScene, AdvancementScene, QuestScene, RankingScene, MailboxScene, EventScene, AstrologerScene, FusionScene],
 };
 
 new Phaser.Game(config);

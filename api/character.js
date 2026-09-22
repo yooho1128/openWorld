@@ -173,6 +173,7 @@ function sanitizeCharacter(input, nickname) {
     victories: clampInt(c.victories, 0, 10_000_000, 0),
     defeats: clampInt(c.defeats, 0, 10_000_000, 0),
     bossVictories: clampInt(c.bossVictories, 0, 10_000_000, 0),
+    worldBossVictories: clampInt(c.worldBossVictories, 0, 10_000_000, 0),
     attendanceDays: clampInt(c.attendanceDays, 0, 7, 0),
     highestEnhancement: clampInt(c.highestEnhancement, 0, 20, 0),
     unlockedTitles,

@@ -19,6 +19,7 @@ export function ensureRpgCharacter(character) {
   character.dialogueHistory ??= {};
   character.hunted ??= {};
   character.bossVictories = Math.max(0, Math.floor(Number(character.bossVictories) || 0));
+  character.worldBossVictories = Math.max(0, Math.floor(Number(character.worldBossVictories) || 0));
   character.attendanceDays = Math.max(0, Math.min(7, Math.floor(Number(character.attendanceDays) || 0)));
   character.unlockedTitles = Array.isArray(character.unlockedTitles) ? [...new Set(character.unlockedTitles.filter((id) => typeof id === 'string'))] : [];
   if (!character.unlockedTitles.includes(GLOBAL_BOSS_TITLE_ID)) character.unlockedTitles.push(GLOBAL_BOSS_TITLE_ID);
@@ -140,7 +141,7 @@ export function createRpgCharacter({ nickname, name, gender }) {
     attack: 12, defense: 8, agility: 10, potions: 3,
     inventory: [], companions: [], activeCompanionId: null,
     affinity: { merchant: 0, guildmaster: 0, innkeeper: 0, blacksmith: 0 },
-    dialogueHistory: {}, victories: 0, defeats: 0, bossVictories: 0, hunted: {}, createdAt: Date.now(),
+    dialogueHistory: {}, victories: 0, defeats: 0, bossVictories: 0, worldBossVictories: 0, hunted: {}, createdAt: Date.now(),
     attendanceDays: 0, highestEnhancement: 0, unlockedTitles: [], equippedTitle: null,
     enhancementBlessings: { small: 0, normal: 0, great: 0 }, activeEnhancementBlessing: null,
     astrologerDaily: { date: '', answered: 0, correct: 0 },

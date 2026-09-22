@@ -29,16 +29,20 @@ export class TownScene extends Phaser.Scene {
     addSceneTitle(this, '에버글렌 모험가 길드', '사냥을 준비하고 왕국의 인연을 쌓으세요');
     this.renderHeroCard();
     HUBS.forEach((hub, index) => this.addHub(hub, index));
-    const eventButton = this.add.rectangle(55, 105, 92, 30, 0x7e2938, 0.98).setStrokeStyle(1, 0xffc56b).setInteractive({ useHandCursor: true });
-    const eventText = this.add.text(55, 105, '✦ 이벤트', { fontSize: '11px', fontStyle: 'bold', color: '#ffe9ae' }).setOrigin(0.5);
+    const eventButton = this.add.rectangle(48, 122, 76, 28, 0x7e2938, 0.98).setStrokeStyle(1, 0xffc56b).setInteractive({ useHandCursor: true });
+    const eventText = this.add.text(48, 122, '✦ 이벤트', { fontSize: '10px', fontStyle: 'bold', color: '#ffe9ae' }).setOrigin(0.5);
     this.tweens.add({ targets: [eventButton, eventText], alpha: 0.68, duration: 850, yoyo: true, repeat: -1 });
     eventButton.on('pointerdown', () => this.scene.start('Event'));
-    const astrologer = this.add.rectangle(240, 105, 104, 30, 0x44316f, 0.98).setStrokeStyle(1, 0xdab8ff).setInteractive({ useHandCursor: true });
-    const astrologerText = this.add.text(240, 105, '✧ 점성술사', { fontSize: '11px', fontStyle: 'bold', color: '#f1ddff' }).setOrigin(0.5);
+    const astrologer = this.add.rectangle(145, 122, 100, 28, 0x44316f, 0.98).setStrokeStyle(1, 0xdab8ff).setInteractive({ useHandCursor: true });
+    const astrologerText = this.add.text(145, 122, '✧ 점성술사', { fontSize: '10px', fontStyle: 'bold', color: '#f1ddff' }).setOrigin(0.5);
     this.tweens.add({ targets: [astrologer, astrologerText], scaleX: 1.035, scaleY: 1.035, duration: 1200, yoyo: true, repeat: -1 });
     astrologer.on('pointerdown', () => this.scene.start('Astrologer'));
-    const settings = this.add.rectangle(425, 105, 82, 30, 0x213229, 0.96).setStrokeStyle(1, 0xe0c274).setInteractive({ useHandCursor: true });
-    this.add.text(425, 105, '⚙ 설정', { fontSize: '11px', color: '#ffe5a5' }).setOrigin(0.5);
+    const worldBoss = this.add.rectangle(287, 122, 124, 28, 0x57152f, 0.98).setStrokeStyle(2, 0xff805d).setInteractive({ useHandCursor: true });
+    const worldBossText = this.add.text(287, 122, '☄ 월드 보스', { fontSize: '11px', fontStyle: 'bold', color: '#ffe59c' }).setOrigin(0.5);
+    this.tweens.add({ targets: [worldBoss, worldBossText], scaleX: 1.04, scaleY: 1.04, alpha: 0.72, duration: 620, yoyo: true, repeat: -1 });
+    worldBoss.on('pointerdown', () => this.scene.start('WorldBoss'));
+    const settings = this.add.rectangle(430, 122, 70, 28, 0x213229, 0.96).setStrokeStyle(1, 0xe0c274).setInteractive({ useHandCursor: true });
+    this.add.text(430, 122, '⚙ 설정', { fontSize: '10px', color: '#ffe5a5' }).setOrigin(0.5);
     settings.on('pointerdown', () => this.scene.start('Settings'));
   }
 
@@ -49,14 +53,14 @@ export class TownScene extends Phaser.Scene {
     const stats = combatStats(c);
     const companion = getCompanion(c.activeCompanionId);
     const title = getTitle(c.equippedTitle);
-    addOrnatePanel(this, 240, 186, 432, 112, { color: 0x1b2d25, border: job.color, alpha: 0.96 });
-    createEquippedHero(this, c, 74, 184, 1.35);
+    addOrnatePanel(this, 240, 196, 432, 112, { color: 0x1b2d25, border: job.color, alpha: 0.96 });
+    createEquippedHero(this, c, 74, 194, 1.35);
     const heroLine = `${title ? `[${title.name}] ` : ''}${c.name}  Lv.${c.level}  ${advancement?.name ?? job.name}  · 전투력 ${combatPower(c).toLocaleString()}`;
-    this.add.text(116, 145, heroLine, { fontSize: heroLine.length > 34 ? '9px' : title ? '11px' : '13px', fontStyle: 'bold', color: '#ffe6a7', fixedWidth: 328 });
-    this.add.text(116, 174, `HP ${c.hp}/${stats.maxHp}   MP ${c.mp}/${stats.maxMp}   골드 ${c.gold.toLocaleString()}`, { fontSize: '11px', color: '#d9c9a6' });
+    this.add.text(116, 155, heroLine, { fontSize: heroLine.length > 34 ? '9px' : title ? '11px' : '13px', fontStyle: 'bold', color: '#ffe6a7', fixedWidth: 328 });
+    this.add.text(116, 184, `HP ${c.hp}/${stats.maxHp}   MP ${c.mp}/${stats.maxMp}   골드 ${c.gold.toLocaleString()}`, { fontSize: '11px', color: '#d9c9a6' });
     const xpText = c.level >= 999 ? 'MAX' : `${c.xp}/${xpForLevel(c.level)}`;
-    this.add.text(116, 198, `공격 ${stats.attack} · 방어 ${stats.defense} · 민첩 ${stats.agility}   경험치 ${xpText}`, { fontSize: '9px', color: '#9fc7a4', fixedWidth: 328 });
-    this.add.text(116, 219, companion ? `동료: ${companion.name} · ${companion.className}` : '동료: 아직 없음 — 여관에서 모집 가능', { fontSize: '10px', color: companion ? '#b8b0e5' : '#a99d89', fixedWidth: 328 });
+    this.add.text(116, 208, `공격 ${stats.attack} · 방어 ${stats.defense} · 민첩 ${stats.agility}   경험치 ${xpText}`, { fontSize: '9px', color: '#9fc7a4', fixedWidth: 328 });
+    this.add.text(116, 229, companion ? `동료: ${companion.name} · ${companion.className}` : '동료: 아직 없음 — 여관에서 모집 가능', { fontSize: '10px', color: companion ? '#b8b0e5' : '#a99d89', fixedWidth: 328 });
   }
 
   addHub(hub, index) {
