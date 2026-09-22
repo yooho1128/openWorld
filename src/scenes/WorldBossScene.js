@@ -1,9 +1,11 @@
 import Phaser from 'phaser';
 import { getAdvancement, getClass, getCompanion } from '../data/rpg.js';
 import { equipmentDisplayName, getRarity, guaranteedBossEquipment } from '../data/equipment.js';
-import { addLoot, addXp, combatStats, companionStats, ensureRpgCharacter, grantCompanionXp, saveCharacter } from '../state/rpgCharacter.js';
+import { getPotion, potionHealValues } from '../data/potions.js';
+import { addLoot, addXp, combatStats, companionStats, ensureRpgCharacter, grantCompanionXp, potionCount, saveCharacter, totalPotionCount, usePotion } from '../state/rpgCharacter.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { addFantasyBackdrop, addOrnatePanel } from '../ui/fantasyTheme.js';
+import { closePanel, openPanel, qs } from '../ui/domForms.js';
 
 const WORLD_DRAGON = {
   id: 'world-dragon-aurex', name: '천공을 삼키는 고룡 · 아우렉스', rank: 'S', biome: 'storm', trait: '천공 붕괴',
@@ -124,30 +126,53 @@ export class WorldBossScene extends Phaser.Scene {
 
   buildCommands() {
     this.commandLayer = this.add.container().setDepth(30);
+    this.mainCommandPage = this.add.container();
+    this.dodgeCommandPage = this.add.container();
+    this.commandLayer.add([this.mainCommandPage, this.dodgeCommandPage]);
     const primarySkill = this.advancement?.skills?.[0] ?? { name: this.job.skill, power: this.job.skillPower, cost: 12, effect: this.character.classId, heal: this.job.heal };
-    this.addCommand(84, 620, '⚔ 공격', () => this.playerAction('attack'), 0x77332d);
-    this.addCommand(240, 620, `✦ ${primarySkill.name}\n${primarySkill.cost}MP`, () => this.playerAction('skill', primarySkill), this.advancement?.color ?? this.job.color);
-    this.addCommand(396, 620, '♜ 방어', () => this.playerAction('guard'), 0x405878);
+    this.addCommand(84, 620, '⚔ 공격', () => this.playerAction('attack'), 0x77332d, this.mainCommandPage);
+    this.addCommand(240, 620, `✦ ${primarySkill.name}\n${primarySkill.cost}MP`, () => this.playerAction('skill', primarySkill), this.advancement?.color ?? this.job.color, this.mainCommandPage);
+    this.addCommand(396, 620, '♜ 방어', () => this.playerAction('guard'), 0x405878, this.mainCommandPage);
+    this.potionCommands = [];
+    this.potionCommands.push(this.addCommand(84, 683, '', () => this.openPotionMenu(), 0x3f7456, this.mainCommandPage));
+    this.addCommand(240, 683, '회피 전술 ▶', () => this.setCommandPage('dodge'), 0x51446e, this.mainCommandPage);
+    this.addCommand(396, 683, '길드로 철수', () => {
+      if (!this.busy) { saveCharacter(this); this.scene.start('Town'); }
+    }, 0x332c35, this.mainCommandPage);
     LANES.forEach((lane) => {
-      const button = this.addCommand(lane.x, 683, `회피 · ${lane.label}`, () => this.playerAction('dodge', lane.id), 0x51446e);
+      const button = this.addCommand(lane.x, 620, `회피 · ${lane.label}`, () => this.playerAction('dodge', lane.id), 0x51446e, this.dodgeCommandPage);
       this.laneButtons ??= {};
       this.laneButtons[lane.id] = button;
     });
-    const leave = this.add.rectangle(240, 751, 180, 38, 0x332c35, 0.96).setStrokeStyle(1, 0x9c7f72).setInteractive({ useHandCursor: true });
-    const leaveText = this.add.text(240, 751, '길드로 철수', { fontSize: '12px', color: '#cbbcb1' }).setOrigin(0.5);
-    leave.on('pointerdown', () => { if (!this.busy) { saveCharacter(this); this.scene.start('Town'); } });
-    this.commandLayer.add([leave, leaveText]);
+    this.addCommand(84, 683, '♜ 방어', () => this.playerAction('guard'), 0x405878, this.dodgeCommandPage);
+    this.potionCommands.push(this.addCommand(240, 683, '', () => this.openPotionMenu(), 0x3f7456, this.dodgeCommandPage));
+    this.addCommand(396, 683, '◀ 전투 명령', () => this.setCommandPage('main'), 0x59434f, this.dodgeCommandPage);
+    this.commandPageText = this.add.text(240, 733, '', { fontSize: '10px', fontStyle: 'bold', color: '#bda9c8' }).setOrigin(0.5);
+    this.commandLayer.add(this.commandPageText);
+    this.setCommandPage('main');
   }
 
-  addCommand(x, y, label, action, color) {
+  addCommand(x, y, label, action, color, layer = this.commandLayer) {
     const shadow = this.add.rectangle(x + 2, y + 4, 140, 50, 0x06040a, 0.45);
     const bg = this.add.rectangle(x, y, 140, 50, color, 0.94).setStrokeStyle(2, 0xe4ba68).setInteractive({ useHandCursor: true });
     const text = this.add.text(x, y, label, { fontSize: label.length > 14 ? '10px' : '12px', fontStyle: 'bold', color: '#fff0bd', align: 'center', lineSpacing: 2 }).setOrigin(0.5);
     bg.on('pointerdown', action);
     bg.on('pointerover', () => bg.setScale(1.025));
     bg.on('pointerout', () => bg.setScale(1));
-    this.commandLayer.add([shadow, bg, text]);
+    layer.add([shadow, bg, text]);
     return { bg, text };
+  }
+
+  setCommandPage(page) {
+    this.commandPage = page;
+    this.mainCommandPage.setVisible(page === 'main');
+    this.dodgeCommandPage.setVisible(page === 'dodge');
+    this.commandPageText.setText(page === 'main' ? '전투 명령  1 / 2' : '회피 전술  2 / 2');
+  }
+
+  refreshPotionLabels() {
+    const label = `◆ 물약 (${totalPotionCount(this.character)})`;
+    this.potionCommands?.forEach((command) => command.text.setText(label));
   }
 
   async playEntrance() {
@@ -175,6 +200,7 @@ export class WorldBossScene extends Phaser.Scene {
     this.drawBar(252, 129, 206, 16, this.boss.hp / this.boss.maxHp, this.phase === 3 ? 0xff3757 : this.phase === 2 ? 0xb958e6 : 0xdd654e);
     this.playerText.setText(`${this.character.name} · Lv.${this.character.level}\nHP ${Math.max(0, this.character.hp)}/${this.playerStats.maxHp} · MP ${this.character.mp}/${this.playerStats.maxMp}\n공격 ${this.playerStats.attack} · 방어 ${this.playerStats.defense}`);
     this.bossText.setText(`★ 월드 보스 · Lv.${this.boss.level}\nHP ${Math.max(0, this.boss.hp).toLocaleString()} / ${this.boss.maxHp.toLocaleString()}`);
+    this.refreshPotionLabels();
   }
 
   drawBar(x, y, width, height, ratio, color) {
@@ -183,9 +209,37 @@ export class WorldBossScene extends Phaser.Scene {
     this.statusGraphics.lineStyle(1, 0xffe4a0, 0.45).strokeRoundedRect(x, y, width, height, 4);
   }
 
+  openPotionMenu() {
+    if (this.busy) return;
+    const owned = Object.entries(this.character.potions ?? {})
+      .filter(([, quantity]) => quantity > 0)
+      .map(([id, quantity]) => ({ potion: getPotion(id), quantity }))
+      .filter((entry) => entry.potion)
+      .sort((a, b) => a.potion.tier - b.potion.tier);
+    if (!owned.length) { this.logText.setText('보유한 물약이 없다!'); return; }
+    const rows = owned.map(({ potion, quantity }) => {
+      const { hpHeal, mpHeal } = potionHealValues(potion, this.playerStats);
+      const healText = [hpHeal ? `HP +${hpHeal}` : null, mpHeal ? `MP +${mpHeal}` : null].filter(Boolean).join(' · ');
+      return `<div class="gear-card"><div><strong>${potion.name}</strong><small>${healText}</small><small>보유 ${quantity}개</small></div><button id="use-potion-${potion.id}">사용</button></div>`;
+    }).join('');
+    openPanel(`
+      <div class="panel">
+        <h2>월드 보스 · 물약 사용</h2>
+        <div class="gear-list">${rows}</div>
+        <button id="potion-cancel" class="secondary">닫기</button>
+      </div>
+    `);
+    owned.forEach(({ potion }) => qs(`use-potion-${potion.id}`)?.addEventListener('click', () => {
+      closePanel();
+      this.playerAction('potion', potion);
+    }));
+    qs('potion-cancel')?.addEventListener('click', () => closePanel());
+  }
+
   async playerAction(type, payload = null) {
     if (this.busy) return;
     if (type === 'skill' && this.character.mp < payload.cost) { this.logText.setText('마력이 부족하다!'); return; }
+    if (type === 'potion' && (!payload || potionCount(this.character, payload.id) <= 0)) { this.logText.setText('물약이 부족하다!'); return; }
     this.busy = true;
     this.guard = type === 'guard';
     this.dodgeLane = type === 'dodge' ? payload : null;
@@ -204,6 +258,16 @@ export class WorldBossScene extends Phaser.Scene {
       if (payload.heal) this.character.hp = Math.min(this.playerStats.maxHp, this.character.hp + Math.round(payload.heal + this.playerStats.maxHp * 0.1));
       this.magicBurst(this.advancement?.color ?? this.job.color);
     } else if (type === 'guard') message = '방패를 세우고 재앙의 충격에 대비한다.';
+    else if (type === 'potion') {
+      usePotion(this.character, payload.id);
+      const { hpHeal, mpHeal } = potionHealValues(payload, this.playerStats);
+      const healedHp = Math.max(0, Math.min(hpHeal, this.playerStats.maxHp - this.character.hp));
+      const healedMp = Math.max(0, Math.min(mpHeal, this.playerStats.maxMp - this.character.mp));
+      this.character.hp = Math.min(this.playerStats.maxHp, this.character.hp + hpHeal);
+      this.character.mp = Math.min(this.playerStats.maxMp, this.character.mp + mpHeal);
+      const healedParts = [healedHp ? `HP ${healedHp}` : null, healedMp ? `MP ${healedMp}` : null].filter(Boolean).join(' · ');
+      message = `${payload.name} 사용! ${healedParts || '변화 없음'} 회복.`;
+    }
     else message = `${LANES.find((lane) => lane.id === payload)?.label} 방향으로 몸을 날렸다!`;
     this.logText.setText(message);
     this.refreshStatus();
@@ -241,12 +305,14 @@ export class WorldBossScene extends Phaser.Scene {
       const safe = Phaser.Utils.Array.GetRandom(LANES);
       this.intent = { type: this.phase === 3 ? 'apocalypse' : 'meteor', safeLane: safe.id, label: this.phase === 3 ? '종말의 천궁' : '천공 운석우' };
       this.showPattern(safe.id);
+      this.setCommandPage('dodge');
       this.intentText.setText(`${this.intent.label}\n붉은 구역을 피하라!`);
     } else {
       const pool = this.phase === 1
         ? [{ type: 'claw', label: '왕룡의 발톱' }, { type: 'breath', label: '성운 브레스' }, { type: 'wing', label: '하늘 찢기' }]
         : [{ type: 'breath', label: '보랏빛 겁화' }, { type: 'wing', label: '차원 날갯짓' }, { type: 'claw', label: '황제의 강습' }];
       this.intent = Phaser.Utils.Array.GetRandom(pool);
+      this.setCommandPage('main');
       this.intentText.setText(`${this.intent.label}\n${this.intent.type === 'breath' ? '강력한 일격 · 방어 권장' : '회피 또는 방어 가능'}`);
     }
   }
