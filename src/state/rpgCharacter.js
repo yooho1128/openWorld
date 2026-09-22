@@ -30,6 +30,7 @@ export function ensureRpgCharacter(character) {
   character.redeemedCoupons ??= [];
   character.enhancementBlessings ??= { small: 0, normal: 0, great: 0 };
   for (const key of ['small', 'normal', 'great']) character.enhancementBlessings[key] = Math.max(0, Math.floor(Number(character.enhancementBlessings[key]) || 0));
+  character.enhancementScrolls = Math.max(0, Math.floor(Number(character.enhancementScrolls) || 0));
   character.activeEnhancementBlessing = ['small', 'normal', 'great'].includes(character.activeEnhancementBlessing) ? character.activeEnhancementBlessing : null;
   // 짧게 사용됐던 숫자형 축복 저장값도 새 소모품 구조로 안전하게 옮긴다.
   if (Number(character.enhancementBlessing) > 0) {
@@ -143,7 +144,7 @@ export function createRpgCharacter({ nickname, name, gender }) {
     affinity: { merchant: 0, guildmaster: 0, innkeeper: 0, blacksmith: 0 },
     dialogueHistory: {}, victories: 0, defeats: 0, bossVictories: 0, worldBossVictories: 0, hunted: {}, createdAt: Date.now(),
     attendanceDays: 0, highestEnhancement: 0, unlockedTitles: [], equippedTitle: null,
-    enhancementBlessings: { small: 0, normal: 0, great: 0 }, activeEnhancementBlessing: null,
+    enhancementBlessings: { small: 0, normal: 0, great: 0 }, enhancementScrolls: 0, activeEnhancementBlessing: null,
     astrologerDaily: { date: '', answered: 0, correct: 0 },
   });
 }

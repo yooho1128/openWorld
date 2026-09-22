@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { getAdvancement, getClass, getCompanion } from '../data/rpg.js';
-import { equipmentDisplayName, getRarity, guaranteedBossEquipment } from '../data/equipment.js';
+import { equipmentDisplayName, getRarity, worldBossEquipment } from '../data/equipment.js';
 import { getPotion, potionHealValues } from '../data/potions.js';
-import { addLoot, addXp, combatStats, companionStats, ensureRpgCharacter, grantCompanionXp, potionCount, saveCharacter, totalPotionCount, usePotion } from '../state/rpgCharacter.js';
+import { addLoot, addPotion, addXp, combatStats, companionStats, ensureRpgCharacter, grantCompanionXp, potionCount, saveCharacter, totalPotionCount, usePotion } from '../state/rpgCharacter.js';
 import { createEquippedHero } from '../ui/equipmentVisuals.js';
 import { addFantasyBackdrop, addOrnatePanel } from '../ui/fantasyTheme.js';
 import { closePanel, openPanel, qs } from '../ui/domForms.js';
@@ -12,6 +12,20 @@ const WORLD_DRAGON = {
 };
 const LANES = [{ id: 'left', label: '좌익', x: 82 }, { id: 'center', label: '중앙', x: 240 }, { id: 'right', label: '우익', x: 398 }];
 const BOSS_DAMAGE_SCALE = 0.5;
+const DODGE_CLUES = {
+  left: {
+    sigil: '지는 별의 꼬리',
+    clue: '고룡의 오른눈이 타오른다. 그 시선을 거슬러 지는 별을 따라라.',
+  },
+  center: {
+    sigil: '고요한 심장',
+    clue: '두 날개가 바깥 하늘을 찢는다. 폭풍 속 고요한 심장 아래로 파고들어라.',
+  },
+  right: {
+    sigil: '떠오르는 달의 뿔',
+    clue: '고룡의 왼눈이 타오른다. 그 시선을 거슬러 떠오르는 달을 따라라.',
+  },
+};
 
 function createWorldDragon(scene) {
   const dragon = scene.add.container(342, 225).setDepth(8);
@@ -76,6 +90,8 @@ export class WorldBossScene extends Phaser.Scene {
     this.guard = false;
     this.dodgeLane = null;
     this.patternLayer = null;
+    this.patternSequence = null;
+    this.forcePhasePattern = false;
     const power = Math.max(1, this.playerStats.attack * 5 + this.playerStats.defense * 4 + this.playerStats.maxHp * 0.35);
     this.boss = {
       level: Math.max(100, this.character.level),
@@ -144,8 +160,8 @@ export class WorldBossScene extends Phaser.Scene {
       this.laneButtons ??= {};
       this.laneButtons[lane.id] = button;
     });
-    this.addCommand(84, 683, '♜ 방어', () => this.playerAction('guard'), 0x405878, this.dodgeCommandPage);
-    this.potionCommands.push(this.addCommand(240, 683, '', () => this.openPotionMenu(), 0x3f7456, this.dodgeCommandPage));
+    this.addCommand(84, 683, '단서 다시 읽기', () => this.repeatPatternClue(), 0x405878, this.dodgeCommandPage);
+    this.addCommand(240, 683, '오직 회피만 가능', () => this.repeatPatternClue(), 0x643347, this.dodgeCommandPage);
     this.addCommand(396, 683, '◀ 전투 명령', () => this.setCommandPage('main'), 0x59434f, this.dodgeCommandPage);
     this.commandPageText = this.add.text(240, 733, '', { fontSize: '10px', fontStyle: 'bold', color: '#bda9c8' }).setOrigin(0.5);
     this.commandLayer.add(this.commandPageText);
@@ -240,6 +256,11 @@ export class WorldBossScene extends Phaser.Scene {
     if (this.busy) return;
     if (type === 'skill' && this.character.mp < payload.cost) { this.logText.setText('마력이 부족하다!'); return; }
     if (type === 'potion' && (!payload || potionCount(this.character, payload.id) <= 0)) { this.logText.setText('물약이 부족하다!'); return; }
+    if (type === 'dodge' && !this.intent?.lethal) {
+      this.logText.setText('아직 필멸의 징조는 없다. 전투 명령에 집중하자.');
+      this.setCommandPage('main');
+      return;
+    }
     this.busy = true;
     this.guard = type === 'guard';
     this.dodgeLane = type === 'dodge' ? payload : null;
@@ -268,16 +289,21 @@ export class WorldBossScene extends Phaser.Scene {
       const healedParts = [healedHp ? `HP ${healedHp}` : null, healedMp ? `MP ${healedMp}` : null].filter(Boolean).join(' · ');
       message = `${payload.name} 사용! ${healedParts || '변화 없음'} 회복.`;
     }
-    else message = `${LANES.find((lane) => lane.id === payload)?.label} 방향으로 몸을 날렸다!`;
+    else message = `${LANES.find((lane) => lane.id === payload)?.label} 방향으로 운명을 걸고 몸을 날렸다!`;
     this.logText.setText(message);
     this.refreshStatus();
     await this.pause(type === 'skill' ? 720 : 430);
     if (this.boss.hp <= 0) return this.victory();
     await this.checkPhaseTransition();
-    if (this.companion) await this.companionTurn();
+    if (this.companion && !this.intent?.lethal) await this.companionTurn();
     if (this.boss.hp <= 0) return this.victory();
-    await this.bossTurn();
+    const bossResult = await this.bossTurn();
     if (this.character.hp <= 0) return this.defeat();
+    if (this.boss.hp <= 0) return this.victory();
+    if (bossResult === 'continue-pattern') {
+      this.busy = false;
+      return;
+    }
     this.turn += 1;
     this.selectIntent();
     this.busy = false;
@@ -300,33 +326,78 @@ export class WorldBossScene extends Phaser.Scene {
 
   selectIntent() {
     this.clearPattern();
-    const patternTurn = this.phase >= 2 && (this.phase === 3 || this.turn % 2 === 0);
+    const patternTurn = this.forcePhasePattern
+      || (this.phase === 1 && this.turn % 3 === 0)
+      || (this.phase === 2 && this.turn % 2 === 0)
+      || (this.phase === 3 && this.turn % 2 === 1);
     if (patternTurn) {
-      const safe = Phaser.Utils.Array.GetRandom(LANES);
-      this.intent = { type: this.phase === 3 ? 'apocalypse' : 'meteor', safeLane: safe.id, label: this.phase === 3 ? '종말의 천궁' : '천공 운석우' };
-      this.showPattern(safe.id);
-      this.setCommandPage('dodge');
-      this.intentText.setText(`${this.intent.label}\n붉은 구역을 피하라!`);
+      this.forcePhasePattern = false;
+      const count = this.phase === 1 ? 1 : this.phase === 2 ? Phaser.Math.Between(2, 3) : 3;
+      this.startLethalSequence(count, this.phase === 3);
+      return;
+    }
+    const pool = this.phase === 1
+      ? [{ type: 'claw', label: '왕룡의 발톱' }, { type: 'breath', label: '성운 브레스' }, { type: 'wing', label: '하늘 찢기' }]
+      : [{ type: 'breath', label: '보랏빛 겁화' }, { type: 'wing', label: '차원 날갯짓' }, { type: 'claw', label: '황제의 강습' }];
+    this.intent = { ...Phaser.Utils.Array.GetRandom(pool), lethal: false };
+    this.setCommandPage('main');
+    this.intentText.setText(`${this.intent.label}\n${this.intent.type === 'breath' ? '강력한 일격 · 방어 권장' : '일반 공격 · 방어 가능'}`);
+  }
+
+  startLethalSequence(count, memoryTrial = false) {
+    const lanes = [];
+    while (lanes.length < count) {
+      const lane = Phaser.Utils.Array.GetRandom(LANES).id;
+      if (lanes.length === 0 || lanes.at(-1) !== lane) lanes.push(lane);
+    }
+    this.patternSequence = { lanes, index: 0, memoryTrial };
+    this.preparePatternStep();
+  }
+
+  preparePatternStep() {
+    const { lanes, index, memoryTrial } = this.patternSequence;
+    const safeLane = lanes[index];
+    const clueData = DODGE_CLUES[safeLane];
+    const total = lanes.length;
+    const label = memoryTrial ? '용의 눈 · 시간 붕괴' : this.phase === 2 ? '연쇄 천공 붕괴' : '천공의 단죄';
+    this.intent = { type: memoryTrial ? 'apocalypse' : 'meteor', safeLane, label, lethal: true };
+    this.showLethalWarning(memoryTrial);
+    this.setCommandPage('dodge');
+    if (memoryTrial && index === 0) {
+      const prophecy = lanes.map((lane, order) => `${order + 1}. ${DODGE_CLUES[lane].sigil}`).join('  →  ');
+      this.currentPatternClue = `세 개의 예언을 기억하라. ${prophecy}`;
+      this.logText.setText(this.currentPatternClue);
+      this.intentText.setText(`용의 눈 · 시간 붕괴\n세 예언을 기억하라`);
+    } else if (memoryTrial) {
+      this.currentPatternClue = `${index + 1}번째 예언을 기억해 내라. 용의 눈은 이미 닫혔다.`;
+      this.logText.setText(this.currentPatternClue);
+      this.intentText.setText(`시간 붕괴 ${index + 1} / ${total}\n기억만이 살길이다`);
     } else {
-      const pool = this.phase === 1
-        ? [{ type: 'claw', label: '왕룡의 발톱' }, { type: 'breath', label: '성운 브레스' }, { type: 'wing', label: '하늘 찢기' }]
-        : [{ type: 'breath', label: '보랏빛 겁화' }, { type: 'wing', label: '차원 날갯짓' }, { type: 'claw', label: '황제의 강습' }];
-      this.intent = Phaser.Utils.Array.GetRandom(pool);
-      this.setCommandPage('main');
-      this.intentText.setText(`${this.intent.label}\n${this.intent.type === 'breath' ? '강력한 일격 · 방어 권장' : '회피 또는 방어 가능'}`);
+      this.currentPatternClue = clueData.clue;
+      this.logText.setText(this.currentPatternClue);
+      this.intentText.setText(`${label} ${index + 1} / ${total}\n암시를 읽고 피하라`);
     }
   }
 
-  showPattern(safeLane) {
+  repeatPatternClue() {
+    if (!this.intent?.lethal) {
+      this.logText.setText('아직 필멸의 징조는 없다.');
+      return;
+    }
+    this.logText.setText(this.currentPatternClue);
+  }
+
+  showLethalWarning(memoryTrial) {
+    this.clearPattern();
     this.patternLayer = this.add.container().setDepth(16);
-    LANES.forEach((lane) => {
-      const safe = lane.id === safeLane;
-      const zone = this.add.rectangle(lane.x, 330, 140, 292, safe ? 0x4ed6b0 : 0xff324f, safe ? 0.045 : 0.18).setStrokeStyle(3, safe ? 0x5ee7c5 : 0xff5b62, safe ? 0.18 : 0.72);
-      const mark = this.add.text(lane.x, 342, safe ? '◇' : '!', { fontFamily: 'Georgia, serif', fontSize: safe ? '28px' : '44px', fontStyle: 'bold', color: safe ? '#6ee8ce' : '#ff9b76' }).setOrigin(0.5).setAlpha(safe ? 0.16 : 0.8);
-      this.patternLayer.add([zone, mark]);
-      this.tweens.add({ targets: [zone, mark], alpha: safe ? 0.08 : 0.34, duration: 360, yoyo: true, repeat: -1 });
-      this.laneButtons?.[lane.id]?.bg.setStrokeStyle(3, safe ? 0x58d8bd : 0xff6c5f, safe ? 0.35 : 0.9);
-    });
+    const veil = this.add.rectangle(240, 292, 470, 360, memoryTrial ? 0x24001c : 0x2a0710, memoryTrial ? 0.32 : 0.2).setStrokeStyle(4, memoryTrial ? 0xb85cff : 0xff4c59, 0.48);
+    const rune = this.add.text(240, 322, memoryTrial ? '◉  ◇  ◉' : '♛   ?   ♛', {
+      fontFamily: 'Georgia, serif', fontSize: memoryTrial ? '48px' : '38px', fontStyle: 'bold', color: memoryTrial ? '#d89cff' : '#ff8b72', stroke: '#2b0417', strokeThickness: 7,
+    }).setOrigin(0.5).setAlpha(0.62);
+    this.patternLayer.add([veil, rune]);
+    this.tweens.add({ targets: [veil, rune], alpha: memoryTrial ? 0.2 : 0.34, scale: 1.035, duration: 420, yoyo: true, repeat: -1 });
+    LANES.forEach((lane) => this.laneButtons?.[lane.id]?.bg.setStrokeStyle(3, 0xff695f, 0.78));
+    this.cameras.main.flash(150, memoryTrial ? 150 : 255, 20, memoryTrial ? 210 : 70, false);
   }
 
   clearPattern() {
@@ -337,23 +408,48 @@ export class WorldBossScene extends Phaser.Scene {
 
   async bossTurn() {
     const intent = this.intent;
-    let multiplier = { claw: 1, breath: 1.55, wing: 1.18, meteor: 2.05, apocalypse: 2.65 }[intent.type] ?? 1;
-    let avoided = false;
-    if (intent.safeLane) avoided = this.dodgeLane === intent.safeLane;
-    else if (this.dodgeLane) multiplier *= 0.48;
-    if (avoided) {
-      this.logText.setText(`${LANES.find((lane) => lane.id === this.dodgeLane)?.label}의 틈으로 파고들어 ${intent.label}을 완전히 회피했다!`);
+    if (intent.lethal) {
+      const avoided = this.dodgeLane === intent.safeLane;
+      if (!avoided) {
+        this.character.hp = 0;
+        this.logText.setText(`${intent.label} 발동! 암시를 잘못 읽었다. 생명력이 완전히 소멸한다.`);
+        this.patternExplosion(intent.safeLane, false);
+        this.refreshStatus();
+        this.cameras.main.flash(650, 255, 0, 32, false);
+        this.cameras.main.shake(1050, 0.045);
+        await this.pause(1100);
+        this.clearPattern();
+        return 'lethal-hit';
+      }
+      const step = this.patternSequence.index + 1;
+      const total = this.patternSequence.lanes.length;
+      this.logText.setText(`${DODGE_CLUES[intent.safeLane].sigil}의 흐름을 읽었다. ${step}/${total} 회피 성공!`);
       this.patternExplosion(intent.safeLane, true);
-      await this.pause(760);
+      await this.pause(650);
       this.clearPattern();
-      return;
+      this.patternSequence.index += 1;
+      if (this.patternSequence.index < total) {
+        this.dodgeLane = null;
+        this.preparePatternStep();
+        return 'continue-pattern';
+      }
+      const memoryTrial = this.patternSequence.memoryTrial;
+      this.patternSequence = null;
+      if (memoryTrial) {
+        const heartDamage = Math.max(1, Math.round(this.boss.maxHp * 0.08));
+        this.boss.hp -= heartDamage;
+        this.refreshStatus();
+        this.magicBurst(0xff486f);
+        this.logText.setText(`세 갈래 미래를 돌파했다! 용의 심장에 ${heartDamage.toLocaleString()} 피해.`);
+      } else this.logText.setText('필멸의 연격을 모두 흘려냈다!');
+      return 'pattern-complete';
     }
+    let multiplier = { claw: 1, breath: 1.55, wing: 1.18, meteor: 2.05, apocalypse: 2.65 }[intent.type] ?? 1;
     const raw = this.damage(this.boss.attack * multiplier, this.playerStats.defense);
     const incoming = Math.max(1, Math.ceil(raw * BOSS_DAMAGE_SCALE * (this.guard ? (intent.type === 'apocalypse' ? 0.55 : 0.38) : 1)));
     this.character.hp -= incoming;
     this.logText.setText(`${WORLD_DRAGON.name}의 ${intent.label}! ${incoming.toLocaleString()} 피해.`);
-    if (intent.safeLane) this.patternExplosion(intent.safeLane, false);
-    else if (intent.type === 'breath') this.breathEffect();
+    if (intent.type === 'breath') this.breathEffect();
     else this.clawEffect();
     this.refreshStatus();
     this.cameras.main.shake(intent.type === 'apocalypse' ? 720 : 320, intent.type === 'apocalypse' ? 0.028 : 0.014);
@@ -369,6 +465,7 @@ export class WorldBossScene extends Phaser.Scene {
 
   async transitionToPhase(nextPhase) {
     this.phase = nextPhase;
+    this.forcePhasePattern = true;
     this.clearPattern();
     this.boss.attack = Math.round(this.boss.attack * (nextPhase === 2 ? 1.17 : 1.24));
     this.boss.defense = Math.round(this.boss.defense * (nextPhase === 2 ? 1.08 : 1.12));
@@ -394,7 +491,7 @@ export class WorldBossScene extends Phaser.Scene {
     }
     this.cameras.main.flash(450, nextPhase === 2 ? 120 : 255, 25, nextPhase === 2 ? 210 : 70, false);
     this.cameras.main.shake(950, nextPhase === 2 ? 0.022 : 0.032);
-    this.logText.setText(nextPhase === 2 ? '아우렉스가 하늘로 솟구친다. 붉게 물든 공격 구역을 피해라!' : '고룡의 눈이 전장을 집어삼킨다. 한 번의 판단이 생사를 가른다!');
+    this.logText.setText(nextPhase === 2 ? '아우렉스가 하늘로 솟구친다. 연속된 필멸의 징조를 읽어라!' : '고룡의 눈이 세 갈래 미래를 새긴다. 예언의 순서를 기억하라!');
     this.tweens.add({ targets: [veil, banner], alpha: 0, delay: 720, duration: 430, onComplete: () => { veil.destroy(); banner.destroy(); } });
     await this.pause(1250);
   }
@@ -449,15 +546,16 @@ export class WorldBossScene extends Phaser.Scene {
     this.busy = true;
     this.clearPattern();
     const xp = Math.max(5000, Math.round(1200 + this.boss.level * 65));
-    const gold = Math.max(25000, Math.round(8000 + this.boss.level * 110));
-    const drops = Array.from({ length: 3 }, () => guaranteedBossEquipment(WORLD_DRAGON, this.character.classId, this.boss.level)).filter(Boolean);
-    this.character.gold += gold;
-    this.character.goldEarnedTotal = (this.character.goldEarnedTotal ?? 0) + gold;
+    const guaranteedEquipment = worldBossEquipment(WORLD_DRAGON, this.character.classId, this.boss.level);
+    const chestRewards = Phaser.Utils.Array.Shuffle([
+      { type: 'empty' },
+      guaranteedEquipment ? { type: 'equipment', item: guaranteedEquipment } : { type: 'gold', amount: 100000 },
+      this.rollWorldBossSpecialChest(),
+    ]);
     this.character.victories += 1;
     this.character.bossVictories = (this.character.bossVictories ?? 0) + 1;
     this.character.worldBossVictories = (this.character.worldBossVictories ?? 0) + 1;
     this.character.hunted[WORLD_DRAGON.id] = (this.character.hunted[WORLD_DRAGON.id] ?? 0) + 1;
-    drops.forEach((item) => addLoot(this.character, item));
     const levels = addXp(this.character, xp);
     const companionLevels = this.companion ? grantCompanionXp(this.character, this.companion.id, Math.round(xp * 0.16)) : [];
     saveCharacter(this);
@@ -466,9 +564,139 @@ export class WorldBossScene extends Phaser.Scene {
       const star = this.add.text(Phaser.Math.Between(20, 460), Phaser.Math.Between(40, 430), index % 3 ? '✦' : '♛', { fontSize: `${10 + index % 5 * 3}px`, color: index % 2 ? '#ffe68c' : '#c795ff' }).setDepth(50);
       this.tweens.add({ targets: star, y: star.y - 120, angle: 360, alpha: 0, duration: 900 + index * 35, onComplete: () => star.destroy() });
     }
-    const gearLines = drops.map((item) => `${getRarity(item.rarity).name} · ${equipmentDisplayName(item)}`).join('\n');
-    const extra = `${levels.length ? `\n레벨 ${levels.at(-1)} 달성!` : ''}${companionLevels.length ? `\n${this.companion.name} 유대 Lv.${companionLevels.at(-1)}!` : ''}`;
-    this.finish(`월드 보스 토벌 성공!\n${xp.toLocaleString()} XP · ${gold.toLocaleString()} 골드\n전설의 전리품 3개 획득\n${gearLines}${extra}`, 0x8a55bd, true);
+    const extra = `${levels.length ? ` · Lv.${levels.at(-1)} 달성` : ''}${companionLevels.length ? ` · ${this.companion.name} 유대 Lv.${companionLevels.at(-1)}` : ''}`;
+    this.showVictoryChests(chestRewards, `${xp.toLocaleString()} XP${extra}`);
+  }
+
+  rollWorldBossSpecialChest() {
+    const roll = Math.random();
+    if (roll < 0.5) return { type: 'gold', amount: 100000 };
+    if (roll < 0.75) return { type: 'potion', potionId: 'potion-hp-superior', amount: 1 };
+    if (roll < 0.95) {
+      const junk = Phaser.Utils.Array.GetRandom([
+        { id: 'junk-aurex-scale', name: '아우렉스의 황금 비늘', value: 28000 },
+        { id: 'junk-aurex-horn', name: '균열 난 고룡의 뿔', value: 36000 },
+        { id: 'junk-aurex-ash', name: '별을 삼킨 용의 잿가루', value: 22000 },
+      ]);
+      return { type: 'junk', item: { ...junk, type: 'junk', rarity: 'S', quantity: Phaser.Math.Between(1, 2) } };
+    }
+    return { type: 'scroll', amount: 1 };
+  }
+
+  grantWorldBossReward(reward) {
+    if (reward.type === 'equipment' || reward.type === 'junk') addLoot(this.character, reward.item);
+    else if (reward.type === 'scroll') this.character.enhancementScrolls += reward.amount;
+    else if (reward.type === 'potion') addPotion(this.character, reward.potionId, reward.amount);
+    else if (reward.type === 'gold') {
+      this.character.gold += reward.amount;
+      this.character.goldEarnedTotal = (this.character.goldEarnedTotal ?? 0) + reward.amount;
+    }
+  }
+
+  worldBossRewardLabel(reward) {
+    if (reward.type === 'empty') return '꽝\n텅 빈 상자';
+    if (reward.type === 'equipment') return `${getRarity(reward.item.rarity).name}\n${equipmentDisplayName(reward.item)}`;
+    if (reward.type === 'scroll') return '+1 확정 강화 주문서\n1장';
+    if (reward.type === 'potion') return `${getPotion(reward.potionId)?.name ?? '상급 물약'}\n${reward.amount}개`;
+    if (reward.type === 'junk') return `${reward.item.name}\n${reward.item.quantity}개`;
+    return `황금 보따리\n${reward.amount.toLocaleString()}G`;
+  }
+
+  showVictoryChests(rewards, summary) {
+    this.commandLayer.destroy(true);
+    this.intentText.setVisible(false);
+    this.add.rectangle(240, 590, 462, 390, 0x100914, 0.97).setStrokeStyle(4, 0xd6a95e).setDepth(60);
+    this.add.text(240, 420, 'WORLD BOSS TREASURE', { fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'bold', color: '#ffd977', letterSpacing: 3 }).setOrigin(0.5).setDepth(62);
+    this.add.text(240, 448, '상자 3개 중 2개를 선택하라', { fontSize: '19px', fontStyle: 'bold', color: '#fff0bd' }).setOrigin(0.5).setDepth(62);
+    const selectionText = this.add.text(240, 474, `${summary} · 남은 선택 2회`, { fontSize: '10px', color: '#d9c89f', align: 'center' }).setOrigin(0.5).setDepth(62);
+    const chestCards = [];
+    let openedCount = 0;
+    rewards.forEach((reward, index) => {
+      const x = 82 + index * 158;
+      const glow = this.add.circle(x, 548, 56, 0xffd45f, 0.08).setStrokeStyle(3, 0xffd45f, 0.25).setDepth(61);
+      const chest = this.add.container(x, 540).setDepth(63).setSize(112, 92).setInteractive({ useHandCursor: true });
+      const body = this.add.rectangle(0, 12, 94, 54, 0x7a421f, 1).setStrokeStyle(4, 0xf0c66f);
+      const band = this.add.rectangle(0, 10, 16, 55, 0xdba54c, 1);
+      const lid = this.add.rectangle(0, -18, 100, 28, 0x9a5828, 1).setStrokeStyle(4, 0xf5d17a);
+      const lock = this.add.rectangle(0, 5, 18, 19, 0xf5cf67, 1).setStrokeStyle(2, 0x5d3218);
+      chest.add([body, band, lid, lock]);
+      const label = this.add.text(x, 615, this.worldBossRewardLabel(reward), { fontSize: '9px', fontStyle: 'bold', color: '#fff0bd', align: 'center', fixedWidth: 142, wordWrap: { width: 136 }, lineSpacing: 2 }).setOrigin(0.5).setDepth(64).setAlpha(0);
+      const card = { chest, lid, glow, label, reward, opened: false };
+      chestCards.push(card);
+      chest.on('pointerover', () => { if (!card.opened && openedCount < 2) chest.setScale(1.06); });
+      chest.on('pointerout', () => chest.setScale(1));
+      chest.on('pointerdown', () => {
+        if (card.opened || openedCount >= 2) return;
+        card.opened = true;
+        openedCount += 1;
+        chest.disableInteractive().setScale(1);
+        this.grantWorldBossReward(reward);
+        saveCharacter(this);
+        const rewardColor = reward.type === 'empty' ? 0x756b70 : reward.type === 'scroll' ? 0xb96cff : reward.type === 'equipment' ? getRarity(reward.item.rarity).color : reward.type === 'gold' ? 0xffd45f : 0x65cba1;
+        glow.setFillStyle(rewardColor, 0.14).setStrokeStyle(3, rewardColor, 0.7);
+        this.tweens.add({ targets: lid, y: -34, angle: index % 2 ? 7 : -7, duration: 260, ease: 'Back.easeOut' });
+        this.tweens.add({ targets: glow, alpha: 0.7, scale: 1.18, duration: 300, yoyo: true, repeat: 1 });
+        this.tweens.add({ targets: label, alpha: 1, y: 608, duration: 280 });
+        this.playChestRewardEffect(x, reward);
+        selectionText.setText(`${summary} · 남은 선택 ${2 - openedCount}회`);
+        if (openedCount === 2) {
+          const sealed = chestCards.find((entry) => !entry.opened);
+          if (sealed) {
+            sealed.chest.disableInteractive();
+            sealed.label.setText('선택하지 않은 상자\n안개 속으로 사라짐').setAlpha(0.65);
+            this.tweens.add({ targets: [sealed.chest, sealed.glow], alpha: 0.2, duration: 420 });
+          }
+          selectionText.setText(`${summary} · 선택 완료`);
+          retry.setAlpha(1).setInteractive({ useHandCursor: true });
+          back.setAlpha(1).setInteractive({ useHandCursor: true });
+          retryText.setAlpha(1);
+          backText.setAlpha(1);
+        }
+      });
+    });
+    const retry = this.add.rectangle(132, 744, 198, 44, 0x68408c, 0.98).setStrokeStyle(2, 0xf0c575).setDepth(64).setAlpha(0.22);
+    const retryText = this.add.text(132, 744, '다시 도전', { fontSize: '14px', fontStyle: 'bold', color: '#fff0bd' }).setOrigin(0.5).setDepth(65).setAlpha(0.22);
+    const back = this.add.rectangle(348, 744, 198, 44, 0x3d4f4a, 0.98).setStrokeStyle(2, 0xf0c575).setDepth(64).setAlpha(0.22);
+    const backText = this.add.text(348, 744, '길드로 귀환', { fontSize: '14px', fontStyle: 'bold', color: '#fff0bd' }).setOrigin(0.5).setDepth(65).setAlpha(0.22);
+    retry.on('pointerdown', () => this.scene.restart());
+    back.on('pointerdown', () => this.scene.start('Town'));
+  }
+
+  playChestRewardEffect(x, reward) {
+    if (reward.type === 'empty') {
+      const taunt = this.add.text(x, 505, '꽝! 다음 기회에~', { fontSize: '12px', fontStyle: 'bold', color: '#b6aeb3', stroke: '#251d22', strokeThickness: 4 }).setOrigin(0.5).setDepth(68);
+      this.tweens.add({ targets: taunt, x: x + 7, angle: 5, yoyo: true, repeat: 4, duration: 75, onComplete: () => this.tweens.add({ targets: taunt, alpha: 0, y: 480, duration: 420, onComplete: () => taunt.destroy() }) });
+      for (let index = 0; index < 10; index += 1) {
+        const dust = this.add.circle(x + Phaser.Math.Between(-28, 28), 532, 4 + index % 4, 0x756b70, 0.58).setDepth(66);
+        this.tweens.add({ targets: dust, x: dust.x + Phaser.Math.Between(-38, 38), y: 485 + Phaser.Math.Between(-18, 26), scale: 2.2, alpha: 0, duration: 520 + index * 28, onComplete: () => dust.destroy() });
+      }
+      return;
+    }
+
+    if (reward.type === 'equipment') {
+      const color = getRarity(reward.item.rarity).color;
+      const beam = this.add.rectangle(x, 485, 42, 220, color, 0.28).setOrigin(0.5, 1).setDepth(62);
+      const crest = this.add.text(x, 493, reward.item.slot === 'weapon' ? '⚔' : '♛', { fontSize: '34px', color: '#fff4bd', stroke: '#54210d', strokeThickness: 6 }).setOrigin(0.5).setDepth(68).setScale(0.2);
+      this.tweens.add({ targets: beam, scaleX: 2.2, alpha: 0, duration: 950, ease: 'Cubic.easeOut', onComplete: () => beam.destroy() });
+      this.tweens.add({ targets: crest, scale: 1.2, angle: 360, duration: 620, ease: 'Back.easeOut', yoyo: true, hold: 180, onComplete: () => crest.destroy() });
+      this.cameras.main.flash(220, (color >> 16) & 255, (color >> 8) & 255, color & 255, false);
+      return;
+    }
+
+    const effect = reward.type === 'gold'
+      ? { color: 0xffd75f, symbol: 'G', count: 16 }
+      : reward.type === 'potion'
+        ? { color: 0x62e698, symbol: '✚', count: 12 }
+        : reward.type === 'scroll'
+          ? { color: 0xc47cff, symbol: '◇', count: 14 }
+          : { color: 0x9a7654, symbol: '◆', count: 10 };
+    const ring = this.add.circle(x, 522, 18, effect.color, 0.1).setStrokeStyle(5, effect.color, 0.82).setDepth(66);
+    this.tweens.add({ targets: ring, scale: 3.5, alpha: 0, duration: 720, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
+    for (let index = 0; index < effect.count; index += 1) {
+      const angle = (Math.PI * 2 * index) / effect.count;
+      const symbol = this.add.text(x, 522, effect.symbol, { fontFamily: 'Georgia, serif', fontSize: `${9 + index % 3 * 3}px`, fontStyle: 'bold', color: Phaser.Display.Color.IntegerToColor(effect.color).rgba }).setOrigin(0.5).setDepth(67);
+      this.tweens.add({ targets: symbol, x: x + Math.cos(angle) * (44 + index % 3 * 9), y: 522 + Math.sin(angle) * (42 + index % 4 * 7), angle: reward.type === 'scroll' ? 240 : 0, alpha: 0, duration: 580 + index * 24, onComplete: () => symbol.destroy() });
+    }
   }
 
   defeat() {

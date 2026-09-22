@@ -91,7 +91,11 @@ export class InventoryScene extends Phaser.Scene {
       const sellPrice = Math.max(1, Math.round(potion.price * 0.5 * sellBonus));
       return `<div class="inventory-row"><div><strong>${potion.name}</strong><small>${potionDescription(potion)} · ${qty}개 보유 · 판매가 ${sellPrice.toLocaleString()}G</small></div><div class="potion-sell-actions"><button id="sell-potion-one-${id}">1개</button><button id="sell-potion-all-${id}">전부</button></div></div>`;
     }).join('') : '';
-    const bagHtml = bagCardsHtml || bagPotionHtml || `<p class="empty-state">보유한 ${CATEGORY_LABELS[this.bagTab]} 아이템이 없습니다.</p>`;
+    const scrollHtml = this.bagTab === 'consumable' && c.enhancementScrolls > 0
+      ? `<div class="inventory-row"><div><strong>+1 확정 강화 주문서</strong><small>${c.enhancementScrolls}장 보유 · 대장간에서 착용 장비를 실패 없이 +1 강화</small></div></div>`
+      : '';
+    const combinedBagHtml = this.bagTab === 'consumable' ? `${bagCardsHtml}${bagPotionHtml}${scrollHtml}` : bagCardsHtml;
+    const bagHtml = combinedBagHtml || `<p class="empty-state">보유한 ${CATEGORY_LABELS[this.bagTab]} 아이템이 없습니다.</p>`;
 
     this.shopItems = shopEquipment(c.classId, c.level);
     const shopEntries = this.shopItems.map((item, index) => ({ item, index }));

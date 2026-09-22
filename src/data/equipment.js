@@ -208,6 +208,23 @@ export function guaranteedBossEquipment(monster, classId, level = 1) {
   return item;
 }
 
+// 월드 보스 보물상자 전용. 장비 보상은 반드시 레전더리 이상이며,
+// 신화 등급은 희귀한 잭팟으로만 등장한다.
+export function worldBossEquipment(monster, classId, level = 1) {
+  const rarity = Math.random() < 0.12 ? 'mythic' : 'legendary';
+  const pool = EQUIPMENT_CATALOG.filter((item) => item.rarity === rarity && (!item.classId || item.classId === classId));
+  const eligible = pool.filter((item) => item.biome === monster.biome);
+  const source = eligible.length ? eligible : pool;
+  const base = source[Math.floor(Math.random() * source.length)];
+  if (!base) return null;
+  const item = cloneItem(base, `-world-boss-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`);
+  item.level = Math.max(1, level);
+  item.name = `${monster.name}의 보물 · ${base.name}`;
+  item.source = `world-boss-${monster.id}`;
+  normalizeEquipmentStats(item);
+  return item;
+}
+
 // 장비 랜덤 뽑기권: 부위 전체 랜덤, 등급은 노멀 50%/레어 25%/유니크 15%/레전더리 8%/신화 2%.
 export const GACHA_RARITY_TABLE = [
   ['normal', 0.5],

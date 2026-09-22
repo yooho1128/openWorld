@@ -39,7 +39,7 @@ export class BlacksmithScene extends Phaser.Scene {
       const alt = strongerBagAlternative(item, this.character, this.character.level);
       const altDiff = alt ? baseItemPower(alt, this.character.level) - baseItemPower(item, this.character.level) : 0;
       const altHtml = alt ? `<small class="compare-badge compare-down">▼ 가방의 ${equipmentDisplayName(alt)}이(가) 더 강함 (+${altDiff}) · 여기 강화하기 전에 상태창에서 교체를 고려하세요</small>` : '';
-      return `<div class="forge-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${statText}</small><small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<small class="forge-risk">성공 ${rate}%${blessingText}${destroy ? ` · 파괴 ${destroy}%` : ''}${failText}</small>${altHtml}</div><div class="forge-actions"><button id="forge-${index}" ${level >= 20 ? 'disabled' : ''}>${level >= 20 ? '최대 강화' : `강화 ${cost.toLocaleString()}G`}</button><button id="repair-${index}" class="repair" ${repairCost <= 0 ? 'disabled' : ''}>${repairCost > 0 ? `수리 ${repairCost.toLocaleString()}G` : '내구도 최대'}</button></div></div>`;
+      return `<div class="forge-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${statText}</small><small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<small class="forge-risk">성공 ${rate}%${blessingText}${destroy ? ` · 파괴 ${destroy}%` : ''}${failText}</small>${altHtml}</div><div class="forge-actions"><button id="forge-${index}" ${level >= 20 ? 'disabled' : ''}>${level >= 20 ? '최대 강화' : `강화 ${cost.toLocaleString()}G`}</button><button id="scroll-${index}" ${level >= 20 || this.character.enhancementScrolls <= 0 ? 'disabled' : ''}>+1 주문서</button><button id="repair-${index}" class="repair" ${repairCost <= 0 ? 'disabled' : ''}>${repairCost > 0 ? `수리 ${repairCost.toLocaleString()}G` : '내구도 최대'}</button></div></div>`;
     }).join('') : '<p class="empty-state">착용 중인 장비가 없습니다. 상태창에서 먼저 장비를 착용해주세요.</p>';
     const affinity = this.character.affinity.blacksmith ?? 0;
     const blessingButtons = Object.entries(ENHANCEMENT_BLESSINGS).map(([key, blessing]) => {
@@ -53,13 +53,14 @@ export class BlacksmithScene extends Phaser.Scene {
         <div class="relationship ${affinity >= 0 ? 'friendly' : 'hostile'}">토르간 우호도 ${affinity >= 0 ? '+' : ''}${affinity} · 비용 ${Math.round(affinityPriceMultiplier(affinity) * 100)}%</div>
         <div class="blessing-picker"><strong>강화에 사용할 축복</strong><div>${blessingButtons}</div><button id="blessing-none" class="secondary">사용하지 않기</button></div>
         ${activeBlessing ? `<div class="star-blessing">${activeBlessing.symbol} 선택됨: 다음 강화 1회 성공률 +${activeBlessing.bonus}%</div>` : ''}
-        <p class="gold-line">보유 골드 <strong>${this.character.gold.toLocaleString()}G</strong></p>
+        <p class="gold-line">보유 골드 <strong>${this.character.gold.toLocaleString()}G</strong> · +1 강화 주문서 <strong>${this.character.enhancementScrolls}장</strong></p>
         ${message ? `<p class="forge-message ${messageClass}">${message}</p>` : ''}
         <div class="forge-list">${html}</div>
         <button id="forge-back" class="secondary">길드로 돌아가기</button>
       </div>
     `);
     items.forEach((item, index) => qs(`forge-${index}`)?.addEventListener('click', () => this.enhance(item)));
+    items.forEach((item, index) => qs(`scroll-${index}`)?.addEventListener('click', () => this.useEnhancementScroll(item)));
     items.forEach((item, index) => qs(`repair-${index}`)?.addEventListener('click', () => this.repair(item)));
     Object.keys(ENHANCEMENT_BLESSINGS).forEach((key) => qs(`blessing-${key}`)?.addEventListener('click', () => this.selectBlessing(key)));
     qs('blessing-none')?.addEventListener('click', () => this.selectBlessing(null));
@@ -124,6 +125,18 @@ export class BlacksmithScene extends Phaser.Scene {
     item.enhancement = Math.max(0, level - 1);
     saveCharacter(this);
     this.render(`강화 실패. 강화 수치가 +${item.enhancement}(으)로 내려갔습니다.`, 'fail');
+  }
+
+  useEnhancementScroll(item) {
+    const level = item.enhancement ?? 0;
+    if (level >= 20) return this.render('이미 최대 강화에 도달했습니다.');
+    if (this.character.enhancementScrolls <= 0) return this.render('+1 강화 주문서가 없습니다.', 'fail');
+    this.character.enhancementScrolls -= 1;
+    item.enhancement = level + 1;
+    this.character.highestEnhancement = Math.max(this.character.highestEnhancement ?? 0, item.enhancement);
+    adjustAffinity(this.character, 'blacksmith', 1);
+    saveCharacter(this);
+    this.render(`+1 강화 주문서 사용! ${item.name}이(가) +${item.enhancement}(이)가 되었습니다. 실패·하락·파괴 없음.`, 'success');
   }
 
   removeItem(itemId) {

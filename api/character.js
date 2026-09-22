@@ -168,6 +168,7 @@ function sanitizeCharacter(input, nickname) {
     agility: clampNumber(c.agility, 0, 1_000_000, 10),
     potions: sanitizePotions(c.potions, isMaster),
     enhancementBlessings: sanitizeBlessings(c.enhancementBlessings),
+    enhancementScrolls: clampInt(c.enhancementScrolls, 0, 9999, 0),
     activeEnhancementBlessing: blessingKeys.includes(c.activeEnhancementBlessing) ? c.activeEnhancementBlessing : null,
     astrologerDaily: asPlainObject(c.astrologerDaily),
     victories: clampInt(c.victories, 0, 10_000_000, 0),
