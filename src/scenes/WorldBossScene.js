@@ -9,6 +9,7 @@ const WORLD_DRAGON = {
   id: 'world-dragon-aurex', name: '천공을 삼키는 고룡 · 아우렉스', rank: 'S', biome: 'storm', trait: '천공 붕괴',
 };
 const LANES = [{ id: 'left', label: '좌익', x: 82 }, { id: 'center', label: '중앙', x: 240 }, { id: 'right', label: '우익', x: 398 }];
+const BOSS_DAMAGE_SCALE = 0.5;
 
 function createWorldDragon(scene) {
   const dragon = scene.add.container(342, 225).setDepth(8);
@@ -282,7 +283,7 @@ export class WorldBossScene extends Phaser.Scene {
       return;
     }
     const raw = this.damage(this.boss.attack * multiplier, this.playerStats.defense);
-    const incoming = Math.ceil(raw * (this.guard ? (intent.type === 'apocalypse' ? 0.55 : 0.38) : 1));
+    const incoming = Math.max(1, Math.ceil(raw * BOSS_DAMAGE_SCALE * (this.guard ? (intent.type === 'apocalypse' ? 0.55 : 0.38) : 1)));
     this.character.hp -= incoming;
     this.logText.setText(`${WORLD_DRAGON.name}의 ${intent.label}! ${incoming.toLocaleString()} 피해.`);
     if (intent.safeLane) this.patternExplosion(intent.safeLane, false);
