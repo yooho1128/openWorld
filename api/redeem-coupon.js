@@ -9,9 +9,20 @@ const sql = connectionString ? neon(connectionString) : null;
 // place instead of a hardcoded object here.
 const SEED_COUPONS = [
   { code: '최유호는 너무 멋져', effect: 'weapon', amount: null },
-  { code: '최유호는 아쿠마다', effect: 'drain', amount: null },
   { code: '황금폭풍', effect: 'gold', amount: 30000 },
 ];
+
+const VALID_EFFECTS = new Set(['gold', 'weapon', 'mythic-weapon', 'mythic-accessory', 'enhance', 'levelup']);
+const EFFECT_ALIASES = new Map([
+  ['enhancement', 'enhance'], ['upgrade', 'enhance'], ['reinforce', 'enhance'], ['강화', 'enhance'],
+]);
+
+export function normalizeEffect(value) {
+  if (typeof value !== 'string') return null;
+  const effect = value.trim().toLowerCase();
+  const normalized = EFFECT_ALIASES.get(effect) ?? effect;
+  return VALID_EFFECTS.has(normalized) ? normalized : null;
+}
 
 function safeNickname(value) {
   if (typeof value !== 'string') return null;
@@ -66,6 +77,10 @@ export default async function handler(req, res) {
     const couponRows = await sql`SELECT effect, amount, reusable FROM coupons WHERE code = ${code} AND enabled = true`;
     if (!couponRows.length) return res.json({ ok: false, reason: 'invalid' });
     const coupon = couponRows[0];
+    const effect = normalizeEffect(coupon.effect);
+    // 폐기된 drain이나 오타 효과는 사용 처리조차 하지 않는다. 특히 오래된
+    // 쿠폰 행 하나가 캐릭터의 골드를 지우는 일이 다시는 없어야 한다.
+    if (!effect) return res.status(409).json({ ok: false, reason: 'invalid_effect' });
 
     const rows = await sql`SELECT data FROM characters WHERE nickname = ${nickname}`;
     if (!rows.length) return res.status(404).json({ ok: false, reason: 'not_found' });
@@ -78,7 +93,7 @@ export default async function handler(req, res) {
       await sql`UPDATE characters SET data = ${JSON.stringify(updatedData)}, updated_at = now() WHERE nickname = ${nickname}`;
     }
 
-    return res.json({ ok: true, effect: coupon.effect, amount: coupon.amount ?? null });
+    return res.json({ ok: true, effect, amount: coupon.amount ?? null });
   } catch (err) {
     console.error('Coupon redeem failed:', err);
     return res.status(502).json({ ok: false, reason: 'server_error' });

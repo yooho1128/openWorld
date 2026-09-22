@@ -238,6 +238,20 @@ export function strongestEquippedItem(character) {
   })[0] ?? null;
 }
 
+// 강화 쿠폰은 장비 수치만 올리는 무상 보상이다. 골드는 입력 당시 값으로
+// 되돌려 두어 다른 쿠폰 효과나 오래된 클라이언트 로직이 섞여도 차감되지 않는다.
+export function applyEnhancementCoupon(character, amount = 1) {
+  const goldBefore = Math.max(0, Number(character.gold) || 0);
+  const target = strongestEquippedItem(character);
+  if (!target) return { ok: false, reason: 'no_equipment' };
+  const before = Math.max(0, Math.floor(Number(target.enhancement) || 0));
+  const increase = Math.max(1, Math.floor(Number(amount) || 1));
+  target.enhancement = Math.min(20, before + increase);
+  character.highestEnhancement = Math.max(character.highestEnhancement ?? 0, target.enhancement);
+  character.gold = goldBefore;
+  return { ok: true, target, before, after: target.enhancement };
+}
+
 export function potionCount(character, potionId) {
   return character.potions?.[potionId] ?? 0;
 }

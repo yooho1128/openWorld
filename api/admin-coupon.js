@@ -5,7 +5,7 @@ import { checkRateLimit, clientIp, rejectRateLimited } from '../lib/rateLimit.js
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
 
-const VALID_EFFECTS = ['gold', 'weapon', 'mythic-weapon', 'mythic-accessory', 'drain', 'enhance', 'levelup'];
+const VALID_EFFECTS = ['gold', 'weapon', 'mythic-weapon', 'mythic-accessory', 'enhance', 'levelup'];
 const AMOUNT_REQUIRED_EFFECTS = ['gold', 'enhance', 'levelup'];
 
 async function ensureTable() {

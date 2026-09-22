@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { classCouponWeapon, equipmentDisplayName, mythicAccessoryCoupon, mythicWeaponCoupon } from '../data/equipment.js';
 import { ADVANCEMENTS } from '../data/rpg.js';
-import { addLoot, ensureRpgCharacter, grantLevels, saveCharacter, strongestEquippedItem } from '../state/rpgCharacter.js';
+import { addLoot, applyEnhancementCoupon, ensureRpgCharacter, grantLevels, saveCharacter } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
 import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 
@@ -28,7 +28,6 @@ export class SettingsScene extends Phaser.Scene {
           <option value="mythic-accessory">신화급 악세서리 지급</option>
           <option value="enhance">강화 주문서 (현재 강화 수치에서 +N, 최대 +20)</option>
           <option value="levelup">레벨업 주문서 (현재 레벨에서 +N)</option>
-          <option value="drain">골드 전부 삭제(장난용)</option>
         </select>
         <label for="admin-coupon-amount">수량 (골드/강화/레벨 지급일 때 필수)</label><input id="admin-coupon-amount" type="number" min="0" placeholder="예: 골드=200000, 강화=3, 레벨=10" />
         <label style="display:flex;align-items:center;gap:6px;"><input id="admin-coupon-reusable" type="checkbox" style="width:auto;" />여러 번 사용 가능(재사용)</label>
@@ -77,7 +76,9 @@ export class SettingsScene extends Phaser.Scene {
     }
     this.redeeming = false;
     if (!result.ok) {
-      return this.render(result.reason === 'used' ? '이미 사용한 쿠폰입니다.' : '존재하지 않는 쿠폰입니다.');
+      if (result.reason === 'used') return this.render('이미 사용한 쿠폰입니다.');
+      if (result.reason === 'invalid_effect') return this.render('안전하지 않거나 폐기된 쿠폰 효과입니다. 골드와 아이템은 변경되지 않았습니다.');
+      return this.render('존재하지 않는 쿠폰입니다.');
     }
     this.character.redeemedCoupons.push(code);
     if (result.effect === 'weapon') {
@@ -110,14 +111,10 @@ export class SettingsScene extends Phaser.Scene {
     }
     if (result.effect === 'enhance') {
       const amount = Math.max(1, Math.floor(Number(result.amount) || 1));
-      const target = strongestEquippedItem(this.character);
-      if (!target) return this.render('강화할 장비가 없습니다. 먼저 장비를 착용해주세요.');
-      const before = target.enhancement ?? 0;
-      // 대장간과 동일하게 +20이 상한이다.
-      target.enhancement = Math.min(20, before + amount);
-      this.character.highestEnhancement = Math.max(this.character.highestEnhancement ?? 0, target.enhancement);
+      const enhancement = applyEnhancementCoupon(this.character, amount);
+      if (!enhancement.ok) return this.render('강화할 장비가 없습니다. 먼저 장비를 착용해주세요.');
       saveCharacter(this);
-      return this.render(`주문서의 힘으로 「${target.name}」이(가) +${before} → +${target.enhancement}(으)로 강화되었습니다!`);
+      return this.render(`주문서의 힘으로 「${enhancement.target.name}」이(가) +${enhancement.before} → +${enhancement.after}(으)로 강화되었습니다! 골드는 차감되지 않습니다.`);
     }
     if (result.effect === 'levelup') {
       const amount = Math.max(1, Math.floor(Number(result.amount) || 1));
@@ -126,16 +123,7 @@ export class SettingsScene extends Phaser.Scene {
       saveCharacter(this);
       return this.render(gained.length ? `주문서의 힘으로 Lv.${before} → Lv.${this.character.level}(으)로 레벨업했습니다!` : '이미 최대 레벨(999)입니다.');
     }
-    if (result.effect === 'drain') {
-      this.character.gold = 0;
-      saveCharacter(this);
-      return this.render('쿠폰의 악마 같은 힘으로 보유 골드가 모두 사라졌습니다.');
-    }
-    // Falling through here used to mean "drain" by default, so any effect
-    // this client doesn't recognize yet (a new one added server-side while
-    // an old cached bundle is still running, a typo, ...) silently wiped the
-    // player's gold instead of failing safely. Do nothing destructive and
-    // ask for a refresh instead.
+    // 알 수 없거나 폐기된 효과는 어떤 캐릭터 자원도 건드리지 않는다.
     this.character.redeemedCoupons.pop();
     saveCharacter(this);
     this.render('알 수 없는 쿠폰 효과입니다. 페이지를 새로고침한 뒤 다시 시도해주세요.');
