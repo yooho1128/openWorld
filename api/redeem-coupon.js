@@ -12,7 +12,7 @@ const SEED_COUPONS = [
   { code: '황금폭풍', effect: 'gold', amount: 30000 },
 ];
 
-const VALID_EFFECTS = new Set(['gold', 'weapon', 'mythic-weapon', 'mythic-accessory', 'enhance', 'levelup']);
+const VALID_EFFECTS = new Set(['gold', 'weapon', 'mythic-weapon', 'mythic-accessory', 'equipment', 'enhance', 'levelup']);
 const EFFECT_ALIASES = new Map([
   ['enhancement', 'enhance'], ['upgrade', 'enhance'], ['reinforce', 'enhance'], ['강화', 'enhance'],
 ]);
@@ -38,6 +38,7 @@ async function ensureTables() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
+  await sql`ALTER TABLE coupons ADD COLUMN IF NOT EXISTS config JSONB`;
   await sql`
     CREATE TABLE IF NOT EXISTS coupons (
       code TEXT PRIMARY KEY,
@@ -74,7 +75,7 @@ export default async function handler(req, res) {
 
   try {
     await ensureTables();
-    const couponRows = await sql`SELECT effect, amount, reusable FROM coupons WHERE code = ${code} AND enabled = true`;
+    const couponRows = await sql`SELECT effect, amount, config, reusable FROM coupons WHERE code = ${code} AND enabled = true`;
     if (!couponRows.length) return res.json({ ok: false, reason: 'invalid' });
     const coupon = couponRows[0];
     const effect = normalizeEffect(coupon.effect);
@@ -93,7 +94,7 @@ export default async function handler(req, res) {
       await sql`UPDATE characters SET data = ${JSON.stringify(updatedData)}, updated_at = now() WHERE nickname = ${nickname}`;
     }
 
-    return res.json({ ok: true, effect, amount: coupon.amount ?? null });
+    return res.json({ ok: true, effect, amount: coupon.amount ?? null, config: effect === 'equipment' ? coupon.config ?? null : null });
   } catch (err) {
     console.error('Coupon redeem failed:', err);
     return res.status(502).json({ ok: false, reason: 'server_error' });

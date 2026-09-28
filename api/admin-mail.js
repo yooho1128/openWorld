@@ -1,12 +1,15 @@
 import { neon } from '@neondatabase/serverless';
 import { adminPasswordConfigured, verifyAdminPassword } from '../lib/adminAuth.js';
 import { checkRateLimit, clientIp, rejectRateLimited } from '../lib/rateLimit.js';
-import { classCouponWeapon, mythicAccessoryCoupon, mythicWeaponCoupon } from '../src/data/equipment.js';
+import { classCouponWeapon, customGrantEquipment, mythicAccessoryCoupon, mythicWeaponCoupon } from '../src/data/equipment.js';
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
 
-const ITEM_PRESETS = ['none', 'gacha', 'class-weapon', 'mythic-weapon', 'mythic-accessory'];
+const ITEM_PRESETS = ['none', 'gacha', 'class-weapon', 'mythic-weapon', 'mythic-accessory', 'custom-equipment'];
+const EQUIPMENT_RARITIES = ['normal', 'rare', 'unique', 'legendary', 'mythic'];
+const EQUIPMENT_SLOTS = ['helmet', 'armor', 'gloves', 'boots', 'weapon', 'necklace', 'ring', 'earring'];
+const EQUIPMENT_BIOMES = ['forest', 'frozen', 'blood', 'swamp', 'desert', 'volcanic', 'storm', 'abyss', 'undead', 'demonic', 'celestial', 'crystal'];
 
 function safeNickname(value) {
   if (typeof value !== 'string') return null;
@@ -69,6 +72,16 @@ export default async function handler(req, res) {
       item = mythicWeaponCoupon(classId, level);
     } else if (itemPreset === 'mythic-accessory') {
       item = mythicAccessoryCoupon(level);
+    } else if (itemPreset === 'custom-equipment') {
+      const itemLevel = Math.round(Number(req.body?.itemLevel));
+      const itemRarity = req.body?.itemRarity;
+      const itemSlot = req.body?.itemSlot;
+      const itemBiome = req.body?.itemBiome;
+      if (!(itemLevel >= 1 && itemLevel <= 999) || !EQUIPMENT_RARITIES.includes(itemRarity) || !EQUIPMENT_SLOTS.includes(itemSlot) || !EQUIPMENT_BIOMES.includes(itemBiome)) {
+        return res.status(400).json({ ok: false, error: 'invalid_equipment_config' });
+      }
+      item = customGrantEquipment(classId, { level: itemLevel, rarity: itemRarity, slot: itemSlot, biome: itemBiome });
+      if (!item) return res.status(400).json({ ok: false, error: itemSlot === 'weapon' ? 'no_class' : 'equipment_unavailable' });
     }
 
     const mailbox = Array.isArray(character.mailbox) ? character.mailbox : [];

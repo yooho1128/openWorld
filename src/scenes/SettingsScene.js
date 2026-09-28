@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { classCouponWeapon, equipmentDisplayName, mythicAccessoryCoupon, mythicWeaponCoupon } from '../data/equipment.js';
+import { classCouponWeapon, customGrantEquipment, equipmentDisplayName, mythicAccessoryCoupon, mythicWeaponCoupon } from '../data/equipment.js';
 import { ADVANCEMENTS } from '../data/rpg.js';
 import { addLoot, applyEnhancementCoupon, ensureRpgCharacter, grantLevels, saveCharacter } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
@@ -26,9 +26,17 @@ export class SettingsScene extends Phaser.Scene {
           <option value="weapon">직업 유니크 무기 지급</option>
           <option value="mythic-weapon">신화급 무기 지급</option>
           <option value="mythic-accessory">신화급 악세서리 지급</option>
+          <option value="equipment">레벨·등급·부위·세트 선택 장비 지급</option>
           <option value="enhance">강화 주문서 (현재 강화 수치에서 +N, 최대 +20)</option>
           <option value="levelup">레벨업 주문서 (현재 레벨에서 +N)</option>
         </select>
+        <div id="admin-equipment-config" style="display:none;padding:8px;margin:8px 0;border:1px solid #6b5635;border-radius:6px;">
+          <label for="admin-item-level">장비 레벨</label><input id="admin-item-level" type="number" min="1" max="999" value="999" />
+          <label for="admin-item-rarity">등급</label><select id="admin-item-rarity"><option value="normal">노멀</option><option value="rare">레어</option><option value="unique">유니크</option><option value="legendary" selected>레전더리</option><option value="mythic">신화</option></select>
+          <label for="admin-item-slot">부위</label><select id="admin-item-slot"><option value="weapon" selected>무기</option><option value="helmet">투구</option><option value="armor">갑옷</option><option value="gloves">장갑</option><option value="boots">신발</option><option value="necklace">목걸이</option><option value="ring">반지</option><option value="earring">귀걸이</option></select>
+          <label for="admin-item-biome">세트 테마</label><select id="admin-item-biome"><option value="forest">숲</option><option value="frozen">설원</option><option value="blood">피빛</option><option value="swamp">늪지</option><option value="desert">사막</option><option value="volcanic">화염</option><option value="storm">폭풍</option><option value="abyss" selected>심연</option><option value="undead">망령</option><option value="demonic">마계</option><option value="celestial">성광</option><option value="crystal">수정</option></select>
+          <small>무기는 쿠폰을 사용하는 캐릭터의 직업 전용으로 지급됩니다.</small>
+        </div>
         <label for="admin-coupon-amount">수량 (골드/강화/레벨 지급일 때 필수)</label><input id="admin-coupon-amount" type="number" min="0" placeholder="예: 골드=200000, 강화=3, 레벨=10" />
         <label style="display:flex;align-items:center;gap:6px;"><input id="admin-coupon-reusable" type="checkbox" style="width:auto;" />여러 번 사용 가능(재사용)</label>
         <button id="admin-coupon-submit" class="secondary">쿠폰 등록/수정</button>
@@ -52,6 +60,12 @@ export class SettingsScene extends Phaser.Scene {
     }));
     qs('admin-coupon-submit')?.addEventListener('click', () => this.createCoupon());
     qs('admin-coupon-list')?.addEventListener('click', () => this.listCoupons());
+    const toggleAdminEquipment = () => {
+      const config = qs('admin-equipment-config');
+      if (config) config.style.display = qs('admin-coupon-effect')?.value === 'equipment' ? 'block' : 'none';
+    };
+    qs('admin-coupon-effect')?.addEventListener('change', toggleAdminEquipment);
+    toggleAdminEquipment();
     qs('settings-back').addEventListener('click', () => { saveCharacter(this); closePanel(); this.scene.start('Town'); });
   }
 
@@ -102,6 +116,13 @@ export class SettingsScene extends Phaser.Scene {
       saveCharacter(this);
       return this.render(`신화급 악세서리 「${equipmentDisplayName(accessory)}」을 획득했습니다!`);
     }
+    if (result.effect === 'equipment') {
+      const item = customGrantEquipment(this.character.classId, result.config ?? {});
+      if (!item) return this.render('선택 장비를 생성할 수 없습니다. 쿠폰 설정을 확인해주세요.');
+      addLoot(this.character, item);
+      saveCharacter(this);
+      return this.render(`선택 장비 「${equipmentDisplayName(item)}」 (Lv.${item.level})을 획득했습니다!`);
+    }
     if (result.effect === 'gold') {
       const amount = result.amount ?? 0;
       this.character.gold += amount;
@@ -139,18 +160,25 @@ export class SettingsScene extends Phaser.Scene {
     const amountRaw = qs('admin-coupon-amount').value.trim();
     const amount = amountRaw ? Number(amountRaw) : null;
     const reusable = qs('admin-coupon-reusable').checked;
+    const equipmentConfig = effect === 'equipment' ? {
+      itemLevel: Number(qs('admin-item-level').value),
+      itemRarity: qs('admin-item-rarity').value,
+      itemSlot: qs('admin-item-slot').value,
+      itemBiome: qs('admin-item-biome').value,
+    } : {};
     let result;
     try {
       const response = await fetch('/api/admin-coupon', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nickname: this.registry.get('nickname'), action: 'create', code, effect, amount, reusable }),
+        body: JSON.stringify({ nickname: this.registry.get('nickname'), action: 'create', code, effect, amount, reusable, ...equipmentConfig }),
       });
       result = await response.json();
     } catch {
       return this.render('쿠폰 관리 서버에 연결할 수 없습니다.');
     }
     if (!result.ok) return this.render(`쿠폰 등록 실패: ${result.error ?? '알 수 없는 오류'}`);
-    this.render(`쿠폰 「${code}」 등록 완료! (${effect}${amount ? ` · ${amount.toLocaleString()}G` : ''}${reusable ? ' · 재사용가능' : ''})`);
+    const equipmentLabel = effect === 'equipment' ? ` · Lv.${equipmentConfig.itemLevel} ${equipmentConfig.itemRarity} ${equipmentConfig.itemSlot} ${equipmentConfig.itemBiome} 세트` : '';
+    this.render(`쿠폰 「${code}」 등록 완료! (${effect}${amount ? ` · ${amount.toLocaleString()}G` : ''}${equipmentLabel}${reusable ? ' · 재사용가능' : ''})`);
   }
 
   async listCoupons() {
@@ -166,7 +194,7 @@ export class SettingsScene extends Phaser.Scene {
     }
     if (!result.ok) return this.render(`쿠폰 목록 조회 실패: ${result.error ?? '알 수 없는 오류'}`);
     if (!result.coupons.length) return this.render('등록된 쿠폰이 없습니다.');
-    const lines = result.coupons.map((c) => `${c.code} · ${c.effect}${c.amount ? ` ${Number(c.amount).toLocaleString()}G` : ''}${c.reusable ? ' · 재사용' : ''}${c.enabled ? '' : ' · 비활성'}`);
+    const lines = result.coupons.map((c) => `${c.code} · ${c.effect}${c.amount ? ` ${Number(c.amount).toLocaleString()}G` : ''}${c.config ? ` · Lv.${c.config.level} ${c.config.rarity} ${c.config.slot} ${c.config.biome} 세트` : ''}${c.reusable ? ' · 재사용' : ''}${c.enabled ? '' : ' · 비활성'}`);
     this.render(lines.join('<br>'));
   }
 }

@@ -5,8 +5,11 @@ import { checkRateLimit, clientIp, rejectRateLimited } from '../lib/rateLimit.js
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const sql = connectionString ? neon(connectionString) : null;
 
-const VALID_EFFECTS = ['gold', 'weapon', 'mythic-weapon', 'mythic-accessory', 'enhance', 'levelup'];
+const VALID_EFFECTS = ['gold', 'weapon', 'mythic-weapon', 'mythic-accessory', 'equipment', 'enhance', 'levelup'];
 const AMOUNT_REQUIRED_EFFECTS = ['gold', 'enhance', 'levelup'];
+const EQUIPMENT_RARITIES = ['normal', 'rare', 'unique', 'legendary', 'mythic'];
+const EQUIPMENT_SLOTS = ['helmet', 'armor', 'gloves', 'boots', 'weapon', 'necklace', 'ring', 'earring'];
+const EQUIPMENT_BIOMES = ['forest', 'frozen', 'blood', 'swamp', 'desert', 'volcanic', 'storm', 'abyss', 'undead', 'demonic', 'celestial', 'crystal'];
 
 async function ensureTable() {
   await sql`
@@ -19,6 +22,7 @@ async function ensureTable() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
+  await sql`ALTER TABLE coupons ADD COLUMN IF NOT EXISTS config JSONB`;
 }
 
 // Reusable coupon-management tool: create/update, list, or disable coupon
@@ -50,7 +54,7 @@ export default async function handler(req, res) {
   const action = typeof req.body?.action === 'string' ? req.body.action : 'create';
 
   if (action === 'list') {
-    const rows = await sql`SELECT code, effect, amount, reusable, enabled, created_at FROM coupons ORDER BY created_at DESC`;
+    const rows = await sql`SELECT code, effect, amount, config, reusable, enabled, created_at FROM coupons ORDER BY created_at DESC`;
     return res.json({ ok: true, coupons: rows });
   }
 
@@ -68,11 +72,22 @@ export default async function handler(req, res) {
   const reusable = req.body?.reusable === true;
   if (!code || !VALID_EFFECTS.includes(effect)) return res.status(400).json({ ok: false, error: 'invalid_request' });
   if (AMOUNT_REQUIRED_EFFECTS.includes(effect) && !(amount > 0)) return res.status(400).json({ ok: false, error: 'amount_required' });
+  let config = null;
+  if (effect === 'equipment') {
+    const level = Math.round(Number(req.body?.itemLevel));
+    const rarity = req.body?.itemRarity;
+    const slot = req.body?.itemSlot;
+    const biome = req.body?.itemBiome;
+    if (!(level >= 1 && level <= 999) || !EQUIPMENT_RARITIES.includes(rarity) || !EQUIPMENT_SLOTS.includes(slot) || !EQUIPMENT_BIOMES.includes(biome)) {
+      return res.status(400).json({ ok: false, error: 'invalid_equipment_config' });
+    }
+    config = { level, rarity, slot, biome };
+  }
 
   await sql`
-    INSERT INTO coupons (code, effect, amount, reusable, enabled)
-    VALUES (${code}, ${effect}, ${amount}, ${reusable}, true)
-    ON CONFLICT (code) DO UPDATE SET effect = excluded.effect, amount = excluded.amount, reusable = excluded.reusable, enabled = true
+    INSERT INTO coupons (code, effect, amount, config, reusable, enabled)
+    VALUES (${code}, ${effect}, ${amount}, ${config ? JSON.stringify(config) : null}, ${reusable}, true)
+    ON CONFLICT (code) DO UPDATE SET effect = excluded.effect, amount = excluded.amount, config = excluded.config, reusable = excluded.reusable, enabled = true
   `;
-  return res.json({ ok: true, code, effect, amount, reusable });
+  return res.json({ ok: true, code, effect, amount, config, reusable });
 }

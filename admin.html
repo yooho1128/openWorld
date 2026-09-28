@@ -46,7 +46,11 @@
       #gate p { color: #a99b7d; font-size: 12px; }
       #dashboard { display: none; }
       .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-      @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+      .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+      .equipment-config { margin-top: 10px; padding: 10px; border: 1px solid #5b4327; border-radius: 6px; background: #18110d; }
+      .equipment-config label { margin-top: 0; }
+      @media (max-width: 640px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
     </style>
   </head>
   <body>
@@ -79,7 +83,23 @@
           <option value="class-weapon">직업 전용 유니크 무기</option>
           <option value="mythic-weapon">신화급 무기</option>
           <option value="mythic-accessory">신화급 악세서리</option>
+          <option value="custom-equipment">레벨·등급·부위 직접 선택</option>
         </select>
+        <div id="mail-equipment-config" class="equipment-config" style="display:none;">
+          <div class="grid-4">
+            <div><label for="mail-item-level">장비 레벨</label><input id="mail-item-level" type="number" min="1" max="999" value="999" /></div>
+            <div><label for="mail-item-rarity">등급</label><select id="mail-item-rarity">
+              <option value="normal">노멀</option><option value="rare">레어</option><option value="unique">유니크</option><option value="legendary" selected>레전더리</option><option value="mythic">신화</option>
+            </select></div>
+            <div><label for="mail-item-slot">부위</label><select id="mail-item-slot">
+              <option value="weapon" selected>무기</option><option value="helmet">투구</option><option value="armor">갑옷</option><option value="gloves">장갑</option><option value="boots">신발</option><option value="necklace">목걸이</option><option value="ring">반지</option><option value="earring">귀걸이</option>
+            </select></div>
+            <div><label for="mail-item-biome">세트 테마</label><select id="mail-item-biome">
+              <option value="forest">숲</option><option value="frozen">설원</option><option value="blood">피빛</option><option value="swamp">늪지</option><option value="desert">사막</option><option value="volcanic">화염</option><option value="storm">폭풍</option><option value="abyss" selected>심연</option><option value="undead">망령</option><option value="demonic">마계</option><option value="celestial">성광</option><option value="crystal">수정</option>
+            </select></div>
+          </div>
+          <p class="sub" style="margin:8px 0 0;">무기는 받는 캐릭터의 직업 전용으로 생성됩니다.</p>
+        </div>
         <button id="mail-send">우편 보내기</button>
         <div id="mail-msg"></div>
       </section>
@@ -95,10 +115,25 @@
           <option value="weapon">직업 유니크 무기 지급</option>
           <option value="mythic-weapon">신화급 무기 지급</option>
           <option value="mythic-accessory">신화급 악세서리 지급</option>
+          <option value="equipment">레벨·등급·부위 선택 장비 지급</option>
           <option value="enhance">강화 주문서 (현재 강화 수치에서 +N, 최대 +20)</option>
           <option value="levelup">레벨업 주문서 (현재 레벨에서 +N)</option>
-          <option value="drain">골드 전부 삭제(장난용)</option>
         </select>
+        <div id="coupon-equipment-config" class="equipment-config" style="display:none;">
+          <div class="grid-4">
+            <div><label for="coupon-item-level">장비 레벨</label><input id="coupon-item-level" type="number" min="1" max="999" value="999" /></div>
+            <div><label for="coupon-item-rarity">등급</label><select id="coupon-item-rarity">
+              <option value="normal">노멀</option><option value="rare">레어</option><option value="unique">유니크</option><option value="legendary" selected>레전더리</option><option value="mythic">신화</option>
+            </select></div>
+            <div><label for="coupon-item-slot">부위</label><select id="coupon-item-slot">
+              <option value="weapon" selected>무기</option><option value="helmet">투구</option><option value="armor">갑옷</option><option value="gloves">장갑</option><option value="boots">신발</option><option value="necklace">목걸이</option><option value="ring">반지</option><option value="earring">귀걸이</option>
+            </select></div>
+            <div><label for="coupon-item-biome">세트 테마</label><select id="coupon-item-biome">
+              <option value="forest">숲</option><option value="frozen">설원</option><option value="blood">피빛</option><option value="swamp">늪지</option><option value="desert">사막</option><option value="volcanic">화염</option><option value="storm">폭풍</option><option value="abyss" selected>심연</option><option value="undead">망령</option><option value="demonic">마계</option><option value="celestial">성광</option><option value="crystal">수정</option>
+            </select></div>
+          </div>
+          <p class="sub" style="margin:8px 0 0;">무기 쿠폰은 사용하는 캐릭터의 직업 전용으로 생성됩니다.</p>
+        </div>
         <label for="coupon-amount">수량 (골드/강화/레벨 지급일 때 필수)</label>
         <input id="coupon-amount" type="number" min="0" placeholder="예: 골드=200000, 강화=3, 레벨=10" />
         <div class="checkbox-row"><input id="coupon-reusable" type="checkbox" /><label for="coupon-reusable">여러 번 사용 가능(재사용)</label></div>

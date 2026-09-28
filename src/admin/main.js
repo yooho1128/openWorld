@@ -2,6 +2,9 @@ import { BOSS_GUARANTEED_RATES, ENHANCEMENT_BLESSINGS, ENHANCEMENT_DESTROY_RATES
 
 const STORAGE_KEY = 'everglen-admin-password';
 const $ = (id) => document.getElementById(id);
+const RARITY_LABELS = { normal: '노멀', rare: '레어', unique: '유니크', legendary: '레전더리', mythic: '신화' };
+const SLOT_LABELS = { helmet: '투구', armor: '갑옷', gloves: '장갑', boots: '신발', weapon: '무기', necklace: '목걸이', ring: '반지', earring: '귀걸이' };
+const BIOME_LABELS = { forest: '숲', frozen: '설원', blood: '피빛', swamp: '늪지', desert: '사막', volcanic: '화염', storm: '폭풍', abyss: '심연', undead: '망령', demonic: '마계', celestial: '성광', crystal: '수정' };
 
 function getPassword() {
   try { return sessionStorage.getItem(STORAGE_KEY) ?? ''; } catch { return ''; }
@@ -85,6 +88,12 @@ function renderForgeTable() {
 
 function couponRowHtml(coupon) {
   const parts = [coupon.effect];
+  if (coupon.effect === 'equipment' && coupon.config) {
+    parts.push(`Lv.${coupon.config.level}`);
+    parts.push(RARITY_LABELS[coupon.config.rarity] ?? coupon.config.rarity);
+    parts.push(SLOT_LABELS[coupon.config.slot] ?? coupon.config.slot);
+    parts.push(`${BIOME_LABELS[coupon.config.biome] ?? coupon.config.biome} 세트`);
+  }
   if (coupon.amount) parts.push(`${Number(coupon.amount).toLocaleString()}G`);
   if (coupon.reusable) parts.push('재사용');
   if (!coupon.enabled) parts.push('비활성');
@@ -120,7 +129,13 @@ async function submitCoupon() {
   const amountRaw = $('coupon-amount').value.trim();
   const amount = amountRaw ? Number(amountRaw) : null;
   const reusable = $('coupon-reusable').checked;
-  const { ok, data } = await callAdminApi('/api/admin-coupon', { action: 'create', code, effect, amount, reusable });
+  const equipmentConfig = effect === 'equipment' ? {
+    itemLevel: Number($('coupon-item-level').value),
+    itemRarity: $('coupon-item-rarity').value,
+    itemSlot: $('coupon-item-slot').value,
+    itemBiome: $('coupon-item-biome').value,
+  } : {};
+  const { ok, data } = await callAdminApi('/api/admin-coupon', { action: 'create', code, effect, amount, reusable, ...equipmentConfig });
   showMsg($('coupon-msg'), ok ? `「${code}」 등록/수정 완료.` : `등록 실패: ${data.error ?? '알 수 없는 오류'}`, ok ? 'ok' : 'error');
   if (ok) { $('coupon-code').value = ''; $('coupon-amount').value = ''; $('coupon-reusable').checked = false; loadCoupons(); }
 }
@@ -134,11 +149,28 @@ async function sendMail() {
     body: $('mail-body').value.trim(),
     gold: $('mail-gold').value.trim() || undefined,
     itemPreset: $('mail-item').value,
+    ...($('mail-item').value === 'custom-equipment' ? {
+      itemLevel: Number($('mail-item-level').value),
+      itemRarity: $('mail-item-rarity').value,
+      itemSlot: $('mail-item-slot').value,
+      itemBiome: $('mail-item-biome').value,
+    } : {}),
   };
   const { ok, data } = await callAdminApi('/api/admin-mail', payload);
-  const errorLabels = { not_found: '해당 닉네임의 캐릭터를 찾을 수 없습니다.', no_class: '이 캐릭터는 아직 직업을 선택하지 않아 직업 전용 무기를 보낼 수 없습니다.' };
-  showMsg($('mail-msg'), ok ? `「${nickname}」에게 우편을 보냈습니다.` : (errorLabels[data.error] ?? `전송 실패: ${data.error ?? '알 수 없는 오류'}`), ok ? 'ok' : 'error');
-  if (ok) { $('mail-nickname').value = ''; $('mail-title').value = ''; $('mail-body').value = ''; $('mail-gold').value = ''; $('mail-item').value = 'none'; }
+  const errorLabels = {
+    not_found: '해당 닉네임의 캐릭터를 찾을 수 없습니다.',
+    no_class: '이 캐릭터는 아직 직업을 선택하지 않아 직업 전용 무기를 보낼 수 없습니다.',
+    invalid_equipment_config: '장비 레벨·등급·부위·세트 설정을 확인하세요.',
+    equipment_unavailable: '선택한 조건에 맞는 장비가 없습니다.',
+  };
+  const sentItem = data.mail?.item ? ` (${data.mail.item.name} · Lv.${data.mail.item.level})` : '';
+  showMsg($('mail-msg'), ok ? `「${nickname}」에게 우편을 보냈습니다.${sentItem}` : (errorLabels[data.error] ?? `전송 실패: ${data.error ?? '알 수 없는 오류'}`), ok ? 'ok' : 'error');
+  if (ok) { $('mail-nickname').value = ''; $('mail-title').value = ''; $('mail-body').value = ''; $('mail-gold').value = ''; $('mail-item').value = 'none'; toggleEquipmentConfig(); }
+}
+
+function toggleEquipmentConfig() {
+  $('mail-equipment-config').style.display = $('mail-item').value === 'custom-equipment' ? 'block' : 'none';
+  $('coupon-equipment-config').style.display = $('coupon-effect').value === 'equipment' ? 'block' : 'none';
 }
 
 async function tryEnter() {
@@ -161,5 +193,8 @@ $('gate-submit').addEventListener('click', tryEnter);
 $('gate-password').addEventListener('keydown', (event) => { if (event.key === 'Enter') tryEnter(); });
 $('coupon-submit').addEventListener('click', submitCoupon);
 $('mail-send').addEventListener('click', sendMail);
+$('coupon-effect').addEventListener('change', toggleEquipmentConfig);
+$('mail-item').addEventListener('change', toggleEquipmentConfig);
+toggleEquipmentConfig();
 
 if (getPassword()) tryEnter();

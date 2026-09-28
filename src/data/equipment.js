@@ -333,6 +333,26 @@ export function mythicAccessoryCoupon(level = 1) {
   return item;
 }
 
+// 운영자가 레벨/등급/부위를 직접 지정하는 쿠폰·우편 전용 장비.
+// 무기는 수령 캐릭터의 직업 전용 장비만 고르고, 다른 부위는 직업 제한 없이 지급한다.
+export function customGrantEquipment(classId, { level = 1, rarity = 'normal', slot = 'weapon', biome = 'forest' } = {}) {
+  if (!RARITIES[rarity] || !EQUIPMENT_SLOTS.some((entry) => entry.id === slot) || !BIOMES.some(([id]) => id === biome)) return null;
+  const pool = EQUIPMENT_CATALOG.filter((item) => (
+    item.slot === slot
+    && item.rarity === rarity
+    && item.biome === biome
+    && (slot !== 'weapon' || item.classId === classId)
+  ));
+  const base = pool[Math.floor(Math.random() * pool.length)];
+  if (!base) return null;
+  const item = cloneItem(base, '-admin-custom');
+  item.level = Math.max(1, Math.min(999, Math.round(Number(level) || 1)));
+  item.name = `운영자의 선택 · ${base.name}`;
+  item.source = 'admin-custom-equipment';
+  normalizeEquipmentStats(item);
+  return item;
+}
+
 // 캐릭터 레벨이 장비 레벨보다 20 이상 높아지면 서서히 성능이 떨어진다
 // (초과분 1레벨당 1%씩, 최대 80% 감소 - 완전히 못 쓰게 되진 않는다).
 // 저레벨 사냥터에서 얻은 장비를 고레벨에서 계속 우려먹지 못하게 하기 위함.

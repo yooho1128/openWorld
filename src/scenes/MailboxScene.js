@@ -7,7 +7,7 @@ import { addFantasyBackdrop, addSceneTitle } from '../ui/fantasyTheme.js';
 function attachLabel(entry) {
   if (entry.titleReward) return `특별 칭호 「${entry.titleReward.name}」`;
   if (entry.gachaEquipment) return '무작위 장비 1개';
-  if (entry.item) return `${entry.item.name}${entry.item.quantity > 1 ? ` x${entry.item.quantity}` : ''}`;
+  if (entry.item) return `${getRarity(entry.item.rarity).name} · Lv.${entry.item.level ?? 1} · ${entry.item.name}${entry.item.quantity > 1 ? ` x${entry.item.quantity}` : ''}`;
   if (entry.gold) return `골드 ${entry.gold.toLocaleString()}`;
   return '-';
 }
