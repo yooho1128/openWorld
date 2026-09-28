@@ -480,11 +480,11 @@ export function enhancementVisualClass(item) {
   return '';
 }
 
-// +10까지는 성장 구간으로 보고 높은 성공률과 실패 안전장치를 적용한다.
-// +10 이후에는 실패 시 강화 수치만 1 내려가며 장비는 어떤 단계에서도 파괴되지 않는다.
+// 모든 단계에서 실패해도 강화 수치와 장비는 유지된다.
 export const ENHANCEMENT_SUCCESS_RATES = [100, 100, 98, 96, 93, 90, 86, 82, 76, 70, 28, 22, 17, 13, 10, 7, 5, 3, 2, 1];
 // 외부 표/이전 코드와의 호환성을 위해 유지하되 전 구간 파괴 확률은 0%다.
 export const ENHANCEMENT_DESTROY_RATES = Array(20).fill(0);
+export const ENHANCEMENT_PITY_FAILURES = 10;
 
 export const ENHANCEMENT_BLESSINGS = {
   small: { name: '작은 축복', bonus: 10, symbol: '✧' },
@@ -497,8 +497,12 @@ export function enhancementSuccessRate(level, blessingBonus = 0) {
   return Math.min(100, base + Math.max(0, Math.min(30, blessingBonus)));
 }
 
-export function isSafeEnhancement(level) {
-  return level < 10;
+export function enhancementFailureCount(item) {
+  return Math.max(0, Math.min(ENHANCEMENT_PITY_FAILURES, Math.floor(Number(item?.enhancementFailureCount) || 0)));
+}
+
+export function isEnhancementGuaranteed(item) {
+  return enhancementFailureCount(item) >= ENHANCEMENT_PITY_FAILURES;
 }
 
 export function catalogStats() {
