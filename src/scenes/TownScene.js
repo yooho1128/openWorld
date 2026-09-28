@@ -37,12 +37,16 @@ export class TownScene extends Phaser.Scene {
     const astrologerText = this.add.text(145, 122, '✧ 점성술사', { fontSize: '10px', fontStyle: 'bold', color: '#f1ddff' }).setOrigin(0.5);
     this.tweens.add({ targets: [astrologer, astrologerText], scaleX: 1.035, scaleY: 1.035, duration: 1200, yoyo: true, repeat: -1 });
     astrologer.on('pointerdown', () => this.scene.start('Astrologer'));
-    const worldBoss = this.add.rectangle(287, 122, 124, 28, 0x57152f, 0.98).setStrokeStyle(2, 0xff805d).setInteractive({ useHandCursor: true });
-    const worldBossText = this.add.text(287, 122, '☄ 월드 보스', { fontSize: '11px', fontStyle: 'bold', color: '#ffe59c' }).setOrigin(0.5);
+    const worldBoss = this.add.rectangle(250, 122, 92, 28, 0x57152f, 0.98).setStrokeStyle(2, 0xff805d).setInteractive({ useHandCursor: true });
+    const worldBossText = this.add.text(250, 122, '☄ 고룡', { fontSize: '10px', fontStyle: 'bold', color: '#ffe59c' }).setOrigin(0.5);
     this.tweens.add({ targets: [worldBoss, worldBossText], scaleX: 1.04, scaleY: 1.04, alpha: 0.72, duration: 620, yoyo: true, repeat: -1 });
     worldBoss.on('pointerdown', () => this.scene.start('WorldBoss'));
-    const settings = this.add.rectangle(430, 122, 70, 28, 0x213229, 0.96).setStrokeStyle(1, 0xe0c274).setInteractive({ useHandCursor: true });
-    this.add.text(430, 122, '⚙ 설정', { fontSize: '10px', color: '#ffe5a5' }).setOrigin(0.5);
+    const apexBoss = this.add.rectangle(352, 122, 102, 28, 0x220b2f, 0.99).setStrokeStyle(2, 0xff4f79).setInteractive({ useHandCursor: true });
+    const apexBossText = this.add.text(352, 122, '☾ 신화 보스', { fontSize: '10px', fontStyle: 'bold', color: '#ffd2e7' }).setOrigin(0.5);
+    this.tweens.add({ targets: [apexBoss, apexBossText], scaleX: 1.05, scaleY: 1.05, alpha: 0.64, duration: 470, yoyo: true, repeat: -1 });
+    apexBoss.on('pointerdown', () => this.scene.start('ApexWorldBoss'));
+    const settings = this.add.rectangle(447, 122, 54, 28, 0x213229, 0.96).setStrokeStyle(1, 0xe0c274).setInteractive({ useHandCursor: true });
+    this.add.text(447, 122, '⚙', { fontSize: '12px', color: '#ffe5a5' }).setOrigin(0.5);
     settings.on('pointerdown', () => this.scene.start('Settings'));
   }
 

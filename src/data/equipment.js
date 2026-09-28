@@ -225,6 +225,23 @@ export function worldBossEquipment(monster, classId, level = 1) {
   return item;
 }
 
+// 최상위 월드 보스 전용 확정 보상. 현재 직업의 무기만 나오며
+// 레전더리 70% / 신화 30%로 일반 월드 보스보다 확실한 성장 목표를 준다.
+export function apexWorldBossWeapon(monster, classId, level = 999) {
+  const rarity = Math.random() < 0.3 ? 'mythic' : 'legendary';
+  const classPool = EQUIPMENT_CATALOG.filter((item) => item.slot === 'weapon' && item.rarity === rarity && item.classId === classId);
+  const themed = classPool.filter((item) => item.biome === monster.biome);
+  const source = themed.length ? themed : classPool;
+  const base = source[Math.floor(Math.random() * source.length)];
+  if (!base) return null;
+  const item = cloneItem(base, `-apex-world-boss-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`);
+  item.level = Math.max(1, Math.min(999, level));
+  item.name = `${monster.name}의 월식 무기 · ${base.name}`;
+  item.source = monster.id;
+  normalizeEquipmentStats(item);
+  return item;
+}
+
 // 장비 랜덤 뽑기권: 부위 전체 랜덤, 등급은 노멀 50%/레어 25%/유니크 15%/레전더리 8%/신화 2%.
 export const GACHA_RARITY_TABLE = [
   ['normal', 0.5],

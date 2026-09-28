@@ -74,7 +74,39 @@ function createWorldDragon(scene) {
 }
 
 export class WorldBossScene extends Phaser.Scene {
-  constructor() { super('WorldBoss'); }
+  constructor(sceneKey = 'WorldBoss') { super(sceneKey); }
+
+  getWorldBoss() { return WORLD_DRAGON; }
+  getCombatTuning() {
+    return {
+      damageScale: BOSS_DAMAGE_SCALE,
+      heartDamageRatio: 0.08,
+      turnLimit: Infinity,
+      initialLog: '하늘이 갈라지고, 고룡 아우렉스가 강림한다!',
+      arrivalLabel: '아우렉스 강림',
+      phaseLabels: ['PHASE I · 지상 대치', 'PHASE II · 공중 추격 시점', 'PHASE III · 용의 눈 시점'],
+      phaseBanners: ['PHASE I', 'PHASE II\n공중 추격전', 'FINAL PHASE\n용의 눈 · 종말 시점'],
+      phaseLogs: ['', '아우렉스가 하늘로 솟구친다. 연속된 필멸의 징조를 읽어라!', '고룡의 눈이 세 갈래 미래를 새긴다. 예언의 순서를 기억하라!'],
+      memorySuccess: '세 갈래 미래를 돌파했다! 용의 심장',
+      memoryPatternLabel: '용의 눈 · 시간 붕괴',
+      memoryRecall: '용의 눈은 이미 닫혔다.',
+      chainPatternLabel: '연쇄 천공 붕괴',
+      singlePatternLabel: '천공의 단죄',
+      defeatMessage: '아우렉스의 포효가 하늘을 뒤덮었다...',
+      dodgeClues: DODGE_CLUES,
+    };
+  }
+
+  createBossStats(power) {
+    return {
+      level: Math.max(100, this.character.level),
+      maxHp: Math.max(18000, Math.round(this.playerStats.attack * 135 + power * 10)),
+      attack: Math.round(this.playerStats.defense * 0.46 + this.playerStats.maxHp * 0.115),
+      defense: Math.round(this.playerStats.attack * 0.36),
+    };
+  }
+
+  createBossVisual() { return createWorldDragon(this); }
 
   create() {
     this.character = ensureRpgCharacter(this.registry.get('character'));
@@ -92,16 +124,14 @@ export class WorldBossScene extends Phaser.Scene {
     this.patternLayer = null;
     this.patternSequence = null;
     this.forcePhasePattern = false;
+    this.worldBoss = this.getWorldBoss();
+    this.combatTuning = this.getCombatTuning();
+    this.dodgeClues = this.combatTuning.dodgeClues ?? DODGE_CLUES;
     const power = Math.max(1, this.playerStats.attack * 5 + this.playerStats.defense * 4 + this.playerStats.maxHp * 0.35);
-    this.boss = {
-      level: Math.max(100, this.character.level),
-      maxHp: Math.max(18000, Math.round(this.playerStats.attack * 135 + power * 10)),
-      attack: Math.round(this.playerStats.defense * 0.46 + this.playerStats.maxHp * 0.115),
-      defense: Math.round(this.playerStats.attack * 0.36),
-    };
+    this.boss = this.createBossStats(power);
     this.boss.hp = this.boss.maxHp;
     this.buildArena();
-    this.dragon = createWorldDragon(this);
+    this.dragon = this.createBossVisual();
     this.hero = createEquippedHero(this, this.character, 112, 425, 2.15).setDepth(11);
     this.add.ellipse(112, 468, 112, 25, 0x030207, 0.48).setDepth(10);
     this.statusGraphics = this.add.graphics().setDepth(18);
@@ -111,7 +141,7 @@ export class WorldBossScene extends Phaser.Scene {
       fontSize: '11px', fontStyle: 'bold', color: '#fff0ae', align: 'center', backgroundColor: '#1b0822dd', padding: { x: 9, y: 5 },
     }).setOrigin(0.5).setDepth(25);
     addOrnatePanel(this, 240, 559, 442, 68, { color: 0x1a1020, border: 0xd6895a, alpha: 0.97 });
-    this.logText = this.add.text(240, 557, '하늘이 갈라지고, 고룡 아우렉스가 강림한다!', {
+    this.logText = this.add.text(240, 557, this.combatTuning.initialLog, {
       fontSize: '12px', fontStyle: 'bold', color: '#ffe0a2', align: 'center', wordWrap: { width: 414 }, lineSpacing: 3,
     }).setOrigin(0.5).setDepth(22);
     this.buildCommands();
@@ -134,10 +164,10 @@ export class WorldBossScene extends Phaser.Scene {
       this.tweens.add({ targets: mote, y: mote.y - 85, x: mote.x + (index % 2 ? 18 : -14), alpha: 0.05, duration: 1200 + index * 80, yoyo: true, repeat: -1 });
     }
     this.add.text(240, 28, 'WORLD BOSS', { fontFamily: 'Georgia, serif', fontSize: '13px', fontStyle: 'bold', color: '#ff846a', letterSpacing: 6 }).setOrigin(0.5).setDepth(20);
-    this.titleText = this.add.text(240, 52, '천공을 삼키는 고룡 · 아우렉스', {
+    this.titleText = this.add.text(240, 52, this.worldBoss.name, {
       fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '20px', fontStyle: 'bold', color: '#fff0bc', stroke: '#390f2d', strokeThickness: 5,
     }).setOrigin(0.5).setDepth(20);
-    this.phaseText = this.add.text(240, 77, 'PHASE I · 지상 대치', { fontSize: '10px', fontStyle: 'bold', color: '#e4b6ff' }).setOrigin(0.5).setDepth(20);
+    this.phaseText = this.add.text(240, 77, this.combatTuning.phaseLabels[0], { fontSize: '10px', fontStyle: 'bold', color: '#e4b6ff' }).setOrigin(0.5).setDepth(20);
   }
 
   buildCommands() {
@@ -195,7 +225,7 @@ export class WorldBossScene extends Phaser.Scene {
     this.commandLayer.setAlpha(0.25);
     this.dragon.setAlpha(0).setScale(2.1).setAngle(-12);
     const seal = this.add.circle(240, 238, 125, 0x4d174f, 0.18).setStrokeStyle(8, 0xff6e65, 0.72).setDepth(40);
-    const warning = this.add.text(240, 230, '⚠  WORLD BOSS  ⚠\n아우렉스 강림', {
+    const warning = this.add.text(240, 230, `⚠  WORLD BOSS  ⚠\n${this.combatTuning.arrivalLabel}`, {
       fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: '24px', fontStyle: 'bold', color: '#fff0b0', align: 'center', stroke: '#5a0b25', strokeThickness: 6,
     }).setOrigin(0.5).setDepth(42);
     this.cameras.main.flash(480, 120, 30, 55, false);
@@ -357,19 +387,21 @@ export class WorldBossScene extends Phaser.Scene {
   preparePatternStep() {
     const { lanes, index, memoryTrial } = this.patternSequence;
     const safeLane = lanes[index];
-    const clueData = DODGE_CLUES[safeLane];
+    const clueData = this.dodgeClues[safeLane];
     const total = lanes.length;
-    const label = memoryTrial ? '용의 눈 · 시간 붕괴' : this.phase === 2 ? '연쇄 천공 붕괴' : '천공의 단죄';
+    const label = memoryTrial
+      ? this.combatTuning.memoryPatternLabel
+      : this.phase === 2 ? this.combatTuning.chainPatternLabel : this.combatTuning.singlePatternLabel;
     this.intent = { type: memoryTrial ? 'apocalypse' : 'meteor', safeLane, label, lethal: true };
     this.showLethalWarning(memoryTrial);
     this.setCommandPage('dodge');
     if (memoryTrial && index === 0) {
-      const prophecy = lanes.map((lane, order) => `${order + 1}. ${DODGE_CLUES[lane].sigil}`).join('  →  ');
+      const prophecy = lanes.map((lane, order) => `${order + 1}. ${this.dodgeClues[lane].sigil}`).join('  →  ');
       this.currentPatternClue = `세 개의 예언을 기억하라. ${prophecy}`;
       this.logText.setText(this.currentPatternClue);
-      this.intentText.setText(`용의 눈 · 시간 붕괴\n세 예언을 기억하라`);
+      this.intentText.setText(`${label}\n세 예언을 기억하라`);
     } else if (memoryTrial) {
-      this.currentPatternClue = `${index + 1}번째 예언을 기억해 내라. 용의 눈은 이미 닫혔다.`;
+      this.currentPatternClue = `${index + 1}번째 예언을 기억해 내라. ${this.combatTuning.memoryRecall}`;
       this.logText.setText(this.currentPatternClue);
       this.intentText.setText(`시간 붕괴 ${index + 1} / ${total}\n기억만이 살길이다`);
     } else {
@@ -408,6 +440,15 @@ export class WorldBossScene extends Phaser.Scene {
 
   async bossTurn() {
     const intent = this.intent;
+    if (this.turn >= this.combatTuning.turnLimit) {
+      this.character.hp = 0;
+      this.logText.setText(`${this.worldBoss.name}의 광폭화! 제한된 운명이 끝나 생명력이 소멸한다.`);
+      this.refreshStatus();
+      this.cameras.main.flash(750, 255, 0, 45, false);
+      this.cameras.main.shake(1100, 0.05);
+      await this.pause(1100);
+      return 'enrage';
+    }
     if (intent.lethal) {
       const avoided = this.dodgeLane === intent.safeLane;
       if (!avoided) {
@@ -423,7 +464,7 @@ export class WorldBossScene extends Phaser.Scene {
       }
       const step = this.patternSequence.index + 1;
       const total = this.patternSequence.lanes.length;
-      this.logText.setText(`${DODGE_CLUES[intent.safeLane].sigil}의 흐름을 읽었다. ${step}/${total} 회피 성공!`);
+      this.logText.setText(`${this.dodgeClues[intent.safeLane].sigil}의 흐름을 읽었다. ${step}/${total} 회피 성공!`);
       this.patternExplosion(intent.safeLane, true);
       await this.pause(650);
       this.clearPattern();
@@ -436,19 +477,19 @@ export class WorldBossScene extends Phaser.Scene {
       const memoryTrial = this.patternSequence.memoryTrial;
       this.patternSequence = null;
       if (memoryTrial) {
-        const heartDamage = Math.max(1, Math.round(this.boss.maxHp * 0.08));
+        const heartDamage = Math.max(1, Math.round(this.boss.maxHp * this.combatTuning.heartDamageRatio));
         this.boss.hp -= heartDamage;
         this.refreshStatus();
         this.magicBurst(0xff486f);
-        this.logText.setText(`세 갈래 미래를 돌파했다! 용의 심장에 ${heartDamage.toLocaleString()} 피해.`);
+        this.logText.setText(`${this.combatTuning.memorySuccess}에 ${heartDamage.toLocaleString()} 피해.`);
       } else this.logText.setText('필멸의 연격을 모두 흘려냈다!');
       return 'pattern-complete';
     }
     let multiplier = { claw: 1, breath: 1.55, wing: 1.18, meteor: 2.05, apocalypse: 2.65 }[intent.type] ?? 1;
     const raw = this.damage(this.boss.attack * multiplier, this.playerStats.defense);
-    const incoming = Math.max(1, Math.ceil(raw * BOSS_DAMAGE_SCALE * (this.guard ? (intent.type === 'apocalypse' ? 0.55 : 0.38) : 1)));
+    const incoming = Math.max(1, Math.ceil(raw * this.combatTuning.damageScale * (this.guard ? (intent.type === 'apocalypse' ? 0.55 : 0.38) : 1)));
     this.character.hp -= incoming;
-    this.logText.setText(`${WORLD_DRAGON.name}의 ${intent.label}! ${incoming.toLocaleString()} 피해.`);
+    this.logText.setText(`${this.worldBoss.name}의 ${intent.label}! ${incoming.toLocaleString()} 피해.`);
     if (intent.type === 'breath') this.breathEffect();
     else this.clawEffect();
     this.refreshStatus();
@@ -470,10 +511,10 @@ export class WorldBossScene extends Phaser.Scene {
     this.boss.attack = Math.round(this.boss.attack * (nextPhase === 2 ? 1.17 : 1.24));
     this.boss.defense = Math.round(this.boss.defense * (nextPhase === 2 ? 1.08 : 1.12));
     const veil = this.add.rectangle(240, 240, 480, 480, nextPhase === 2 ? 0x351452 : 0x4f061d, 0.45).setDepth(35);
-    const banner = this.add.text(240, 230, nextPhase === 2 ? 'PHASE II\n공중 추격전' : 'FINAL PHASE\n용의 눈 · 종말 시점', {
+    const banner = this.add.text(240, 230, this.combatTuning.phaseBanners[nextPhase - 1], {
       fontFamily: 'Georgia, "Malgun Gothic", serif', fontSize: nextPhase === 2 ? '28px' : '25px', fontStyle: 'bold', color: '#fff0ad', align: 'center', stroke: '#4f102d', strokeThickness: 7,
     }).setOrigin(0.5).setDepth(40);
-    this.phaseText.setText(nextPhase === 2 ? 'PHASE II · 공중 추격 시점' : 'PHASE III · 용의 눈 시점').setColor(nextPhase === 2 ? '#dca7ff' : '#ff9a8f');
+    this.phaseText.setText(this.combatTuning.phaseLabels[nextPhase - 1]).setColor(nextPhase === 2 ? '#dca7ff' : '#ff9a8f');
     if (nextPhase === 2) {
       this.tweens.add({ targets: this.dragon, x: 240, y: 186, scale: 1.18, duration: 900, ease: 'Cubic.easeInOut' });
       this.tweens.add({ targets: this.hero, x: 82, y: 405, angle: -5, duration: 900, ease: 'Cubic.easeInOut' });
@@ -491,7 +532,7 @@ export class WorldBossScene extends Phaser.Scene {
     }
     this.cameras.main.flash(450, nextPhase === 2 ? 120 : 255, 25, nextPhase === 2 ? 210 : 70, false);
     this.cameras.main.shake(950, nextPhase === 2 ? 0.022 : 0.032);
-    this.logText.setText(nextPhase === 2 ? '아우렉스가 하늘로 솟구친다. 연속된 필멸의 징조를 읽어라!' : '고룡의 눈이 세 갈래 미래를 새긴다. 예언의 순서를 기억하라!');
+    this.logText.setText(this.combatTuning.phaseLogs[nextPhase - 1]);
     this.tweens.add({ targets: [veil, banner], alpha: 0, delay: 720, duration: 430, onComplete: () => { veil.destroy(); banner.destroy(); } });
     await this.pause(1250);
   }
@@ -546,7 +587,7 @@ export class WorldBossScene extends Phaser.Scene {
     this.busy = true;
     this.clearPattern();
     const xp = Math.max(5000, Math.round(1200 + this.boss.level * 65));
-    const guaranteedEquipment = worldBossEquipment(WORLD_DRAGON, this.character.classId, this.boss.level);
+    const guaranteedEquipment = worldBossEquipment(this.worldBoss, this.character.classId, this.boss.level);
     const chestRewards = Phaser.Utils.Array.Shuffle([
       { type: 'empty' },
       guaranteedEquipment ? { type: 'equipment', item: guaranteedEquipment } : { type: 'gold', amount: 100000 },
@@ -555,7 +596,7 @@ export class WorldBossScene extends Phaser.Scene {
     this.character.victories += 1;
     this.character.bossVictories = (this.character.bossVictories ?? 0) + 1;
     this.character.worldBossVictories = (this.character.worldBossVictories ?? 0) + 1;
-    this.character.hunted[WORLD_DRAGON.id] = (this.character.hunted[WORLD_DRAGON.id] ?? 0) + 1;
+    this.character.hunted[this.worldBoss.id] = (this.character.hunted[this.worldBoss.id] ?? 0) + 1;
     const levels = addXp(this.character, xp);
     const companionLevels = this.companion ? grantCompanionXp(this.character, this.companion.id, Math.round(xp * 0.16)) : [];
     saveCharacter(this);
@@ -705,7 +746,7 @@ export class WorldBossScene extends Phaser.Scene {
     this.character.hp = Math.ceil(this.playerStats.maxHp * 0.45);
     this.character.mp = Math.ceil(this.playerStats.maxMp * 0.45);
     saveCharacter(this);
-    this.finish(`아우렉스의 포효가 하늘을 뒤덮었다...\n도전 기록은 남지만 골드와 장비는 잃지 않는다.\n패턴을 읽고 다시 도전하라.`, 0x7d3048, false);
+    this.finish(`${this.combatTuning.defeatMessage}\n도전 기록은 남지만 골드와 장비는 잃지 않는다.\n패턴을 읽고 다시 도전하라.`, 0x7d3048, false);
   }
 
   finish(message, color, victory) {
