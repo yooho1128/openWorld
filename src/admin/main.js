@@ -1,4 +1,4 @@
-import { BOSS_GUARANTEED_RATES, ENHANCEMENT_BLESSINGS, ENHANCEMENT_DESTROY_RATES, ENHANCEMENT_SUCCESS_RATES, GACHA_RARITY_TABLE, HUNT_DROP_RATES, getRarity, isSafeEnhancement } from '../data/equipment.js';
+import { BOSS_GUARANTEED_RATES, ENHANCEMENT_BLESSINGS, ENHANCEMENT_SUCCESS_RATES, GACHA_RARITY_TABLE, HUNT_DROP_RATES, getRarity, isSafeEnhancement } from '../data/equipment.js';
 
 const STORAGE_KEY = 'everglen-admin-password';
 const $ = (id) => document.getElementById(id);
@@ -67,8 +67,7 @@ function renderDropTable() {
 
 function renderForgeTable() {
   const rows = ENHANCEMENT_SUCCESS_RATES.map((rate, level) => {
-    const destroy = ENHANCEMENT_DESTROY_RATES[level];
-    const failNote = isSafeEnhancement(level) ? '실패해도 유지' : destroy ? `파괴 ${destroy}%` : '실패 시 -1';
+    const failNote = isSafeEnhancement(level) ? '실패해도 유지 · 파괴 없음' : '실패 시 -1 · 파괴 없음';
     return `<tr><td>+${level} → +${level + 1}</td><td>${rate}%</td><td>${failNote}</td></tr>`;
   }).join('');
   const blessingRows = Object.entries(ENHANCEMENT_BLESSINGS).map(([key, b]) => `<tr><td>${b.symbol} ${b.name}</td><td>${key}</td><td>성공률 +${b.bonus}%</td></tr>`).join('');
@@ -77,7 +76,7 @@ function renderForgeTable() {
       <tr><th>강화 단계</th><th>성공률</th><th>실패 시</th></tr>
       ${rows}
     </table>
-    <p style="font-size:11px;color:#a99b7d;margin:12px 0 4px;">+10 미만은 실패해도 수치가 유지되는 안전 구간. +10부터 파괴 위험이 있고, 파괴되지 않는 실패는 수치가 1 하락. 최대 +20.</p>
+    <p style="font-size:11px;color:#a99b7d;margin:12px 0 4px;">모든 강화 단계에서 장비는 파괴되지 않습니다. +10 미만은 실패해도 수치 유지, +10부터는 실패 시 강화 수치만 1 하락. 최대 +20.</p>
     <table>
       <tr><th>축복</th><th>키</th><th>효과</th></tr>
       ${blessingRows}

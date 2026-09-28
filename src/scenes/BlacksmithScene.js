@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ENHANCEMENT_BLESSINGS, ENHANCEMENT_DESTROY_RATES as DESTROY_RATES, baseItemPower, getRarity, equipmentDisplayName, enhancementStats, enhancementVisualClass, enhancementSuccessRate, isSafeEnhancement, levelEffectiveness, strongerBagAlternative } from '../data/equipment.js';
+import { ENHANCEMENT_BLESSINGS, baseItemPower, getRarity, equipmentDisplayName, enhancementStats, enhancementVisualClass, enhancementSuccessRate, isSafeEnhancement, levelEffectiveness, strongerBagAlternative } from '../data/equipment.js';
 import { affinityPriceMultiplier } from '../data/rpg.js';
 import { adjustAffinity, ensureRpgCharacter, equippedItems, saveCharacter } from '../state/rpgCharacter.js';
 import { openPanel, closePanel, qs } from '../ui/domForms.js';
@@ -11,7 +11,7 @@ export class BlacksmithScene extends Phaser.Scene {
     this.character = ensureRpgCharacter(this.registry.get('character'));
     if (!this.character) return this.scene.start('Login');
     addFantasyBackdrop(this, { dark: true });
-    addSceneTitle(this, '토르간의 대장간', '+10까지 안전 강화 · +10부터 하락/파괴 위험 · 별의 축복 사용 가능');
+    addSceneTitle(this, '토르간의 대장간', '전 구간 장비 파괴 없음 · +10부터 실패 시 강화 수치만 하락');
     this.render();
   }
 
@@ -29,7 +29,6 @@ export class BlacksmithScene extends Phaser.Scene {
       const level = item.enhancement ?? 0;
       const cost = this.cost(item);
       const rate = level < 20 ? enhancementSuccessRate(level, blessingBonus) : 0;
-      const destroy = level < 20 ? DESTROY_RATES[level] : 0;
       const repairCost = this.repairCost(item);
       const statText = Object.entries(enhancementStats(item, this.character.level)).filter(([, value]) => value).map(([key, value]) => `${key.toUpperCase()} ${value}`).join(' · ');
       const effectiveness = levelEffectiveness(item.level ?? 1, this.character.level);
@@ -39,7 +38,7 @@ export class BlacksmithScene extends Phaser.Scene {
       const alt = strongerBagAlternative(item, this.character, this.character.level);
       const altDiff = alt ? baseItemPower(alt, this.character.level) - baseItemPower(item, this.character.level) : 0;
       const altHtml = alt ? `<small class="compare-badge compare-down">▼ 가방의 ${equipmentDisplayName(alt)}이(가) 더 강함 (+${altDiff}) · 여기 강화하기 전에 상태창에서 교체를 고려하세요</small>` : '';
-      return `<div class="forge-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${statText}</small><small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<small class="forge-risk">성공 ${rate}%${blessingText}${destroy ? ` · 파괴 ${destroy}%` : ''}${failText}</small>${altHtml}</div><div class="forge-actions"><button id="forge-${index}" ${level >= 20 ? 'disabled' : ''}>${level >= 20 ? '최대 강화' : `강화 ${cost.toLocaleString()}G`}</button><button id="scroll-${index}" ${level >= 20 || this.character.enhancementScrolls <= 0 ? 'disabled' : ''}>+1 주문서</button><button id="repair-${index}" class="repair" ${repairCost <= 0 ? 'disabled' : ''}>${repairCost > 0 ? `수리 ${repairCost.toLocaleString()}G` : '내구도 최대'}</button></div></div>`;
+      return `<div class="forge-card rarity-${item.rarity} ${enhancementVisualClass(item)}"><div><strong>${equipmentDisplayName(item)}</strong><small>${getRarity(item.rarity).name} · ${statText}</small><small>내구도 ${item.durability}/${item.maxDurability}</small>${levelNote}<small class="forge-risk">성공 ${rate}%${blessingText}${failText} · 장비 파괴 없음</small>${altHtml}</div><div class="forge-actions"><button id="forge-${index}" ${level >= 20 ? 'disabled' : ''}>${level >= 20 ? '최대 강화' : `강화 ${cost.toLocaleString()}G`}</button><button id="scroll-${index}" ${level >= 20 || this.character.enhancementScrolls <= 0 ? 'disabled' : ''}>+1 주문서</button><button id="repair-${index}" class="repair" ${repairCost <= 0 ? 'disabled' : ''}>${repairCost > 0 ? `수리 ${repairCost.toLocaleString()}G` : '내구도 최대'}</button></div></div>`;
     }).join('') : '<p class="empty-state">착용 중인 장비가 없습니다. 상태창에서 먼저 장비를 착용해주세요.</p>';
     const affinity = this.character.affinity.blacksmith ?? 0;
     const blessingButtons = Object.entries(ENHANCEMENT_BLESSINGS).map(([key, blessing]) => {
@@ -113,18 +112,13 @@ export class BlacksmithScene extends Phaser.Scene {
       saveCharacter(this);
       return this.render(`${item.name} 강화 성공! +${item.enhancement}`, 'success');
     }
-    if (level >= 10 && Math.random() * 100 < DESTROY_RATES[level]) {
-      this.removeItem(item.id);
-      saveCharacter(this);
-      return this.render(`${equipmentDisplayName(item)}이(가) 강화 중 파괴되었습니다...`, 'destroyed');
-    }
     if (isSafeEnhancement(level)) {
       saveCharacter(this);
-      return this.render(`강화 실패. +10 이하 안전 구간이라 강화 수치가 +${level}로 유지됩니다.`, 'fail');
+      return this.render(`강화 실패. 안전 구간이라 강화 수치가 +${level}로 유지됩니다. 장비는 파괴되지 않습니다.`, 'fail');
     }
     item.enhancement = Math.max(0, level - 1);
     saveCharacter(this);
-    this.render(`강화 실패. 강화 수치가 +${item.enhancement}(으)로 내려갔습니다.`, 'fail');
+    this.render(`강화 실패. 장비는 유지되고 강화 수치만 +${item.enhancement}(으)로 내려갔습니다.`, 'fail');
   }
 
   useEnhancementScroll(item) {
@@ -136,14 +130,6 @@ export class BlacksmithScene extends Phaser.Scene {
     this.character.highestEnhancement = Math.max(this.character.highestEnhancement ?? 0, item.enhancement);
     adjustAffinity(this.character, 'blacksmith', 1);
     saveCharacter(this);
-    this.render(`+1 강화 주문서 사용! ${item.name}이(가) +${item.enhancement}(이)가 되었습니다. 실패·하락·파괴 없음.`, 'success');
-  }
-
-  removeItem(itemId) {
-    this.character.inventory = this.character.inventory.filter((item) => item.id !== itemId);
-    const equipment = this.character.equipment;
-    for (const key of ['helmet', 'armor', 'gloves', 'boots', 'weapon', 'necklace']) if (equipment[key]?.id === itemId) equipment[key] = null;
-    equipment.rings = equipment.rings.map((item) => item?.id === itemId ? null : item);
-    equipment.earrings = equipment.earrings.map((item) => item?.id === itemId ? null : item);
+    this.render(`+1 강화 주문서 사용! ${item.name}이(가) +${item.enhancement}(이)가 되었습니다. 실패·하락 없음.`, 'success');
   }
 }
