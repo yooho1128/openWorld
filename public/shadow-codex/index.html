@@ -237,7 +237,7 @@ function render(){
     const g=growth(s);
     return `<button class="card" data-id="${esc(s.id)}" style="--c:${esc(s.c)}" aria-label="${esc(s.n)} 상세 보기">
       <span class="no">${String(i+1).padStart(3,'0')}</span>
-      <span class="art"><img loading="lazy" src="img/${esc(s.id)}.webp" alt=""></span>
+      <span class="art"><img loading="lazy" src="/shadow-codex/img/${esc(s.id)}.webp" alt=""></span>
       <span class="nm">${esc(s.n)}</span>
       <span class="row"><span class="badge" style="--ec:${EL[s.el][1]}"><span class="dot"></span>${EL[s.el][0]}</span>
         <span class="pips" title="성장 단계"><i class="pip ${s.f[0]?'on r':''}"></i><i class="pip ${s.f[1]?'on s':''}"></i><i class="pip ${s.f[2]?'on g':''}"></i></span></span>
@@ -281,7 +281,7 @@ function openDetail(id,push){
   const p=$('panel');
   p.innerHTML=`<div class="closebar"><button class="close" id="closeBtn">닫기</button></div>
   <div class="hero" style="--c:${esc(s.c)}">
-    <div class="art"><img src="img/${esc(s.id)}.webp" alt="${esc(s.n)} 초상"></div>
+    <div class="art"><img src="/shadow-codex/img/${esc(s.id)}.webp" alt="${esc(s.n)} 초상"></div>
     <div style="min-width:0">
       <span class="id">${esc(s.id)} · No.${String(S.indexOf(s)+1).padStart(3,'0')}</span>
       <h2 id="dName">${esc(s.n)}</h2><p class="t">${esc(s.t)}</p>
@@ -290,7 +290,7 @@ function openDetail(id,push){
         <span class="badge">${ROLE[s.role]}</span>
         <span class="badge" style="--ec:${esc(s.c)}"><span class="dot"></span>${esc(s.c)}</span>
         ${s.gen?'<span class="badge auto">지역 확장 생성종</span>':''}</div>
-      <div class="field">${s.fld?`<span class="sprite"><img id="fieldImg" src="img/${esc(s.id)}_f01.png" alt="필드 걷기 프레임"></span><span>전용 필드 걷기 2프레임</span>`:`<span class="sprite"><img src="img/${esc(s.id)}.webp" alt=""></span><span>필드에서는 초상을 한 칸 크기로 줄여 코드 모션으로 움직입니다 (전용 걷기 프레임 없음)</span>`}</div>
+      <div class="field">${s.fld?`<span class="sprite"><img id="fieldImg" src="/shadow-codex/img/${esc(s.id)}_f01.png" alt="필드 걷기 프레임"></span><span>전용 필드 걷기 2프레임</span>`:`<span class="sprite"><img src="/shadow-codex/img/${esc(s.id)}.webp" alt=""></span><span>필드에서는 초상을 한 칸 크기로 줄여 코드 모션으로 움직입니다 (전용 걷기 프레임 없음)</span>`}</div>
     </div>
   </div>
 
@@ -344,7 +344,7 @@ function openDetail(id,push){
   $('lvR').addEventListener('input',upd);upd();
   $('closeBtn').addEventListener('click',closeDetail);
   $('closeBtn').focus();
-  if(s.fld){let f=1;clearInterval(window._spr);window._spr=setInterval(()=>{const im=$('fieldImg');if(!im){clearInterval(window._spr);return}f=f===1?2:1;im.src=`img/${s.id}_f0${f}.png`},420)}
+  if(s.fld){let f=1;clearInterval(window._spr);window._spr=setInterval(()=>{const im=$('fieldImg');if(!im){clearInterval(window._spr);return}f=f===1?2:1;im.src=`/shadow-codex/img/${s.id}_f0${f}.png`},420)}
   if(push){try{history.replaceState(null,'','#'+s.id)}catch(e){}}
 }
 function closeDetail(){
