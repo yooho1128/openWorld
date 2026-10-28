@@ -74,7 +74,13 @@ for origin in roots:
 items={}
 for name in ['CoreContentCatalog','Act2ContentCatalog','Act3ContentCatalog','Act4ContentCatalog','Act5ContentCatalog','Act6ContentCatalog','Act7ContentCatalog','Act8ContentCatalog','ItemExpansionCatalog']:
  for it in load(name).get('items',[]):items[it['itemId']]=dict(it)
-for it in items.values():it['sources']=[]
+limits={r['itemId']:r for r in load('TrainingItemLimits')['entries']}
+for it in items.values():
+ it['sources']=[]
+ if it['effectType']=='GainExperience':
+  assert it['itemId'] in limits,it['itemId']
+  it['trainingRange']=limits[it['itemId']]
+
 policy=(root/'Assets/Scripts/Story/TownServices.cs').read_text();common_section=policy[policy.index(' CommonItems ='):];common_section=common_section[:common_section.index('};')];common=set(re.findall(r'"([^"]+)"',common_section));spec_section=policy[policy.index(' Specialties ='):];spec_section=spec_section[:spec_section.index('};')];specialties={rid:re.findall(r'"([^"]+)"',rest) for rid,rest in re.findall(r'\{ "([^"]+)", new\[\] \{([^}]+)\}',spec_section)}
 for it in items.values():
  if not it.get('isEventOnly'):

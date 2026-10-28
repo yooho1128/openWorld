@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "587cf39c4788991bc4ab962ad88ab1724191fd1b",
+  "sourceCommit": "3ce9b2e79d10d7db1382078a68ed0041baeaa8dc",
   "forms": [
     {
       "id": "knight/restored",
@@ -5590,7 +5590,7 @@
     {
       "itemId": "rehearsal_script",
       "displayName": "기억의 연습 대본",
-      "description": "되찾은 장면을 반복 연습해 선택한 그림자에게 경험치 300을 전한다.",
+      "description": "필드에서 경험치 300을 전한다. Lv.1~19에 사용하며 최대 Lv.20까지만 성장한다. 상한을 넘는 경험치는 지급하지 않는다.",
       "effectType": "GainExperience",
       "value": 300,
       "usableInBattle": false,
@@ -5761,6 +5761,11 @@
           ]
         }
       ],
+      "trainingRange": {
+        "itemId": "rehearsal_script",
+        "minimumLevel": 1,
+        "maximumLevel": 20
+      },
       "relatedForms": []
     },
     {
@@ -6830,7 +6835,7 @@
     {
       "itemId": "annotated_script",
       "displayName": "주석 달린 기억 대본",
-      "description": "필드에서 선택한 그림자에게 경험치 900을 전한다. 최고 레벨 그림자에게는 사용할 수 없다.",
+      "description": "필드에서 경험치 900을 전한다. Lv.20~49에 사용하며 최대 Lv.50까지만 성장한다. 상한을 넘는 경험치는 지급하지 않는다.",
       "effectType": "GainExperience",
       "value": 900,
       "buyPrice": 240,
@@ -6957,12 +6962,17 @@
           ]
         }
       ],
+      "trainingRange": {
+        "itemId": "annotated_script",
+        "minimumLevel": 20,
+        "maximumLevel": 50
+      },
       "relatedForms": []
     },
     {
       "itemId": "complete_script",
       "displayName": "완성된 기억 대본",
-      "description": "필드에서 선택한 그림자에게 경험치 2400을 전한다. 최고 레벨 그림자에게는 사용할 수 없다.",
+      "description": "필드에서 경험치 2400을 전한다. Lv.50~79에 사용하며 최대 Lv.80까지만 성장한다. 상한을 넘는 경험치는 지급하지 않는다.",
       "effectType": "GainExperience",
       "value": 2400,
       "buyPrice": 640,
@@ -6997,6 +7007,11 @@
           ]
         }
       ],
+      "trainingRange": {
+        "itemId": "complete_script",
+        "minimumLevel": 50,
+        "maximumLevel": 80
+      },
       "relatedForms": []
     }
   ]

@@ -24,7 +24,14 @@ for steps in [r['steps'] for f in forms.values() for r in f['routes']]+[s['steps
    target={'region':regions,'npc':npcs,'shadow':shadows,'item':items}[ref['kind']]
    assert ref['id'] in target,ref
    assert ref['href'].startswith('/shadow-codex/')
-for i in items.values():assert i['sources'],i['itemId']
+for i in items.values():
+ assert i['sources'],i['itemId']
+ if i['effectType']=='GainExperience':assert i['trainingRange']['maximumLevel'] in [20,50,80]
+assert items['rehearsal_script']['trainingRange']['maximumLevel']==20
+assert items['annotated_script']['trainingRange']['minimumLevel']==20
+assert items['annotated_script']['trainingRange']['maximumLevel']==50
+assert items['complete_script']['trainingRange']['minimumLevel']==50
+assert items['complete_script']['trainingRange']['maximumLevel']==80
 for n in npcs.values():
  for f in n['evolutions']:assert f['id'] in forms
 for r in regions.values():

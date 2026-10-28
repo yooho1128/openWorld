@@ -13,7 +13,7 @@ await page.locator('#search').fill('초침 무희');assert.ok(await page.locator
 await page.evaluate(()=>location.hash='puppet/restored');await page.waitForFunction(()=>document.querySelector('#detail').textContent.includes('초침 무희'));
 await page.screenshot({path:'/tmp/evolution-guide-desktop.png'});
 await page.locator('#detail a[href="/shadow-codex/items/#greater_potion"]').click();await page.locator('#content').waitFor({state:'visible'});
-for(const item of D.items){await page.evaluate(id=>location.hash=id,item.itemId);await page.waitForFunction(name=>document.querySelector('#detail h2')?.textContent===name,item.displayName);assert.ok(await page.locator('.item-source').count()>0)}
+for(const item of D.items){await page.evaluate(id=>location.hash=id,item.itemId);await page.waitForFunction(name=>document.querySelector('#detail h2')?.textContent===name,item.displayName);assert.ok(await page.locator('.item-source').count()>0);if(item.trainingRange)assert.ok((await page.locator('#detail').innerText()).includes('최대 Lv.'+item.trainingRange.maximumLevel))}
 await page.locator('#kind').selectOption('event');assert.equal(await page.locator('.item-card').count(),3);await page.locator('#filters').evaluate(f=>f.reset());await page.waitForTimeout(40);
 for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Item overflow '+width)}
 await page.goto('http://127.0.0.1:4174/shadow-codex/evolution/#ticketless_passenger%2Fsalvation');await page.locator('#content').waitFor({state:'visible'});assert.match(await page.locator('#detail').innerText(),/20걸음/);
