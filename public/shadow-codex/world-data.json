@@ -1,0 +1,5755 @@
+{
+  "sourceCommit": "587cf39c4788991bc4ab962ad88ab1724191fd1b",
+  "pages": [
+    {
+      "title": "유랑촌 · 재의 왕국",
+      "image": "guide-art/world-0.webp"
+    },
+    {
+      "title": "수상극 항구 · 달가면 산촌",
+      "image": "guide-art/world-1.webp"
+    },
+    {
+      "title": "실타래 공방 · 검은 검열단",
+      "image": "guide-art/world-2.webp"
+    },
+    {
+      "title": "기억의 바다 · 마지막 장막",
+      "image": "guide-art/world-3.webp"
+    }
+  ],
+  "regions": [
+    {
+      "regionId": "prologue_theater",
+      "displayName": "웃음막 유랑촌",
+      "sceneName": "PrologueTheater",
+      "order": 1,
+      "act": 1,
+      "actTitle": "광대 극단 생활권",
+      "environment": "천막과 폐극장이 맞닿은 유랑촌",
+      "summary": "광대 극단이 머무는 첫 마을. 플레이어와 각본집의 여정이 시작된다.",
+      "recommendedLevelMin": 1,
+      "recommendedLevelMax": 5,
+      "isSettlement": true,
+      "accentHex": "E7A34B",
+      "arrivalX": 0,
+      "arrivalY": -5,
+      "arrivalFacing": 3,
+      "bossShadowName": "",
+      "featuredShadows": [],
+      "connectedRegionIds": [
+        "echo_village",
+        "painted_wagon_road"
+      ],
+      "atlas": {
+        "regionId": "prologue_theater",
+        "page": 0,
+        "x": 0.12,
+        "y": 0.63
+      },
+      "npcs": [
+        "npc_aria",
+        "town_prologue_theater_healer",
+        "town_prologue_theater_rumor",
+        "town_prologue_theater_investigator",
+        "town_prologue_theater_craftsman",
+        "town_prologue_theater_merchant",
+        "town_prologue_theater_requester"
+      ],
+      "condition": "",
+      "shadows": [],
+      "quests": [],
+      "exits": [
+        {
+          "target": "echo_village",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "painted_wagon_road",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "echo_village",
+      "displayName": "웃음막 뒤뜰",
+      "sceneName": "EchoVillage",
+      "order": 2,
+      "act": 1,
+      "actTitle": "광대 극단 생활권",
+      "environment": "천막 뒤편의 안개 낀 공터",
+      "summary": "공연 도구와 낡은 수레가 흩어진 유랑촌 외곽.",
+      "recommendedLevelMin": 3,
+      "recommendedLevelMax": 7,
+      "accentHex": "55C6BD",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [
+        "등불 심부름꾼",
+        "종이 우산 소녀",
+        "골목의 검은 개"
+      ],
+      "connectedRegionIds": [
+        "prologue_theater",
+        "moonlit_meadow",
+        "painted_wagon_road"
+      ],
+      "atlas": {
+        "regionId": "echo_village",
+        "page": 0,
+        "x": 0.11,
+        "y": 0.38
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "등불 심부름꾼",
+          "id": "exp_echo_village_01"
+        },
+        {
+          "name": "종이 우산 소녀",
+          "id": "exp_echo_village_02"
+        },
+        {
+          "name": "골목의 검은 개",
+          "id": "exp_echo_village_03"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "prologue_theater",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "moonlit_meadow",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "painted_wagon_road",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "moonlit_meadow",
+      "displayName": "달빛 초원",
+      "sceneName": "MoonlitMeadow",
+      "order": 3,
+      "act": 1,
+      "actTitle": "제1막 · 지지 않는 달",
+      "environment": "푸른 달빛 초원",
+      "summary": "반딧불과 잃어버린 대사가 떠도는 넓은 사냥터.",
+      "recommendedLevelMin": 3,
+      "recommendedLevelMax": 6,
+      "accentHex": "68A9F2",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [
+        "끊어진 인형",
+        "재까마귀",
+        "얼음 가면",
+        "밤의 방랑자"
+      ],
+      "connectedRegionIds": [
+        "echo_village",
+        "moonlit_boss_stage"
+      ],
+      "atlas": {
+        "regionId": "moonlit_meadow",
+        "page": 0,
+        "x": 0.29,
+        "y": 0.19
+      },
+      "npcs": [
+        "npc_lantern_keeper"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "끊어진 인형",
+          "id": "puppet"
+        },
+        {
+          "name": "재까마귀",
+          "id": "crow"
+        },
+        {
+          "name": "얼음 가면",
+          "id": "mask"
+        },
+        {
+          "name": "밤의 방랑자",
+          "id": "beast"
+        }
+      ],
+      "quests": [
+        {
+          "title": "달빛이 가리키는 길",
+          "summary": "극장 동쪽 길을 따라 달빛 초원으로 향하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "echo_village",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "moonlit_boss_stage",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "moonlit_boss_stage",
+      "displayName": "지지 않는 달의 무대",
+      "sceneName": "MoonlitBossStage",
+      "order": 4,
+      "act": 1,
+      "actTitle": "제1막 · 지지 않는 달",
+      "environment": "자홍 월식 무대",
+      "summary": "첫 비극이 끝없이 반복되는 지역 보스 무대.",
+      "recommendedLevelMin": 9,
+      "recommendedLevelMax": 12,
+      "isDungeon": true,
+      "isLegendary": true,
+      "requiredFlag": "quest_prologue_04_echoes_complete",
+      "accentHex": "D45AA8",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "달빛의 미망인",
+      "featuredShadows": [
+        "월식의 시녀",
+        "상복 나비",
+        "달빛의 미망인"
+      ],
+      "connectedRegionIds": [
+        "moonlit_meadow",
+        "curtain_pass"
+      ],
+      "atlas": {
+        "regionId": "moonlit_boss_stage",
+        "page": 0,
+        "x": 0.46,
+        "y": 0.18
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "월식의 시녀",
+          "id": "exp_moonlit_boss_stage_01"
+        },
+        {
+          "name": "상복 나비",
+          "id": "exp_moonlit_boss_stage_02"
+        },
+        {
+          "name": "달빛의 미망인",
+          "id": "boss_moonlit_widow"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "moonlit_meadow",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "curtain_pass",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "달빛 무대의 보스 이야기 완료"
+        }
+      ]
+    },
+    {
+      "regionId": "curtain_pass",
+      "displayName": "찢어진 장막길",
+      "sceneName": "CurtainPass",
+      "order": 5,
+      "act": 1,
+      "actTitle": "제1막 · 지지 않는 달",
+      "environment": "바람 부는 산길",
+      "summary": "프롤로그의 무대와 멸망한 왕국을 잇는 첫 관문.",
+      "recommendedLevelMin": 11,
+      "recommendedLevelMax": 15,
+      "isDungeon": true,
+      "requiredFlag": "boss_moonlit_story_complete",
+      "accentHex": "8A77B7",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "장막 파수꾼",
+      "featuredShadows": [
+        "불씨 사냥개",
+        "깃발 없는 창병",
+        "검댕 궁수"
+      ],
+      "connectedRegionIds": [
+        "moonlit_boss_stage",
+        "ash_border"
+      ],
+      "atlas": {
+        "regionId": "curtain_pass",
+        "page": 0,
+        "x": 0.48,
+        "y": 0.42
+      },
+      "npcs": [
+        "npc_curtain_watcher"
+      ],
+      "condition": "달빛 무대의 보스 이야기 완료",
+      "shadows": [
+        {
+          "name": "불씨 사냥개",
+          "id": "ash_hound"
+        },
+        {
+          "name": "깃발 없는 창병",
+          "id": "banner_spearman"
+        },
+        {
+          "name": "검댕 궁수",
+          "id": "soot_archer"
+        }
+      ],
+      "quests": [
+        {
+          "title": "지워진 이름을 따라서",
+          "summary": "달빛의 비극을 넘어 찢어진 장막길로 향하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "moonlit_boss_stage",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "ash_border",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "ash_border",
+      "displayName": "재의 국경",
+      "sceneName": "AshBorder",
+      "order": 6,
+      "act": 2,
+      "actTitle": "제2막 · 왕관의 재",
+      "environment": "붉은 재 황무지",
+      "summary": "멸망한 왕국의 깃발이 아직 타고 있는 변경.",
+      "recommendedLevelMin": 13,
+      "recommendedLevelMax": 18,
+      "requiredFlag": "quest_chapter_01_departure_complete",
+      "accentHex": "CF684D",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [
+        "검댕 궁수",
+        "불씨 사냥개",
+        "깃발 없는 창병"
+      ],
+      "connectedRegionIds": [
+        "curtain_pass",
+        "cinder_city"
+      ],
+      "atlas": {
+        "regionId": "ash_border",
+        "page": 0,
+        "x": 0.64,
+        "y": 0.4
+      },
+      "npcs": [
+        "npc_ash_scout"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "검댕 궁수",
+          "id": "soot_archer"
+        },
+        {
+          "name": "불씨 사냥개",
+          "id": "ash_hound"
+        },
+        {
+          "name": "깃발 없는 창병",
+          "id": "banner_spearman"
+        }
+      ],
+      "quests": [
+        {
+          "title": "재가 내리는 국경",
+          "summary": "재의 국경에서 살아남은 정찰병의 기억을 확인하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "curtain_pass",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "cinder_city",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "cinder_city",
+      "displayName": "대학로 극단 거리",
+      "sceneName": "CinderCity",
+      "order": 7,
+      "act": 2,
+      "actTitle": "대학로 극단 생활권",
+      "environment": "소극장과 붉은 포스터의 거리",
+      "summary": "배우와 연출가가 밤낮없이 새 공연을 올리는 두 번째 마을.",
+      "recommendedLevelMin": 16,
+      "recommendedLevelMax": 21,
+      "isSettlement": true,
+      "requiredFlag": "quest_act2_01_border_complete",
+      "accentHex": "E47B52",
+      "arrivalX": -7,
+      "arrivalY": -1,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [],
+      "connectedRegionIds": [
+        "ash_border",
+        "ruined_barracks",
+        "ember_catacombs",
+        "poster_alley"
+      ],
+      "atlas": {
+        "regionId": "cinder_city",
+        "page": 0,
+        "x": 0.76,
+        "y": 0.63
+      },
+      "npcs": [
+        "npc_ember_archivist",
+        "town_cinder_city_healer",
+        "town_cinder_city_rumor",
+        "town_cinder_city_investigator",
+        "town_cinder_city_craftsman",
+        "town_cinder_city_merchant",
+        "town_cinder_city_requester"
+      ],
+      "condition": "",
+      "shadows": [],
+      "quests": [
+        {
+          "title": "불씨 성도의 기록",
+          "summary": "불씨 성도에서 왕국 멸망 당일의 기록을 찾아보자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "ash_border",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "ruined_barracks",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "ember_catacombs",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "무너진 병영의 보스 이야기 완료"
+        },
+        {
+          "target": "poster_alley",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "ruined_barracks",
+      "displayName": "무너진 병영",
+      "sceneName": "RuinedBarracks",
+      "order": 8,
+      "act": 2,
+      "actTitle": "제2막 · 왕관의 재",
+      "environment": "검댕 병영 미로",
+      "summary": "명령이 끝났음을 모르는 병사들이 순찰하는 폐허.",
+      "recommendedLevelMin": 19,
+      "recommendedLevelMax": 24,
+      "isDungeon": true,
+      "requiredFlag": "quest_act2_02_city_complete",
+      "accentHex": "B85043",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "무릎 꿇지 않는 대장",
+      "featuredShadows": [
+        "깃발 없는 창병",
+        "검댕 궁수",
+        "무릎 꿇지 않는 대장"
+      ],
+      "connectedRegionIds": [
+        "cinder_city",
+        "ember_catacombs",
+        "poster_alley"
+      ],
+      "atlas": {
+        "regionId": "ruined_barracks",
+        "page": 0,
+        "x": 0.9,
+        "y": 0.43
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "깃발 없는 창병",
+          "id": "banner_spearman"
+        },
+        {
+          "name": "검댕 궁수",
+          "id": "soot_archer"
+        },
+        {
+          "name": "무릎 꿇지 않는 대장",
+          "id": "kneeling_captain"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "cinder_city",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "ember_catacombs",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "무너진 병영의 보스 이야기 완료"
+        },
+        {
+          "target": "poster_alley",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "ember_catacombs",
+      "displayName": "불씨 지하묘",
+      "sceneName": "EmberCatacombs",
+      "order": 9,
+      "act": 2,
+      "actTitle": "제2막 · 왕관의 재",
+      "environment": "용암 묘실",
+      "summary": "왕가가 감춘 처형 기록이 붉게 빛나는 지하묘.",
+      "recommendedLevelMin": 22,
+      "recommendedLevelMax": 27,
+      "isDungeon": true,
+      "requiredFlag": "boss_barracks_story_complete",
+      "accentHex": "F0503C",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "목 없는 호위기사",
+      "featuredShadows": [
+        "묘실 촛불",
+        "잿빛 사제",
+        "목 없는 호위기사"
+      ],
+      "connectedRegionIds": [
+        "cinder_city",
+        "ruined_barracks",
+        "crownless_throne"
+      ],
+      "atlas": {
+        "regionId": "ember_catacombs",
+        "page": 0,
+        "x": 0.89,
+        "y": 0.2
+      },
+      "npcs": [
+        "npc_ash_priest"
+      ],
+      "condition": "무너진 병영의 보스 이야기 완료",
+      "shadows": [
+        {
+          "name": "묘실 촛불",
+          "id": "tomb_candle"
+        },
+        {
+          "name": "잿빛 사제",
+          "id": "ash_priest"
+        },
+        {
+          "name": "목 없는 호위기사",
+          "id": "headless_guard"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "cinder_city",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "ruined_barracks",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "crownless_throne",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "crownless_throne",
+      "displayName": "왕관 없는 옥좌",
+      "sceneName": "CrownlessThrone",
+      "order": 10,
+      "act": 2,
+      "actTitle": "제2막 · 왕관의 재",
+      "environment": "불타는 왕좌 무대",
+      "summary": "붉은 불꽃의 진실과 왕국 최후의 명령이 기다린다.",
+      "recommendedLevelMin": 26,
+      "recommendedLevelMax": 30,
+      "isDungeon": true,
+      "isLegendary": true,
+      "requiredFlag": "quest_act2_04_catacombs_complete",
+      "accentHex": "FF7048",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "재의 왕",
+      "featuredShadows": [
+        "종탑 기사",
+        "목 없는 호위기사",
+        "재의 왕"
+      ],
+      "connectedRegionIds": [
+        "ember_catacombs",
+        "frost_port"
+      ],
+      "atlas": {
+        "regionId": "crownless_throne",
+        "page": 0,
+        "x": 0.71,
+        "y": 0.15
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "종탑 기사",
+          "id": "bell_knight"
+        },
+        {
+          "name": "목 없는 호위기사",
+          "id": "headless_guard"
+        },
+        {
+          "name": "재의 왕",
+          "id": "ash_king"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "ember_catacombs",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "frost_port",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "제2막 「왕관의 재」 이야기 완료"
+        }
+      ]
+    },
+    {
+      "regionId": "frost_port",
+      "displayName": "물결막 수상극 항구",
+      "sceneName": "FrostPort",
+      "order": 11,
+      "act": 3,
+      "actTitle": "수상극단 생활권",
+      "environment": "물 위의 무대와 푸른 선착장",
+      "summary": "배우들이 배를 타고 등장하는 수상극단의 항구 마을.",
+      "recommendedLevelMin": 28,
+      "recommendedLevelMax": 33,
+      "isSettlement": true,
+      "requiredFlag": "act2_complete",
+      "accentHex": "73C7E8",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [],
+      "connectedRegionIds": [
+        "crownless_throne",
+        "white_archive",
+        "tidal_boardwalk"
+      ],
+      "atlas": {
+        "regionId": "frost_port",
+        "page": 1,
+        "x": 0.1,
+        "y": 0.18
+      },
+      "npcs": [
+        "npc_glacier_ferryman",
+        "town_frost_port_healer",
+        "town_frost_port_rumor",
+        "town_frost_port_investigator",
+        "town_frost_port_craftsman",
+        "town_frost_port_merchant",
+        "town_frost_port_requester"
+      ],
+      "condition": "제2막 「왕관의 재」 이야기 완료",
+      "shadows": [],
+      "quests": [
+        {
+          "title": "얼어붙은 도항",
+          "summary": "서리 나루에서 마지막 뱃사공의 승객 명부를 확인하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "crownless_throne",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "white_archive",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "tidal_boardwalk",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "white_archive",
+      "displayName": "등불막 그림자촌",
+      "sceneName": "WhiteArchive",
+      "order": 12,
+      "act": 3,
+      "actTitle": "그림자극단 생활권",
+      "environment": "등불과 흰 장막의 마을",
+      "summary": "빛과 장막으로 기억을 비추는 그림자극단의 마을.",
+      "recommendedLevelMin": 31,
+      "recommendedLevelMax": 36,
+      "isSettlement": true,
+      "accentHex": "A8E1F0",
+      "arrivalX": -7,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [],
+      "connectedRegionIds": [
+        "frost_port",
+        "forbidden_stacks",
+        "lantern_reed_field"
+      ],
+      "atlas": {
+        "regionId": "white_archive",
+        "page": 1,
+        "x": 0.27,
+        "y": 0.36
+      },
+      "npcs": [
+        "npc_snow_scribe",
+        "town_white_archive_healer",
+        "town_white_archive_rumor",
+        "town_white_archive_investigator",
+        "town_white_archive_craftsman",
+        "town_white_archive_merchant",
+        "town_white_archive_requester"
+      ],
+      "condition": "",
+      "shadows": [],
+      "quests": [
+        {
+          "title": "녹아 사라지는 문장",
+          "summary": "백색 기록원에서 금단의 서가로 들어갈 색인을 복원하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "frost_port",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "forbidden_stacks",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "lantern_reed_field",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "forbidden_stacks",
+      "displayName": "금단의 서가",
+      "sceneName": "ForbiddenStacks",
+      "order": 13,
+      "act": 3,
+      "actTitle": "제3막 · 금기의 서고",
+      "environment": "수직 서가 미궁",
+      "summary": "읽은 자의 이름을 빼앗는 책이 쌓인 거대 미궁.",
+      "recommendedLevelMin": 34,
+      "recommendedLevelMax": 39,
+      "isDungeon": true,
+      "accentHex": "638EDB",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "책 먹는 용",
+      "featuredShadows": [
+        "잉크 망령",
+        "페이지 박쥐",
+        "책 먹는 용"
+      ],
+      "connectedRegionIds": [
+        "white_archive",
+        "mirror_vault",
+        "tidal_boardwalk"
+      ],
+      "atlas": {
+        "regionId": "forbidden_stacks",
+        "page": 1,
+        "x": 0.28,
+        "y": 0.17
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "잉크 망령",
+          "id": "exp_forbidden_stacks_01"
+        },
+        {
+          "name": "페이지 박쥐",
+          "id": "page_bat"
+        },
+        {
+          "name": "책 먹는 용",
+          "id": "book_drake"
+        }
+      ],
+      "quests": [
+        {
+          "title": "책을 삼킨 문지기",
+          "summary": "금단의 서가에서 책을 지키기 위해 모든 장을 삼킨 용을 정화하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "white_archive",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "mirror_vault",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        },
+        {
+          "target": "tidal_boardwalk",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "mirror_vault",
+      "displayName": "거울 문고",
+      "sceneName": "MirrorVault",
+      "order": 14,
+      "act": 3,
+      "actTitle": "제3막 · 금기의 서고",
+      "environment": "반사되는 비밀서고",
+      "summary": "선택하지 않은 기억이 거울 속 그림자로 나타난다.",
+      "recommendedLevelMin": 37,
+      "recommendedLevelMax": 42,
+      "isDungeon": true,
+      "accentHex": "8DB7FF",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "반전된 사서",
+      "featuredShadows": [
+        "거울 필경사",
+        "유리 올빼미",
+        "반전된 사서"
+      ],
+      "connectedRegionIds": [
+        "forbidden_stacks",
+        "blue_abyss"
+      ],
+      "atlas": {
+        "regionId": "mirror_vault",
+        "page": 1,
+        "x": 0.45,
+        "y": 0.14
+      },
+      "npcs": [
+        "npc_mirror_scribe"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "거울 필경사",
+          "id": "mirror_scribe"
+        },
+        {
+          "name": "유리 올빼미",
+          "id": "glass_owl"
+        },
+        {
+          "name": "반전된 사서",
+          "id": "inverted_librarian"
+        }
+      ],
+      "quests": [
+        {
+          "title": "선택하지 않은 결말",
+          "summary": "거울 문고에서 지워진 결말을 마주하고 반전된 사서를 해방하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "forbidden_stacks",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "blue_abyss",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "blue_abyss",
+      "displayName": "푸른 심연 서고",
+      "sceneName": "BlueAbyss",
+      "order": 15,
+      "act": 3,
+      "actTitle": "제3막 · 금기의 서고",
+      "environment": "빙결 심연 무대",
+      "summary": "푸른 서리가 봉인한 최초의 금서가 잠든 곳.",
+      "recommendedLevelMin": 41,
+      "recommendedLevelMax": 45,
+      "isDungeon": true,
+      "isLegendary": true,
+      "accentHex": "4E7FEF",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "무한서고의 용",
+      "featuredShadows": [
+        "빙결 문장",
+        "침묵의 마도사",
+        "무한서고의 용"
+      ],
+      "connectedRegionIds": [
+        "mirror_vault",
+        "violet_marsh"
+      ],
+      "atlas": {
+        "regionId": "blue_abyss",
+        "page": 1,
+        "x": 0.46,
+        "y": 0.36
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "빙결 문장",
+          "id": "exp_blue_abyss_01"
+        },
+        {
+          "name": "침묵의 마도사",
+          "id": "exp_blue_abyss_02"
+        },
+        {
+          "name": "무한서고의 용",
+          "id": "infinite_archive_dragon"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "mirror_vault",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "violet_marsh",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "violet_marsh",
+      "displayName": "자줏빛 늪",
+      "sceneName": "VioletMarsh",
+      "order": 16,
+      "act": 4,
+      "actTitle": "제4막 · 야수의 밤",
+      "environment": "독안개 습지",
+      "summary": "달빛이 닿지 않는 늪에서 야수의 발자국이 갈라진다.",
+      "recommendedLevelMin": 43,
+      "recommendedLevelMax": 48,
+      "accentHex": "A45AC8",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [
+        "보랏빛 늪뱀",
+        "등불 두꺼비",
+        "수렁 사냥꾼"
+      ],
+      "connectedRegionIds": [
+        "blue_abyss",
+        "howl_village",
+        "lantern_reed_field"
+      ],
+      "atlas": {
+        "regionId": "violet_marsh",
+        "page": 1,
+        "x": 0.59,
+        "y": 0.36
+      },
+      "npcs": [
+        "npc_marsh_guide"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "보랏빛 늪뱀",
+          "id": "marsh_serpent"
+        },
+        {
+          "name": "등불 두꺼비",
+          "id": "lantern_toad"
+        },
+        {
+          "name": "수렁 사냥꾼",
+          "id": "exp_violet_marsh_01"
+        }
+      ],
+      "quests": [
+        {
+          "title": "독안개 속의 길",
+          "summary": "자줏빛 늪의 안전한 길과 야수들의 흔적을 찾자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "blue_abyss",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "howl_village",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "lantern_reed_field",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "howl_village",
+      "displayName": "달가면 산촌",
+      "sceneName": "HowlVillage",
+      "order": 17,
+      "act": 4,
+      "actTitle": "가면극단 생활권",
+      "environment": "달빛 아래 가면을 깎는 산촌",
+      "summary": "탈춤과 산신극을 이어가는 가면극단의 마을.",
+      "recommendedLevelMin": 46,
+      "recommendedLevelMax": 51,
+      "isSettlement": true,
+      "accentHex": "BD68D6",
+      "arrivalX": -7,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [],
+      "connectedRegionIds": [
+        "violet_marsh",
+        "moonfang_forest",
+        "mask_dance_pass"
+      ],
+      "atlas": {
+        "regionId": "howl_village",
+        "page": 1,
+        "x": 0.76,
+        "y": 0.36
+      },
+      "npcs": [
+        "npc_moon_shaman",
+        "town_howl_village_healer",
+        "town_howl_village_rumor",
+        "town_howl_village_investigator",
+        "town_howl_village_craftsman",
+        "town_howl_village_merchant",
+        "town_howl_village_requester"
+      ],
+      "condition": "",
+      "shadows": [],
+      "quests": [
+        {
+          "title": "가면 아래의 울음",
+          "summary": "울음 마을 사람들이 야수 가면을 쓰게 된 이유를 듣자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "violet_marsh",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "moonfang_forest",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "mask_dance_pass",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "moonfang_forest",
+      "displayName": "월아 숲",
+      "sceneName": "MoonfangForest",
+      "order": 18,
+      "act": 4,
+      "actTitle": "제4막 · 야수의 밤",
+      "environment": "다층 달빛 숲",
+      "summary": "넓은 샛길과 숨겨진 굴이 얽힌 야수들의 사냥터.",
+      "recommendedLevelMin": 49,
+      "recommendedLevelMax": 54,
+      "accentHex": "7658C9",
+      "arrivalX": -8,
+      "arrivalY": -2,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [
+        "초승달 여우",
+        "그림자 사슴",
+        "검은 발톱"
+      ],
+      "connectedRegionIds": [
+        "howl_village",
+        "bloodmoon_ridge",
+        "sleeping_beast_den"
+      ],
+      "atlas": {
+        "regionId": "moonfang_forest",
+        "page": 1,
+        "x": 0.76,
+        "y": 0.16
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "초승달 여우",
+          "id": "crescent_fox"
+        },
+        {
+          "name": "그림자 사슴",
+          "id": "shadow_stag"
+        },
+        {
+          "name": "검은 발톱",
+          "id": "exp_moonfang_forest_01"
+        }
+      ],
+      "quests": [
+        {
+          "title": "야수의 발자국",
+          "summary": "월아 숲에서 사냥당한 그림자들의 피난로를 확인하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "howl_village",
+          "cell": [
+            -9,
+            -2
+          ],
+          "condition": ""
+        },
+        {
+          "target": "bloodmoon_ridge",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "sleeping_beast_den",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "bloodmoon_ridge",
+      "displayName": "핏빛 달고개",
+      "sceneName": "BloodmoonRidge",
+      "order": 19,
+      "act": 4,
+      "actTitle": "제4막 · 야수의 밤",
+      "environment": "붉은 월광 능선",
+      "summary": "빠른 그림자만 통과할 수 있다는 바람 센 능선.",
+      "recommendedLevelMin": 52,
+      "recommendedLevelMax": 57,
+      "isDungeon": true,
+      "accentHex": "C94578",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "붉은 뿔의 추격자",
+      "featuredShadows": [
+        "절벽 박쥐",
+        "핏빛 갈기",
+        "붉은 뿔의 추격자"
+      ],
+      "connectedRegionIds": [
+        "moonfang_forest",
+        "sleeping_beast_den",
+        "mask_dance_pass"
+      ],
+      "atlas": {
+        "regionId": "bloodmoon_ridge",
+        "page": 1,
+        "x": 0.91,
+        "y": 0.16
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "절벽 박쥐",
+          "id": "cliff_bat"
+        },
+        {
+          "name": "핏빛 갈기",
+          "id": "exp_bloodmoon_ridge_01"
+        },
+        {
+          "name": "붉은 뿔의 추격자",
+          "id": "bloodmane_stalker"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "moonfang_forest",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "sleeping_beast_den",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        },
+        {
+          "target": "mask_dance_pass",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "sleeping_beast_den",
+      "displayName": "잠든 야수의 굴",
+      "sceneName": "SleepingBeastDen",
+      "order": 20,
+      "act": 4,
+      "actTitle": "제4막 · 야수의 밤",
+      "environment": "보랏빛 심장 동굴",
+      "summary": "방랑 야수의 진명과 최초의 울음이 봉인된 굴.",
+      "recommendedLevelMin": 56,
+      "recommendedLevelMax": 60,
+      "isDungeon": true,
+      "isLegendary": true,
+      "accentHex": "8D48C7",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "밤을 삼킨 짐승",
+      "featuredShadows": [
+        "달의 심장",
+        "자줏빛 포효",
+        "밤을 삼킨 짐승"
+      ],
+      "connectedRegionIds": [
+        "moonfang_forest",
+        "bloodmoon_ridge",
+        "thread_market"
+      ],
+      "atlas": {
+        "regionId": "sleeping_beast_den",
+        "page": 1,
+        "x": 0.91,
+        "y": 0.39
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "달의 심장",
+          "id": "moon_heart"
+        },
+        {
+          "name": "자줏빛 포효",
+          "id": "exp_sleeping_beast_den_01"
+        },
+        {
+          "name": "밤을 삼킨 짐승",
+          "id": "night_devouring_beast"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "moonfang_forest",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "bloodmoon_ridge",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "thread_market",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "thread_market",
+      "displayName": "실타래 인형극 공방촌",
+      "sceneName": "ThreadMarket",
+      "order": 21,
+      "act": 5,
+      "actTitle": "인형극단 생활권",
+      "environment": "인형 공방과 부품 시장",
+      "summary": "인형사와 장인들이 무대 인형을 만드는 공방 마을.",
+      "recommendedLevelMin": 58,
+      "recommendedLevelMax": 63,
+      "isSettlement": true,
+      "accentHex": "E08AAE",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [],
+      "connectedRegionIds": [
+        "sleeping_beast_den",
+        "clockwork_alley",
+        "stitch_field"
+      ],
+      "atlas": {
+        "regionId": "thread_market",
+        "page": 2,
+        "x": 0.12,
+        "y": 0.24
+      },
+      "npcs": [
+        "npc_thread_merchant",
+        "town_thread_market_healer",
+        "town_thread_market_rumor",
+        "town_thread_market_investigator",
+        "town_thread_market_craftsman",
+        "town_thread_market_merchant",
+        "town_thread_market_requester"
+      ],
+      "condition": "",
+      "shadows": [],
+      "quests": [
+        {
+          "title": "몸과 기억의 가격",
+          "summary": "실타래 시장에서 인형들의 부품 거래를 조사하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "sleeping_beast_den",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "clockwork_alley",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "stitch_field",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "clockwork_alley",
+      "displayName": "태엽 골목",
+      "sceneName": "ClockworkAlley",
+      "order": 22,
+      "act": 5,
+      "actTitle": "제5막 · 꼭두각시 도시",
+      "environment": "기계 장치 골목",
+      "summary": "시간마다 길이 바뀌는 톱니바퀴 골목 사냥터.",
+      "recommendedLevelMin": 61,
+      "recommendedLevelMax": 66,
+      "accentHex": "D59A72",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [
+        "태엽쥐",
+        "초침 무희",
+        "황동 광대"
+      ],
+      "connectedRegionIds": [
+        "thread_market",
+        "marionette_opera",
+        "severed_workshop"
+      ],
+      "atlas": {
+        "regionId": "clockwork_alley",
+        "page": 2,
+        "x": 0.28,
+        "y": 0.4
+      },
+      "npcs": [
+        "npc_second_dancer"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "태엽쥐",
+          "id": "clockwork_mouse"
+        },
+        {
+          "name": "초침 무희",
+          "id": "second_dancer"
+        },
+        {
+          "name": "황동 광대",
+          "id": "brass_clown"
+        }
+      ],
+      "quests": [
+        {
+          "title": "멈춘 한 박자",
+          "summary": "태엽 골목의 시간을 풀고 초침 무희의 다음 동작을 되찾자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "thread_market",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "marionette_opera",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "severed_workshop",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "marionette_opera",
+      "displayName": "마리오네트 오페라",
+      "sceneName": "MarionetteOpera",
+      "order": 23,
+      "act": 5,
+      "actTitle": "제5막 · 꼭두각시 도시",
+      "environment": "붉은 인형 극장",
+      "summary": "관객 없이도 인형들이 매일 같은 오페라를 공연한다.",
+      "recommendedLevelMin": 64,
+      "recommendedLevelMax": 69,
+      "isDungeon": true,
+      "accentHex": "C95D83",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "줄 위의 프리마돈나",
+      "featuredShadows": [
+        "합창 인형",
+        "가위 지휘자",
+        "줄 위의 프리마돈나"
+      ],
+      "connectedRegionIds": [
+        "clockwork_alley",
+        "severed_workshop",
+        "stitch_field"
+      ],
+      "atlas": {
+        "regionId": "marionette_opera",
+        "page": 2,
+        "x": 0.43,
+        "y": 0.22
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "합창 인형",
+          "id": "choir_puppet"
+        },
+        {
+          "name": "가위 지휘자",
+          "id": "scissor_conductor"
+        },
+        {
+          "name": "줄 위의 프리마돈나",
+          "id": "wire_primadonna"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "clockwork_alley",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "severed_workshop",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        },
+        {
+          "target": "stitch_field",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "severed_workshop",
+      "displayName": "끊어진 공방",
+      "sceneName": "SeveredWorkshop",
+      "order": 24,
+      "act": 5,
+      "actTitle": "제5막 · 꼭두각시 도시",
+      "environment": "버려진 제작소",
+      "summary": "인형이 스스로 실을 끊는 법을 배운 금지된 공방.",
+      "recommendedLevelMin": 67,
+      "recommendedLevelMax": 72,
+      "isDungeon": true,
+      "accentHex": "B76B9D",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "천 개 손의 장인",
+      "featuredShadows": [
+        "톱니 심장",
+        "봉합 기사",
+        "천 개 손의 장인"
+      ],
+      "connectedRegionIds": [
+        "clockwork_alley",
+        "marionette_opera",
+        "puppeteer_stage"
+      ],
+      "atlas": {
+        "regionId": "severed_workshop",
+        "page": 2,
+        "x": 0.44,
+        "y": 0.49
+      },
+      "npcs": [
+        "npc_stitched_knight"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "톱니 심장",
+          "id": "exp_severed_workshop_01"
+        },
+        {
+          "name": "봉합 기사",
+          "id": "stitched_knight"
+        },
+        {
+          "name": "천 개 손의 장인",
+          "id": "exp_severed_workshop_02"
+        }
+      ],
+      "quests": [
+        {
+          "title": "실을 끊는 법",
+          "summary": "끊어진 공방에서 자유 의지를 얻은 인형들의 선택을 기록하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "clockwork_alley",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "marionette_opera",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "puppeteer_stage",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "puppeteer_stage",
+      "displayName": "인형사의 대무대",
+      "sceneName": "PuppeteerStage",
+      "order": 25,
+      "act": 5,
+      "actTitle": "제5막 · 꼭두각시 도시",
+      "environment": "실의 결계 무대",
+      "summary": "도시 전체를 조종하는 보이지 않는 손과 마주한다.",
+      "recommendedLevelMin": 71,
+      "recommendedLevelMax": 75,
+      "isDungeon": true,
+      "isLegendary": true,
+      "accentHex": "E04478",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "마지막 인형사",
+      "featuredShadows": [
+        "검은 실뭉치",
+        "왕관 인형",
+        "마지막 인형사"
+      ],
+      "connectedRegionIds": [
+        "severed_workshop",
+        "erased_station"
+      ],
+      "atlas": {
+        "regionId": "puppeteer_stage",
+        "page": 2,
+        "x": 0.44,
+        "y": 0.77
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "검은 실뭉치",
+          "id": "exp_puppeteer_stage_01"
+        },
+        {
+          "name": "왕관 인형",
+          "id": "exp_puppeteer_stage_02"
+        },
+        {
+          "name": "마지막 인형사",
+          "id": "last_puppeteer"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "severed_workshop",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "erased_station",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "erased_station",
+      "displayName": "별노래 오페라 성도",
+      "sceneName": "ErasedStation",
+      "order": 26,
+      "act": 6,
+      "actTitle": "오페라 극단 생활권",
+      "environment": "공연 열차가 서는 대극장 도시",
+      "summary": "성악가와 악단, 무대 기술자가 모여 사는 일곱 번째 마을.",
+      "recommendedLevelMin": 73,
+      "recommendedLevelMax": 78,
+      "isSettlement": true,
+      "accentHex": "B9BCCB",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [],
+      "connectedRegionIds": [
+        "puppeteer_stage",
+        "blank_prison",
+        "silent_foyer"
+      ],
+      "atlas": {
+        "regionId": "erased_station",
+        "page": 2,
+        "x": 0.61,
+        "y": 0.75
+      },
+      "npcs": [
+        "npc_ink_conductor",
+        "town_erased_station_healer",
+        "town_erased_station_rumor",
+        "town_erased_station_investigator",
+        "town_erased_station_craftsman",
+        "town_erased_station_merchant",
+        "town_erased_station_requester"
+      ],
+      "condition": "",
+      "shadows": [],
+      "quests": [
+        {
+          "title": "목적지가 지워진 열차",
+          "summary": "지워진 역에서 검열단 영지로 향하는 선로를 찾자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "puppeteer_stage",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "blank_prison",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "silent_foyer",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "blank_prison",
+      "displayName": "백지 감옥",
+      "sceneName": "BlankPrison",
+      "order": 27,
+      "act": 6,
+      "actTitle": "제6막 · 검은 검열단",
+      "environment": "무채색 수용소",
+      "summary": "기억을 빼앗긴 그림자들이 번호로 수감된 감옥.",
+      "recommendedLevelMin": 76,
+      "recommendedLevelMax": 81,
+      "isDungeon": true,
+      "accentHex": "9298AA",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "제0호 간수",
+      "featuredShadows": [
+        "번호 죄수",
+        "봉인 족쇄",
+        "제0호 간수"
+      ],
+      "connectedRegionIds": [
+        "erased_station",
+        "redaction_lab"
+      ],
+      "atlas": {
+        "regionId": "blank_prison",
+        "page": 2,
+        "x": 0.78,
+        "y": 0.76
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "번호 죄수",
+          "id": "numbered_prisoner"
+        },
+        {
+          "name": "봉인 족쇄",
+          "id": "seal_shackle"
+        },
+        {
+          "name": "제0호 간수",
+          "id": "zero_warden"
+        }
+      ],
+      "quests": [
+        {
+          "title": "번호가 된 이름",
+          "summary": "백지 감옥의 이름들을 되찾고 제0호 간수를 정화하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "erased_station",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "redaction_lab",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "redaction_lab",
+      "displayName": "먹칠 연구소",
+      "sceneName": "RedactionLab",
+      "order": 28,
+      "act": 6,
+      "actTitle": "제6막 · 검은 검열단",
+      "environment": "검은 잉크 실험실",
+      "summary": "원한을 추출해 무기로 만드는 검열단의 연구 시설.",
+      "recommendedLevelMin": 79,
+      "recommendedLevelMax": 84,
+      "isDungeon": true,
+      "accentHex": "755477",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "추출 실험체 M",
+      "featuredShadows": [
+        "검은 시험관",
+        "봉합 검열관",
+        "추출 실험체 M"
+      ],
+      "connectedRegionIds": [
+        "blank_prison",
+        "silent_court"
+      ],
+      "atlas": {
+        "regionId": "redaction_lab",
+        "page": 2,
+        "x": 0.91,
+        "y": 0.54
+      },
+      "npcs": [
+        "npc_censor_surgeon"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "검은 시험관",
+          "id": "black_vial"
+        },
+        {
+          "name": "봉합 검열관",
+          "id": "censor_surgeon"
+        },
+        {
+          "name": "추출 실험체 M",
+          "id": "extract_subject_m"
+        }
+      ],
+      "quests": [
+        {
+          "title": "원한 추출 실험",
+          "summary": "먹칠 연구소에서 실험체 M과 검열단의 추출 기록을 해방하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "blank_prison",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "silent_court",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "silent_court",
+      "displayName": "침묵 재판정",
+      "sceneName": "SilentCourt",
+      "order": 29,
+      "act": 6,
+      "actTitle": "제6막 · 검은 검열단",
+      "environment": "거대한 흑백 법정",
+      "summary": "기억을 가진 죄를 심판하는 검열단의 공개 법정.",
+      "recommendedLevelMin": 82,
+      "recommendedLevelMax": 87,
+      "isDungeon": true,
+      "accentHex": "67506F",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "무언의 재판장",
+      "featuredShadows": [
+        "먹지 배심원",
+        "가위 집행관",
+        "무언의 재판장"
+      ],
+      "connectedRegionIds": [
+        "redaction_lab",
+        "black_archive",
+        "silent_foyer"
+      ],
+      "atlas": {
+        "regionId": "silent_court",
+        "page": 2,
+        "x": 0.77,
+        "y": 0.35
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "먹지 배심원",
+          "id": "exp_silent_court_01"
+        },
+        {
+          "name": "가위 집행관",
+          "id": "exp_silent_court_02"
+        },
+        {
+          "name": "무언의 재판장",
+          "id": "mute_judge"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "redaction_lab",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "black_archive",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        },
+        {
+          "target": "silent_foyer",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "black_archive",
+      "displayName": "검은 기록원",
+      "sceneName": "BlackArchive",
+      "order": 30,
+      "act": 6,
+      "actTitle": "제6막 · 검은 검열단",
+      "environment": "삭제 기록 핵심부",
+      "summary": "라이벌 연출가와 검열단장의 진실이 겹치는 검은 탑.",
+      "recommendedLevelMin": 86,
+      "recommendedLevelMax": 90,
+      "isDungeon": true,
+      "isLegendary": true,
+      "accentHex": "4A354F",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "대검열관 노크스",
+      "featuredShadows": [
+        "검열의 칼날",
+        "원한의 대역",
+        "대검열관 노크스"
+      ],
+      "connectedRegionIds": [
+        "silent_court",
+        "glass_coast"
+      ],
+      "atlas": {
+        "regionId": "black_archive",
+        "page": 2,
+        "x": 0.89,
+        "y": 0.16
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "검열의 칼날",
+          "id": "exp_black_archive_01"
+        },
+        {
+          "name": "원한의 대역",
+          "id": "exp_black_archive_02"
+        },
+        {
+          "name": "대검열관 노크스",
+          "id": "high_censor_nox"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "silent_court",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "glass_coast",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "glass_coast",
+      "displayName": "유리 해안",
+      "sceneName": "GlassCoast",
+      "order": 31,
+      "act": 7,
+      "actTitle": "제7막 · 기억의 바다",
+      "environment": "별빛 유리 해변",
+      "summary": "부서진 기억이 유리 조각처럼 밀려오는 해안.",
+      "recommendedLevelMin": 88,
+      "recommendedLevelMax": 93,
+      "accentHex": "62C8D8",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [
+        "유리 소라",
+        "별모래 게",
+        "파도 악사"
+      ],
+      "connectedRegionIds": [
+        "black_archive",
+        "drowned_gallery"
+      ],
+      "atlas": {
+        "regionId": "glass_coast",
+        "page": 3,
+        "x": 0.12,
+        "y": 0.78
+      },
+      "npcs": [
+        "npc_wave_bard"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "유리 소라",
+          "id": "glass_conch"
+        },
+        {
+          "name": "별모래 게",
+          "id": "star_sand_crab"
+        },
+        {
+          "name": "파도 악사",
+          "id": "wave_bard"
+        }
+      ],
+      "quests": [
+        {
+          "title": "부서진 기억의 해안",
+          "summary": "유리 해안에 밀려온 목소리를 수집하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "black_archive",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "drowned_gallery",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "drowned_gallery",
+      "displayName": "물에 잠긴 화랑",
+      "sceneName": "DrownedGallery",
+      "order": 32,
+      "act": 7,
+      "actTitle": "제7막 · 기억의 바다",
+      "environment": "수중 회랑",
+      "summary": "세계가 멸망하기 전의 풍경화가 물속에서 움직인다.",
+      "recommendedLevelMin": 91,
+      "recommendedLevelMax": 96,
+      "isDungeon": true,
+      "accentHex": "4E9FBF",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "익사한 화가",
+      "featuredShadows": [
+        "액자 해파리",
+        "물감 망령",
+        "익사한 화가"
+      ],
+      "connectedRegionIds": [
+        "glass_coast",
+        "name_islands"
+      ],
+      "atlas": {
+        "regionId": "drowned_gallery",
+        "page": 3,
+        "x": 0.13,
+        "y": 0.49
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "액자 해파리",
+          "id": "frame_jellyfish"
+        },
+        {
+          "name": "물감 망령",
+          "id": "pigment_wraith"
+        },
+        {
+          "name": "익사한 화가",
+          "id": "drowned_painter"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "glass_coast",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "name_islands",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "name_islands",
+      "displayName": "이름의 군도",
+      "sceneName": "NameIslands",
+      "order": 33,
+      "act": 7,
+      "actTitle": "제7막 · 기억의 바다",
+      "environment": "부유하는 작은 섬",
+      "summary": "잊힌 진명들이 섬 하나씩을 이루는 개방형 군도.",
+      "recommendedLevelMin": 94,
+      "recommendedLevelMax": 99,
+      "accentHex": "6CC5E6",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "bossShadowName": "",
+      "featuredShadows": [
+        "이름새",
+        "문패 거북",
+        "호명하는 고래"
+      ],
+      "connectedRegionIds": [
+        "drowned_gallery",
+        "mourning_lighthouse"
+      ],
+      "atlas": {
+        "regionId": "name_islands",
+        "page": 3,
+        "x": 0.28,
+        "y": 0.25
+      },
+      "npcs": [
+        "npc_name_keeper"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "이름새",
+          "id": "name_bird"
+        },
+        {
+          "name": "문패 거북",
+          "id": "nameplate_turtle"
+        },
+        {
+          "name": "호명하는 고래",
+          "id": "exp_name_islands_01"
+        }
+      ],
+      "quests": [
+        {
+          "title": "이름이 된 섬",
+          "summary": "이름의 군도에서 잊힌 진명의 주인을 선택하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "drowned_gallery",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "mourning_lighthouse",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "mourning_lighthouse",
+      "displayName": "애도의 등대",
+      "sceneName": "MourningLighthouse",
+      "order": 34,
+      "act": 7,
+      "actTitle": "제7막 · 기억의 바다",
+      "environment": "폭풍 속 나선 등대",
+      "summary": "바다의 모든 비극을 비추는 달빛 등대.",
+      "recommendedLevelMin": 97,
+      "recommendedLevelMax": 102,
+      "isDungeon": true,
+      "accentHex": "87B9DF",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "등대를 지키는 상주",
+      "featuredShadows": [
+        "폭풍 제비",
+        "푸른 상복",
+        "등대를 지키는 상주"
+      ],
+      "connectedRegionIds": [
+        "name_islands",
+        "widow_moon_palace"
+      ],
+      "atlas": {
+        "regionId": "mourning_lighthouse",
+        "page": 3,
+        "x": 0.45,
+        "y": 0.45
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "폭풍 제비",
+          "id": "storm_swallow"
+        },
+        {
+          "name": "푸른 상복",
+          "id": "exp_mourning_lighthouse_01"
+        },
+        {
+          "name": "등대를 지키는 상주",
+          "id": "mourning_keeper"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "name_islands",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "widow_moon_palace",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "widow_moon_palace",
+      "displayName": "미망인의 월궁",
+      "sceneName": "WidowMoonPalace",
+      "order": 35,
+      "act": 7,
+      "actTitle": "제7막 · 기억의 바다",
+      "environment": "달 위의 바다 궁전",
+      "summary": "달빛의 미망인이 완전한 진명으로 기다리는 전설 무대.",
+      "recommendedLevelMin": 101,
+      "recommendedLevelMax": 105,
+      "isDungeon": true,
+      "isLegendary": true,
+      "accentHex": "C3B6FF",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "진명 · 셀레네",
+      "featuredShadows": [
+        "월해의 기사",
+        "은빛 상주",
+        "진명 · 셀레네"
+      ],
+      "connectedRegionIds": [
+        "mourning_lighthouse",
+        "inverted_lobby"
+      ],
+      "atlas": {
+        "regionId": "widow_moon_palace",
+        "page": 3,
+        "x": 0.46,
+        "y": 0.15
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "월해의 기사",
+          "id": "exp_widow_moon_palace_01"
+        },
+        {
+          "name": "은빛 상주",
+          "id": "exp_widow_moon_palace_02"
+        },
+        {
+          "name": "진명 · 셀레네",
+          "id": "exp_widow_moon_palace_03"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "mourning_lighthouse",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "inverted_lobby",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "inverted_lobby",
+      "displayName": "뒤집힌 로비",
+      "sceneName": "InvertedLobby",
+      "order": 36,
+      "act": 8,
+      "actTitle": "최종막 · 그림자 극장",
+      "environment": "상하가 뒤집힌 극장",
+      "summary": "처음 극장의 거울상이 세계 끝에 다시 나타난다.",
+      "recommendedLevelMin": 103,
+      "recommendedLevelMax": 108,
+      "accentHex": "9A6BE2",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "",
+      "featuredShadows": [
+        "거꾸로 안내원",
+        "천장 관객",
+        "반전된 대역"
+      ],
+      "connectedRegionIds": [
+        "widow_moon_palace",
+        "endless_backstage"
+      ],
+      "atlas": {
+        "regionId": "inverted_lobby",
+        "page": 3,
+        "x": 0.62,
+        "y": 0.22
+      },
+      "npcs": [
+        "npc_inverted_guide"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "거꾸로 안내원",
+          "id": "inverted_guide"
+        },
+        {
+          "name": "천장 관객",
+          "id": "ceiling_audience"
+        },
+        {
+          "name": "반전된 대역",
+          "id": "mirrored_understudy"
+        }
+      ],
+      "quests": [
+        {
+          "title": "처음으로 돌아온 극장",
+          "summary": "뒤집힌 로비에서 세계 끝에 나타난 최초의 극장을 조사하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "widow_moon_palace",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "endless_backstage",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "endless_backstage",
+      "displayName": "끝없는 무대 뒤",
+      "sceneName": "EndlessBackstage",
+      "order": 37,
+      "act": 8,
+      "actTitle": "최종막 · 그림자 극장",
+      "environment": "공간이 접힌 백스테이지",
+      "summary": "모든 지역의 소품과 적이 뒤섞이는 최종 사냥터.",
+      "recommendedLevelMin": 106,
+      "recommendedLevelMax": 111,
+      "isDungeon": true,
+      "accentHex": "7E54BD",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "bossShadowName": "막간의 관리자",
+      "featuredShadows": [
+        "잊힌 소품",
+        "막간 배우",
+        "막간의 관리자"
+      ],
+      "connectedRegionIds": [
+        "inverted_lobby",
+        "first_actor_room",
+        "cosmic_auditorium"
+      ],
+      "atlas": {
+        "regionId": "endless_backstage",
+        "page": 3,
+        "x": 0.78,
+        "y": 0.4
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "잊힌 소품",
+          "id": "forgotten_prop"
+        },
+        {
+          "name": "막간 배우",
+          "id": "interlude_actor"
+        },
+        {
+          "name": "막간의 관리자",
+          "id": "interlude_manager"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "inverted_lobby",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "first_actor_room",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        },
+        {
+          "target": "cosmic_auditorium",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "first_actor_room",
+      "displayName": "최초 배우의 분장실",
+      "sceneName": "FirstActorRoom",
+      "order": 38,
+      "act": 8,
+      "actTitle": "최종막 · 그림자 극장",
+      "environment": "금빛 낡은 분장실",
+      "summary": "세상의 첫 배역과 각본집의 기원이 남은 비밀 방.",
+      "recommendedLevelMin": 109,
+      "recommendedLevelMax": 114,
+      "isDungeon": true,
+      "isLegendary": true,
+      "accentHex": "D6A85F",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "최초의 배우",
+      "featuredShadows": [
+        "첫 대사의 메아리",
+        "황금 가면",
+        "최초의 배우"
+      ],
+      "connectedRegionIds": [
+        "endless_backstage",
+        "cosmic_auditorium"
+      ],
+      "atlas": {
+        "regionId": "first_actor_room",
+        "page": 3,
+        "x": 0.62,
+        "y": 0.68
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "첫 대사의 메아리",
+          "id": "first_line_echo"
+        },
+        {
+          "name": "황금 가면",
+          "id": "golden_mask"
+        },
+        {
+          "name": "최초의 배우",
+          "id": "legend_first_actor"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "endless_backstage",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "cosmic_auditorium",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "cosmic_auditorium",
+      "displayName": "우주의 객석",
+      "sceneName": "CosmicAuditorium",
+      "order": 39,
+      "act": 8,
+      "actTitle": "최종막 · 그림자 극장",
+      "environment": "별이 앉은 거대 객석",
+      "summary": "멸망을 지켜본 마지막 관객이 선택을 묻는 공간.",
+      "recommendedLevelMin": 112,
+      "recommendedLevelMax": 117,
+      "isDungeon": true,
+      "isLegendary": true,
+      "accentHex": "6E72DD",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "마지막 관객",
+      "featuredShadows": [
+        "별자리 좌석",
+        "침묵의 박수",
+        "마지막 관객"
+      ],
+      "connectedRegionIds": [
+        "endless_backstage",
+        "first_actor_room",
+        "final_curtain"
+      ],
+      "atlas": {
+        "regionId": "cosmic_auditorium",
+        "page": 3,
+        "x": 0.84,
+        "y": 0.7
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "별자리 좌석",
+          "id": "constellation_seat"
+        },
+        {
+          "name": "침묵의 박수",
+          "id": "silent_applause"
+        },
+        {
+          "name": "마지막 관객",
+          "id": "legend_last_audience"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "endless_backstage",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "first_actor_room",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "final_curtain",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ]
+    },
+    {
+      "regionId": "final_curtain",
+      "displayName": "마지막 장막",
+      "sceneName": "FinalCurtain",
+      "order": 40,
+      "act": 8,
+      "actTitle": "중앙 대극장",
+      "environment": "백색과 흑색의 최종 무대",
+      "summary": "누적된 선택에 따라 세계의 마지막 장면이 달라지는 결말 지역.",
+      "recommendedLevelMin": 115,
+      "recommendedLevelMax": 120,
+      "isDungeon": true,
+      "isLegendary": true,
+      "isBossStage": true,
+      "accentHex": "F0D7FF",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "각본 밖의 그림자",
+      "featuredShadows": [
+        "검열된 주인공",
+        "또 다른 연출가",
+        "각본 밖의 그림자"
+      ],
+      "connectedRegionIds": [
+        "cosmic_auditorium"
+      ],
+      "atlas": {
+        "regionId": "final_curtain",
+        "page": 3,
+        "x": 0.86,
+        "y": 0.17
+      },
+      "npcs": [
+        "npc_rival_director"
+      ],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "검열된 주인공",
+          "id": "censored_protagonist"
+        },
+        {
+          "name": "또 다른 연출가",
+          "id": "rival_director"
+        },
+        {
+          "name": "각본 밖의 그림자",
+          "id": "outside_script_shadow"
+        }
+      ],
+      "quests": [
+        {
+          "title": "우리의 마지막 장면",
+          "summary": "또 다른 연출가와 대화하고 각본 밖의 그림자를 넘어 결말을 선택하자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "cosmic_auditorium",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "painted_wagon_road",
+      "displayName": "채색 수레길",
+      "sceneName": "PaintedWagonRoad",
+      "order": 41,
+      "act": 1,
+      "actTitle": "광대 극단 생활권",
+      "environment": "색바랜 공연 수레가 늘어선 흙길",
+      "summary": "유랑촌을 감싸 돌아 뒤뜰로 합류하는 초보 탐험로.",
+      "recommendedLevelMin": 2,
+      "recommendedLevelMax": 6,
+      "accentHex": "D79A58",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "끊어진 인형",
+        "재까마귀",
+        "천막쥐"
+      ],
+      "connectedRegionIds": [
+        "prologue_theater",
+        "echo_village",
+        "forgotten_tent",
+        "ashes_bell_tower"
+      ],
+      "atlas": {
+        "regionId": "painted_wagon_road",
+        "page": 0,
+        "x": 0.28,
+        "y": 0.57
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "끊어진 인형",
+          "id": "puppet"
+        },
+        {
+          "name": "재까마귀",
+          "id": "crow"
+        },
+        {
+          "name": "천막쥐",
+          "id": "exp_painted_wagon_road_01"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "prologue_theater",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "echo_village",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "forgotten_tent",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "ashes_bell_tower",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "forgotten_tent",
+      "displayName": "잊힌 천막촌",
+      "sceneName": "ForgottenTent",
+      "order": 42,
+      "act": 1,
+      "actTitle": "광대 극단 생활권",
+      "environment": "웃음소리가 멎은 낡은 천막",
+      "summary": "채색 수레길에서만 발견되는 막다른 숨은 지역.",
+      "recommendedLevelMin": 6,
+      "recommendedLevelMax": 10,
+      "isHidden": true,
+      "accentHex": "A96A62",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "버려진 광대",
+        "천막쥐",
+        "종이 우산 소녀"
+      ],
+      "connectedRegionIds": [
+        "painted_wagon_road",
+        "silent_clown_stage"
+      ],
+      "atlas": {
+        "regionId": "forgotten_tent",
+        "page": 0,
+        "x": 0.13,
+        "y": 0.83
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "버려진 광대",
+          "id": "exp_forgotten_tent_01"
+        },
+        {
+          "name": "천막쥐",
+          "id": "exp_painted_wagon_road_01"
+        },
+        {
+          "name": "종이 우산 소녀",
+          "id": "exp_echo_village_02"
+        }
+      ],
+      "quests": [
+        {
+          "title": "지워지지 않는 바퀴 자국",
+          "summary": "수레바퀴 이야기꾼이 말한 흔적을 따라 잊힌 천막촌을 찾아보자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "painted_wagon_road",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "silent_clown_stage",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "silent_clown_stage",
+      "displayName": "침묵한 광대의 무대",
+      "sceneName": "SilentClownStage",
+      "order": 43,
+      "act": 1,
+      "actTitle": "광대 극단 생활권",
+      "environment": "박수 없는 원형 천막 무대",
+      "summary": "웃음을 잃은 광대의 기억이 기다리는 숨겨진 보스 무대.",
+      "recommendedLevelMin": 9,
+      "recommendedLevelMax": 13,
+      "isDungeon": true,
+      "isLegendary": true,
+      "isHidden": true,
+      "isBossStage": true,
+      "accentHex": "C94F67",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "침묵한 광대",
+      "featuredShadows": [
+        "침묵한 광대"
+      ],
+      "connectedRegionIds": [
+        "forgotten_tent"
+      ],
+      "atlas": {
+        "regionId": "silent_clown_stage",
+        "page": 0,
+        "x": 0.31,
+        "y": 0.86
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "침묵한 광대",
+          "id": "exp_silent_clown_stage_01"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "forgotten_tent",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "poster_alley",
+      "displayName": "붉은 포스터 골목",
+      "sceneName": "PosterAlley",
+      "order": 44,
+      "act": 2,
+      "actTitle": "대학로 극단 생활권",
+      "environment": "겹겹이 공연 포스터가 붙은 골목",
+      "summary": "대학로의 두 공연장을 이어 주는 순환 골목.",
+      "recommendedLevelMin": 17,
+      "recommendedLevelMax": 23,
+      "accentHex": "D85C54",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "대역 배우",
+        "버려진 대본",
+        "검댕 궁수"
+      ],
+      "connectedRegionIds": [
+        "cinder_city",
+        "ruined_barracks",
+        "rooftop_rehearsal"
+      ],
+      "atlas": {
+        "regionId": "poster_alley",
+        "page": 0,
+        "x": 0.6,
+        "y": 0.68
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "대역 배우",
+          "id": "exp_poster_alley_01"
+        },
+        {
+          "name": "버려진 대본",
+          "id": "exp_poster_alley_02"
+        },
+        {
+          "name": "검댕 궁수",
+          "id": "soot_archer"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "cinder_city",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "ruined_barracks",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "rooftop_rehearsal",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "rooftop_rehearsal",
+      "displayName": "옥상 연습장",
+      "sceneName": "RooftopRehearsal",
+      "order": 45,
+      "act": 2,
+      "actTitle": "대학로 극단 생활권",
+      "environment": "간판 위로 이어지는 비밀 연습장",
+      "summary": "좁은 비상계단 끝에서 발견되는 배우들의 은밀한 수련터.",
+      "recommendedLevelMin": 21,
+      "recommendedLevelMax": 27,
+      "isHidden": true,
+      "accentHex": "A94D68",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "초침 무희",
+        "대역 배우",
+        "검댕 궁수"
+      ],
+      "connectedRegionIds": [
+        "poster_alley",
+        "sealed_small_theater"
+      ],
+      "atlas": {
+        "regionId": "rooftop_rehearsal",
+        "page": 0,
+        "x": 0.6,
+        "y": 0.88
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "초침 무희",
+          "id": "second_dancer"
+        },
+        {
+          "name": "대역 배우",
+          "id": "exp_poster_alley_01"
+        },
+        {
+          "name": "검댕 궁수",
+          "id": "soot_archer"
+        }
+      ],
+      "quests": [
+        {
+          "title": "벽 뒤의 박수",
+          "summary": "붉은 포스터의 시선이 향하는 샛길에서 옥상 연습장을 찾아보자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "poster_alley",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "sealed_small_theater",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "sealed_small_theater",
+      "displayName": "봉인된 소극장",
+      "sceneName": "SealedSmallTheater",
+      "order": 46,
+      "act": 2,
+      "actTitle": "대학로 극단 생활권",
+      "environment": "문을 닫은 지하 실험극장",
+      "summary": "끝나지 않은 초연이 반복되는 숨겨진 보스 무대.",
+      "recommendedLevelMin": 26,
+      "recommendedLevelMax": 31,
+      "isDungeon": true,
+      "isLegendary": true,
+      "isHidden": true,
+      "isBossStage": true,
+      "accentHex": "8E3F62",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "마지막 대역 배우",
+      "featuredShadows": [
+        "마지막 대역 배우"
+      ],
+      "connectedRegionIds": [
+        "rooftop_rehearsal"
+      ],
+      "atlas": {
+        "regionId": "sealed_small_theater",
+        "page": 0,
+        "x": 0.82,
+        "y": 0.88
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "마지막 대역 배우",
+          "id": "exp_sealed_small_theater_01"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "rooftop_rehearsal",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "tidal_boardwalk",
+      "displayName": "밀물 판자길",
+      "sceneName": "TidalBoardwalk",
+      "order": 47,
+      "act": 3,
+      "actTitle": "수상극단 생활권",
+      "environment": "조수에 따라 길이 잠기는 판자길",
+      "summary": "항구와 외곽 서가를 잇는 수상 순환로.",
+      "recommendedLevelMin": 29,
+      "recommendedLevelMax": 35,
+      "accentHex": "4CAEC8",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "유리 소라",
+        "별모래 게",
+        "빙하 뱃사공"
+      ],
+      "connectedRegionIds": [
+        "frost_port",
+        "forbidden_stacks",
+        "bubble_cave"
+      ],
+      "atlas": {
+        "regionId": "tidal_boardwalk",
+        "page": 1,
+        "x": 0.1,
+        "y": 0.43
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "유리 소라",
+          "id": "glass_conch"
+        },
+        {
+          "name": "별모래 게",
+          "id": "star_sand_crab"
+        },
+        {
+          "name": "빙하 뱃사공",
+          "id": "glacier_ferryman"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "frost_port",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "forbidden_stacks",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "bubble_cave",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "bubble_cave",
+      "displayName": "숨 쉬는 거품 동굴",
+      "sceneName": "BubbleCave",
+      "order": 48,
+      "act": 3,
+      "actTitle": "수상극단 생활권",
+      "environment": "공기방울이 길을 밝히는 해식동굴",
+      "summary": "고무보트나 물속성 그림자로 들어가는 숨은 해식동굴.",
+      "recommendedLevelMin": 34,
+      "recommendedLevelMax": 40,
+      "isHidden": true,
+      "accentHex": "318FB3",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "액자 해파리",
+        "문패 거북",
+        "파도 악사"
+      ],
+      "connectedRegionIds": [
+        "tidal_boardwalk",
+        "whale_back_stage"
+      ],
+      "atlas": {
+        "regionId": "bubble_cave",
+        "page": 1,
+        "x": 0.1,
+        "y": 0.67
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "액자 해파리",
+          "id": "frame_jellyfish"
+        },
+        {
+          "name": "문패 거북",
+          "id": "nameplate_turtle"
+        },
+        {
+          "name": "파도 악사",
+          "id": "wave_bard"
+        }
+      ],
+      "quests": [
+        {
+          "title": "빈 배의 이름",
+          "summary": "밀물 판자길 아래에서 이름이 떠오른다는 숨 쉬는 거품 동굴을 찾아보자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "tidal_boardwalk",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "whale_back_stage",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "whale_back_stage",
+      "displayName": "고래등 수상무대",
+      "sceneName": "WhaleBackStage",
+      "order": 49,
+      "act": 3,
+      "actTitle": "수상극단 생활권",
+      "environment": "거대한 고래 그림자 위의 무대",
+      "summary": "파도가 잠잠할 때만 모습을 드러내는 숨겨진 보스 무대.",
+      "recommendedLevelMin": 39,
+      "recommendedLevelMax": 45,
+      "isDungeon": true,
+      "isLegendary": true,
+      "isHidden": true,
+      "isBossStage": true,
+      "accentHex": "3275B7",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "호명하는 고래",
+      "featuredShadows": [
+        "호명하는 고래"
+      ],
+      "connectedRegionIds": [
+        "bubble_cave"
+      ],
+      "atlas": {
+        "regionId": "whale_back_stage",
+        "page": 1,
+        "x": 0.26,
+        "y": 0.83
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "호명하는 고래",
+          "id": "exp_name_islands_01"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "bubble_cave",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "lantern_reed_field",
+      "displayName": "등불 갈대밭",
+      "sceneName": "LanternReedField",
+      "order": 50,
+      "act": 3,
+      "actTitle": "그림자극단 생활권",
+      "environment": "등불 그림자가 길게 늘어지는 갈대밭",
+      "summary": "등불촌과 자줏빛 늪을 잇는 희미한 순환로.",
+      "recommendedLevelMin": 36,
+      "recommendedLevelMax": 44,
+      "accentHex": "78B894",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "등불 두꺼비",
+        "잉크 여우",
+        "눈송이 서기"
+      ],
+      "connectedRegionIds": [
+        "white_archive",
+        "violet_marsh",
+        "shadow_well"
+      ],
+      "atlas": {
+        "regionId": "lantern_reed_field",
+        "page": 1,
+        "x": 0.42,
+        "y": 0.6
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "등불 두꺼비",
+          "id": "lantern_toad"
+        },
+        {
+          "name": "잉크 여우",
+          "id": "ink_fox"
+        },
+        {
+          "name": "눈송이 서기",
+          "id": "snow_scribe"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "white_archive",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "violet_marsh",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "shadow_well",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "shadow_well",
+      "displayName": "그림자를 삼킨 우물",
+      "sceneName": "ShadowWell",
+      "order": 51,
+      "act": 4,
+      "actTitle": "그림자극단 생활권",
+      "environment": "빛이 바닥에 닿지 않는 오래된 우물",
+      "summary": "갈대 사이 숨은 돌문으로 내려가는 막다른 기억 지역.",
+      "recommendedLevelMin": 42,
+      "recommendedLevelMax": 49,
+      "isHidden": true,
+      "accentHex": "536287",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "잉크 망령",
+        "거울 필경사",
+        "등불 두꺼비"
+      ],
+      "connectedRegionIds": [
+        "lantern_reed_field",
+        "matte_projection_room"
+      ],
+      "atlas": {
+        "regionId": "shadow_well",
+        "page": 1,
+        "x": 0.42,
+        "y": 0.82
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "잉크 망령",
+          "id": "exp_forbidden_stacks_01"
+        },
+        {
+          "name": "거울 필경사",
+          "id": "mirror_scribe"
+        },
+        {
+          "name": "등불 두꺼비",
+          "id": "lantern_toad"
+        }
+      ],
+      "quests": [
+        {
+          "title": "물을 거스르는 문장",
+          "summary": "갈대밭의 등불이 가리키는 돌문 너머에서 그림자를 삼킨 우물을 찾아보자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "lantern_reed_field",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "matte_projection_room",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "matte_projection_room",
+      "displayName": "무광 영사실",
+      "sceneName": "MatteProjectionRoom",
+      "order": 52,
+      "act": 4,
+      "actTitle": "그림자극단 생활권",
+      "environment": "빛을 모두 먹어 치우는 검은 영사실",
+      "summary": "잘못 투사된 기억의 주인이 머무는 숨겨진 보스 무대.",
+      "recommendedLevelMin": 48,
+      "recommendedLevelMax": 54,
+      "isDungeon": true,
+      "isLegendary": true,
+      "isHidden": true,
+      "isBossStage": true,
+      "accentHex": "393C64",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "빛 먹는 영사기사",
+      "featuredShadows": [
+        "빛 먹는 영사기사"
+      ],
+      "connectedRegionIds": [
+        "shadow_well"
+      ],
+      "atlas": {
+        "regionId": "matte_projection_room",
+        "page": 1,
+        "x": 0.59,
+        "y": 0.88
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "빛 먹는 영사기사",
+          "id": "exp_matte_projection_room_01"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "shadow_well",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "mask_dance_pass",
+      "displayName": "탈춤 고갯길",
+      "sceneName": "MaskDancePass",
+      "order": 53,
+      "act": 4,
+      "actTitle": "가면극단 생활권",
+      "environment": "바람에 탈이 흔들리는 산길",
+      "summary": "산촌과 핏빛 달고개를 이어 주는 높은 순환로.",
+      "recommendedLevelMin": 47,
+      "recommendedLevelMax": 54,
+      "accentHex": "9A5EBA",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "가면 사냥꾼",
+        "그림자 사슴",
+        "절벽 박쥐"
+      ],
+      "connectedRegionIds": [
+        "howl_village",
+        "bloodmoon_ridge",
+        "sealed_mask_room",
+        "inverted_moon_path"
+      ],
+      "atlas": {
+        "regionId": "mask_dance_pass",
+        "page": 1,
+        "x": 0.76,
+        "y": 0.59
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "가면 사냥꾼",
+          "id": "mask_hunter"
+        },
+        {
+          "name": "그림자 사슴",
+          "id": "shadow_stag"
+        },
+        {
+          "name": "절벽 박쥐",
+          "id": "cliff_bat"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "howl_village",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "bloodmoon_ridge",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "sealed_mask_room",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        },
+        {
+          "target": "inverted_moon_path",
+          "cell": [
+            0,
+            -8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "sealed_mask_room",
+      "displayName": "봉인된 탈방",
+      "sceneName": "SealedMaskRoom",
+      "order": 54,
+      "act": 4,
+      "actTitle": "가면극단 생활권",
+      "environment": "주인 없는 탈이 벽을 채운 동굴방",
+      "summary": "특정 가면의 시선을 따라가야 발견되는 숨은 지역.",
+      "recommendedLevelMin": 53,
+      "recommendedLevelMax": 59,
+      "isHidden": true,
+      "accentHex": "744987",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "초승달 여우",
+        "가면 사냥꾼",
+        "달술사"
+      ],
+      "connectedRegionIds": [
+        "mask_dance_pass",
+        "moon_eater_ritual",
+        "windless_echo_cavern"
+      ],
+      "atlas": {
+        "regionId": "sealed_mask_room",
+        "page": 1,
+        "x": 0.9,
+        "y": 0.77
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "초승달 여우",
+          "id": "crescent_fox"
+        },
+        {
+          "name": "가면 사냥꾼",
+          "id": "mask_hunter"
+        },
+        {
+          "name": "달술사",
+          "id": "moon_shaman"
+        }
+      ],
+      "quests": [
+        {
+          "title": "달빛을 거스르는 발자국",
+          "summary": "초승달과 반대로 흐르는 은빛 발자국을 따라 봉인된 탈방을 찾아보자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "mask_dance_pass",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "moon_eater_ritual",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "windless_echo_cavern",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "moon_eater_ritual",
+      "displayName": "달 먹는 산신제",
+      "sceneName": "MoonEaterRitual",
+      "order": 55,
+      "act": 4,
+      "actTitle": "가면극단 생활권",
+      "environment": "핏빛 달을 향한 산정 의식장",
+      "summary": "산신의 가면을 쓴 그림자가 기다리는 숨겨진 보스 무대.",
+      "recommendedLevelMin": 58,
+      "recommendedLevelMax": 64,
+      "isDungeon": true,
+      "isLegendary": true,
+      "isHidden": true,
+      "isBossStage": true,
+      "accentHex": "8E315D",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "달을 먹는 산신",
+      "featuredShadows": [
+        "달을 먹는 산신"
+      ],
+      "connectedRegionIds": [
+        "sealed_mask_room"
+      ],
+      "atlas": {
+        "regionId": "moon_eater_ritual",
+        "page": 1,
+        "x": 0.91,
+        "y": 0.93
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "달을 먹는 산신",
+          "id": "exp_moon_eater_ritual_01"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "sealed_mask_room",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "stitch_field",
+      "displayName": "실밥 벌판",
+      "sceneName": "StitchField",
+      "order": 56,
+      "act": 5,
+      "actTitle": "인형극단 생활권",
+      "environment": "거대한 천 조각이 이어진 벌판",
+      "summary": "공방촌과 오페라 무대 뒤편으로 갈라지는 순환 필드.",
+      "recommendedLevelMin": 59,
+      "recommendedLevelMax": 66,
+      "accentHex": "D07A9C",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "천 조각 고양이",
+        "실감개 상인",
+        "봉합 기사"
+      ],
+      "connectedRegionIds": [
+        "thread_market",
+        "marionette_opera",
+        "abandoned_toy_store"
+      ],
+      "atlas": {
+        "regionId": "stitch_field",
+        "page": 2,
+        "x": 0.12,
+        "y": 0.55
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "천 조각 고양이",
+          "id": "thread_cat"
+        },
+        {
+          "name": "실감개 상인",
+          "id": "exp_stitch_field_01"
+        },
+        {
+          "name": "봉합 기사",
+          "id": "stitched_knight"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "thread_market",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "marionette_opera",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "abandoned_toy_store",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "abandoned_toy_store",
+      "displayName": "버려진 장난감 창고",
+      "sceneName": "AbandonedToyStore",
+      "order": 57,
+      "act": 5,
+      "actTitle": "인형극단 생활권",
+      "environment": "완성되지 못한 인형이 쌓인 창고",
+      "summary": "움직이는 장난감 상자를 따라 들어가는 숨은 제작소.",
+      "recommendedLevelMin": 65,
+      "recommendedLevelMax": 71,
+      "isHidden": true,
+      "accentHex": "AA607E",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "태엽쥐",
+        "합창 인형",
+        "톱니 심장"
+      ],
+      "connectedRegionIds": [
+        "stitch_field",
+        "clockwork_heart_stage"
+      ],
+      "atlas": {
+        "regionId": "abandoned_toy_store",
+        "page": 2,
+        "x": 0.12,
+        "y": 0.81
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "태엽쥐",
+          "id": "clockwork_mouse"
+        },
+        {
+          "name": "합창 인형",
+          "id": "choir_puppet"
+        },
+        {
+          "name": "톱니 심장",
+          "id": "exp_severed_workshop_01"
+        }
+      ],
+      "quests": [
+        {
+          "title": "돌아오지 않는 붉은 실",
+          "summary": "실밥 벌판에서 팽팽해진 붉은 실을 따라 버려진 장난감 창고를 찾아보자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "stitch_field",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "clockwork_heart_stage",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "clockwork_heart_stage",
+      "displayName": "태엽 심장실",
+      "sceneName": "ClockworkHeartStage",
+      "order": 58,
+      "act": 5,
+      "actTitle": "인형극단 생활권",
+      "environment": "도시의 태엽이 뛰는 기계 무대",
+      "summary": "공방촌의 모든 인형을 움직이는 숨겨진 보스 무대.",
+      "recommendedLevelMin": 70,
+      "recommendedLevelMax": 76,
+      "isDungeon": true,
+      "isLegendary": true,
+      "isHidden": true,
+      "isBossStage": true,
+      "accentHex": "9C486F",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "태엽 심장의 장인",
+      "featuredShadows": [
+        "태엽 심장의 장인"
+      ],
+      "connectedRegionIds": [
+        "abandoned_toy_store"
+      ],
+      "atlas": {
+        "regionId": "clockwork_heart_stage",
+        "page": 2,
+        "x": 0.29,
+        "y": 0.86
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "태엽 심장의 장인",
+          "id": "exp_clockwork_heart_stage_01"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "abandoned_toy_store",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "silent_foyer",
+      "displayName": "노래 없는 회랑",
+      "sceneName": "SilentFoyer",
+      "order": 59,
+      "act": 6,
+      "actTitle": "오페라 극단 생활권",
+      "environment": "소리를 빼앗긴 대리석 회랑",
+      "summary": "성도와 재판정 사이에서 갈라지는 마지막 숨은 통로.",
+      "recommendedLevelMin": 75,
+      "recommendedLevelMax": 84,
+      "isHidden": true,
+      "accentHex": "72728D",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "표 없는 승객",
+        "먹지 배심원",
+        "침묵의 박수"
+      ],
+      "connectedRegionIds": [
+        "erased_station",
+        "silent_court",
+        "ghost_orchestra_pit"
+      ],
+      "atlas": {
+        "regionId": "silent_foyer",
+        "page": 2,
+        "x": 0.6,
+        "y": 0.46
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "표 없는 승객",
+          "id": "ticketless_passenger"
+        },
+        {
+          "name": "먹지 배심원",
+          "id": "exp_silent_court_01"
+        },
+        {
+          "name": "침묵의 박수",
+          "id": "silent_applause"
+        }
+      ],
+      "quests": [
+        {
+          "title": "표 없는 승객",
+          "summary": "표 없는 승객이 내릴 준비를 한다는 벽 너머에서 노래 없는 회랑을 찾아보자."
+        }
+      ],
+      "exits": [
+        {
+          "target": "erased_station",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "silent_court",
+          "cell": [
+            9,
+            0
+          ],
+          "condition": ""
+        },
+        {
+          "target": "ghost_orchestra_pit",
+          "cell": [
+            0,
+            8
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "ghost_orchestra_pit",
+      "displayName": "유령 관현악단 피트",
+      "sceneName": "GhostOrchestraPit",
+      "order": 60,
+      "act": 6,
+      "actTitle": "오페라 극단 생활권",
+      "environment": "지휘자가 사라진 지하 연주석",
+      "summary": "연주가 끝나야 출구가 열리는 숨겨진 보스 무대.",
+      "recommendedLevelMin": 83,
+      "recommendedLevelMax": 91,
+      "isDungeon": true,
+      "isLegendary": true,
+      "isHidden": true,
+      "isBossStage": true,
+      "accentHex": "57516F",
+      "arrivalX": 0,
+      "arrivalY": -6,
+      "arrivalFacing": 3,
+      "bossShadowName": "박자 잃은 지휘자",
+      "featuredShadows": [
+        "박자 잃은 지휘자"
+      ],
+      "connectedRegionIds": [
+        "silent_foyer"
+      ],
+      "atlas": {
+        "regionId": "ghost_orchestra_pit",
+        "page": 2,
+        "x": 0.6,
+        "y": 0.18
+      },
+      "npcs": [],
+      "condition": "",
+      "shadows": [
+        {
+          "name": "박자 잃은 지휘자",
+          "id": "exp_ghost_orchestra_pit_01"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "silent_foyer",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "ashes_bell_tower",
+      "displayName": "재가 잠든 봉화탑",
+      "sceneName": "AshesBellTower",
+      "order": 61,
+      "act": 1,
+      "actTitle": "광대 극단 생활권",
+      "environment": "불이 꺼진 봉화와 녹슨 종이 남은 탑",
+      "summary": "재까마귀가 수레바퀴의 노래에서 찾아낸, 아무도 보지 못한 마지막 봉화의 무대.",
+      "recommendedLevelMin": 10,
+      "recommendedLevelMax": 16,
+      "isHidden": true,
+      "isDungeon": true,
+      "requiredFlag": "companion_event_crow_wagon_song_complete",
+      "accentHex": "C87958",
+      "arrivalX": 0,
+      "arrivalY": -7,
+      "arrivalFacing": 3,
+      "featuredShadows": [
+        "재까마귀",
+        "끊어진 인형",
+        "천막쥐"
+      ],
+      "connectedRegionIds": [
+        "painted_wagon_road"
+      ],
+      "atlas": {
+        "regionId": "ashes_bell_tower",
+        "page": 0,
+        "x": 0.43,
+        "y": 0.7
+      },
+      "npcs": [
+        "ashes_watchman_memory"
+      ],
+      "condition": "채색 수레길에서 재까마귀 동행 이벤트 완료",
+      "shadows": [
+        {
+          "name": "재까마귀",
+          "id": "crow"
+        },
+        {
+          "name": "끊어진 인형",
+          "id": "puppet"
+        },
+        {
+          "name": "천막쥐",
+          "id": "exp_painted_wagon_road_01"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "painted_wagon_road",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "inverted_moon_path",
+      "displayName": "거꾸로 흐르는 달길",
+      "sceneName": "InvertedMoonPath",
+      "order": 62,
+      "act": 4,
+      "actTitle": "가면극단 생활권",
+      "environment": "달빛이 산 아래에서 위로 흐르는 샛길",
+      "summary": "초승달 여우만 읽을 수 있던 은빛 발자국이 이어지는 숨은 산길.",
+      "recommendedLevelMin": 55,
+      "recommendedLevelMax": 63,
+      "isHidden": true,
+      "requiredFlag": "companion_event_crescent_fox_moon_path_complete",
+      "accentHex": "7866C8",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "초승달 여우",
+        "그림자 사슴",
+        "절벽 박쥐"
+      ],
+      "connectedRegionIds": [
+        "mask_dance_pass"
+      ],
+      "atlas": {
+        "regionId": "inverted_moon_path",
+        "page": 1,
+        "x": 0.6,
+        "y": 0.62
+      },
+      "npcs": [
+        "moon_path_messenger_memory"
+      ],
+      "condition": "탈춤 고갯길에서 초승달 여우 동행 이벤트 완료",
+      "shadows": [
+        {
+          "name": "초승달 여우",
+          "id": "crescent_fox"
+        },
+        {
+          "name": "그림자 사슴",
+          "id": "shadow_stag"
+        },
+        {
+          "name": "절벽 박쥐",
+          "id": "cliff_bat"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "mask_dance_pass",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    },
+    {
+      "regionId": "windless_echo_cavern",
+      "displayName": "바람 없는 메아리굴",
+      "sceneName": "WindlessEchoCavern",
+      "order": 63,
+      "act": 4,
+      "actTitle": "가면극단 생활권",
+      "environment": "바람 대신 오래된 날갯소리만 도는 절벽 동굴",
+      "summary": "절벽 박쥐의 울림이 봉인된 벽 너머에서 찾아낸 숨은 공명 동굴.",
+      "recommendedLevelMin": 60,
+      "recommendedLevelMax": 68,
+      "isHidden": true,
+      "isDungeon": true,
+      "requiredFlag": "companion_event_cliff_bat_sealed_echo_complete",
+      "accentHex": "9B496F",
+      "arrivalX": -8,
+      "arrivalY": 0,
+      "arrivalFacing": 2,
+      "featuredShadows": [
+        "절벽 박쥐",
+        "가면 사냥꾼",
+        "달술사"
+      ],
+      "connectedRegionIds": [
+        "sealed_mask_room"
+      ],
+      "atlas": {
+        "regionId": "windless_echo_cavern",
+        "page": 1,
+        "x": 0.74,
+        "y": 0.88
+      },
+      "npcs": [
+        "echo_cavern_listener_memory"
+      ],
+      "condition": "봉인된 탈방에서 절벽 박쥐 동행 이벤트 완료",
+      "shadows": [
+        {
+          "name": "절벽 박쥐",
+          "id": "cliff_bat"
+        },
+        {
+          "name": "가면 사냥꾼",
+          "id": "mask_hunter"
+        },
+        {
+          "name": "달술사",
+          "id": "moon_shaman"
+        }
+      ],
+      "quests": [],
+      "exits": [
+        {
+          "target": "sealed_mask_room",
+          "cell": [
+            -9,
+            0
+          ],
+          "condition": ""
+        }
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc_aria",
+      "name": "아리아",
+      "role": "이야기",
+      "image": "guide-art/npc_aria.webp",
+      "region": "prologue_theater",
+      "cell": [
+        0,
+        0
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "드디어 깨어났군요, 극단주님. 이 세계는 이름을 잃고 그림자만 남았어요.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "막이 오르다",
+          "objectives": [
+            "아리아와 대화하기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_lantern_keeper",
+      "name": "등불지기 모엔",
+      "role": "이야기",
+      "image": "guide-art/npc_lantern_keeper.webp",
+      "region": "moonlit_meadow",
+      "cell": [
+        1,
+        5
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "이 등불은 길을 밝히는 물건이 아니야. 돌아올 기억을 위한 표식이지.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "흩어진 잔향",
+          "objectives": [
+            "등불지기 모엔의 이야기 듣기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_curtain_watcher",
+      "name": "장막 파수꾼",
+      "role": "이야기",
+      "image": "guide-art/npc_curtain_watcher.webp",
+      "region": "curtain_pass",
+      "cell": [
+        0,
+        3
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "달의 무대가 끝났군. 저 너머부터는 왕관의 재가 길을 덮고 있다.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": []
+    },
+    {
+      "id": "npc_ash_scout",
+      "name": "재의 정찰병",
+      "role": "이야기",
+      "image": "guide-art/npc_ash_scout.webp",
+      "region": "ash_border",
+      "cell": [
+        1,
+        4
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "국경은 무너지지 않았다. 왕이 안쪽에서 성문을 닫았을 뿐이다.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "재가 내리는 국경",
+          "objectives": [
+            "재의 정찰병과 대화하기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_ember_archivist",
+      "name": "재의 기록관",
+      "role": "이야기",
+      "image": "guide-art/npc_ember_archivist.webp",
+      "region": "cinder_city",
+      "cell": [
+        2,
+        2
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "공식 기록에는 왕이 백성을 구하려 했다고 적혀 있어. 하지만 원본 명령서는 달라.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "불씨 성도의 기록",
+          "objectives": [
+            "재의 기록관에게 진실 듣기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_ash_priest",
+      "name": "잿빛 사제",
+      "role": "이야기",
+      "image": "guide-art/npc_ash_priest.webp",
+      "region": "ember_catacombs",
+      "cell": [
+        -2,
+        4
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "왕가가 지운 처형 명부를 내 몸에 옮겨 적었다. 하지만 호위기사가 마지막 장을 가져갔다.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "왕가가 지운 이름",
+          "objectives": [
+            "잿빛 사제의 명부 확인하기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_glacier_ferryman",
+      "name": "빙하 뱃사공",
+      "role": "이야기",
+      "image": "guide-art/npc_glacier_ferryman.webp",
+      "region": "frost_port",
+      "cell": [
+        1,
+        3
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "마지막 배에는 자리가 없었다. 그래서 내 이름을 승객 명부에서 지우고 아이 하나를 더 태웠지.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "얼어붙은 도항",
+          "objectives": [
+            "빙하 뱃사공의 명부 확인하기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_snow_scribe",
+      "name": "눈송이 서기",
+      "role": "이야기",
+      "image": "guide-art/npc_snow_scribe.webp",
+      "region": "white_archive",
+      "cell": [
+        1,
+        3
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "검열단은 책을 태웠지만 색인의 순서까지는 몰랐어. 우리는 매일 녹는 눈 위에 길을 베껴 썼지.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "녹아 사라지는 문장",
+          "objectives": [
+            "눈송이 서기와 금서 색인 복원하기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_mirror_scribe",
+      "name": "거울 필경사",
+      "role": "이야기",
+      "image": "guide-art/npc_mirror_scribe.webp",
+      "region": "mirror_vault",
+      "cell": [
+        -2,
+        3
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "거울에는 현실에서 검열된 결말들이 살아 있어. 하지만 전부 꺼내면 현재의 기억과 충돌할 거야.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "선택하지 않은 결말",
+          "objectives": [
+            "거울 필경사의 선택 듣기"
+          ]
+        },
+        {
+          "title": "가면이 비춘 얼굴",
+          "objectives": [
+            "거울 필경사에게 가면의 원래 얼굴 묻기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_marsh_guide",
+      "name": "늪의 안내자",
+      "role": "이야기",
+      "image": "guide-art/npc_marsh_guide.webp",
+      "region": "violet_marsh",
+      "cell": [
+        1,
+        4
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "독안개가 짙은 곳일수록 늪뱀이 남긴 돌자국을 따라가. 그들은 사람을 습격한 적이 없어.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "독안개 속의 길",
+          "objectives": [
+            "늪의 안내자와 대화하기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_moon_shaman",
+      "name": "달술사",
+      "role": "이야기",
+      "image": "guide-art/npc_moon_shaman.webp",
+      "region": "howl_village",
+      "cell": [
+        1,
+        3
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "우리는 야수로 변한 적이 없어. 검열단의 사냥을 피하려 가면을 썼고, 오래 쓰다 보니 서로의 얼굴을 잊었지.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "가면 아래의 울음",
+          "objectives": [
+            "달술사의 진실 듣기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_thread_merchant",
+      "name": "실타래 상인",
+      "role": "이야기",
+      "image": "guide-art/npc_thread_merchant.webp",
+      "region": "thread_market",
+      "cell": [
+        1,
+        4
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "이 시장에선 팔과 다리뿐 아니라 웃음과 목소리도 부품처럼 팔려. 인형사는 망가지지 않는 도시를 원했거든.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "몸과 기억의 가격",
+          "objectives": [
+            "실타래 상인과 대화하기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_second_dancer",
+      "name": "초침 무희",
+      "role": "이야기",
+      "image": "guide-art/npc_second_dancer.webp",
+      "region": "clockwork_alley",
+      "cell": [
+        1,
+        3
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "나는 마지막 한 박자를 반복하라는 명령을 받았어. 관객들이 대피할 때까지 멈추지 않았지.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "멈춘 한 박자",
+          "objectives": [
+            "초침 무희의 태엽 풀기"
+          ]
+        },
+        {
+          "title": "명령 없는 첫걸음",
+          "objectives": [
+            "초침 무희에게 자유로운 동작 배우기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_stitched_knight",
+      "name": "봉합 기사",
+      "role": "이야기",
+      "image": "guide-art/npc_stitched_knight.webp",
+      "region": "severed_workshop",
+      "cell": [
+        -1,
+        4
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "공방의 인형들은 실을 끊었지만 무엇을 해야 할지 몰라 두려워한다. 명령 없는 삶도 상처를 남기니까.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "실을 끊는 법",
+          "objectives": [
+            "봉합 기사의 선택 듣기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_ink_conductor",
+      "name": "먹칠 역무원",
+      "role": "이야기",
+      "image": "guide-art/npc_ink_conductor.webp",
+      "region": "erased_station",
+      "cell": [
+        1,
+        4
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "검열단은 목적지를 지우면 누구도 떠날 수 없다고 믿었지. 나는 수감 열차를 백지 감옥 반대편 선로로 돌렸다.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "목적지가 지워진 열차",
+          "objectives": [
+            "먹칠 역무원의 증언 듣기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_censor_surgeon",
+      "name": "봉합 검열관",
+      "role": "이야기",
+      "image": "guide-art/npc_censor_surgeon.webp",
+      "region": "redaction_lab",
+      "cell": [
+        -1,
+        4
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "우리는 그림자에게서 연민을 잘라 내고 원한만 남겼다. 강한 무기는 되었지만 누구의 기억인지조차 사라졌지.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "원한 추출 실험",
+          "objectives": [
+            "봉합 검열관의 기록 확인하기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_wave_bard",
+      "name": "파도 악사",
+      "role": "이야기",
+      "image": "guide-art/npc_wave_bard.webp",
+      "region": "glass_coast",
+      "cell": [
+        1,
+        4
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "이 해안의 유리는 모두 누군가의 마지막 말이야. 밟아 부수지 말고 노래의 순서로 모아 줘.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "부서진 기억의 해안",
+          "objectives": [
+            "파도 악사의 노래 듣기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_name_keeper",
+      "name": "문패 거북",
+      "role": "이야기",
+      "image": "guide-art/npc_name_keeper.webp",
+      "region": "name_islands",
+      "cell": [
+        1,
+        4
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "주인을 찾지 못한 이름들이 섬이 되었어. 새로운 이에게 줄 수도, 그대로 기다리게 할 수도 있지.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "이름이 된 섬",
+          "objectives": [
+            "문패 거북과 이름의 주인 정하기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_inverted_guide",
+      "name": "거꾸로 안내원",
+      "role": "이야기",
+      "image": "guide-art/npc_inverted_guide.webp",
+      "region": "inverted_lobby",
+      "cell": [
+        0,
+        4
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "이곳에서는 입장이 곧 퇴장이고, 마지막 막이 첫 막입니다.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "처음으로 돌아온 극장",
+          "objectives": [
+            "거꾸로 안내원에게 마지막 무대의 길 묻기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_rival_director",
+      "name": "또 다른 연출가",
+      "role": "이야기",
+      "image": "guide-art/npc_rival_director.webp",
+      "region": "final_curtain",
+      "cell": [
+        -5,
+        2
+      ],
+      "condition": "이 지역에서 만날 수 있습니다",
+      "category": "이야기",
+      "approximate": false,
+      "quote": "이제 마지막 장면은 네 방식으로 보고 싶군.",
+      "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
+      "quests": [
+        {
+          "title": "우리의 마지막 장면",
+          "objectives": [
+            "또 다른 연출가의 마지막 선택 듣기"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ashes_watchman_memory",
+      "name": "재투성이 파수꾼의 기억",
+      "role": "기억",
+      "image": "guide-art/ashes_watchman_memory.webp",
+      "region": "ashes_bell_tower",
+      "cell": [
+        0,
+        5
+      ],
+      "condition": "이 지역의 순서 퍼즐을 해결한 뒤 등장",
+      "category": "기억",
+      "approximate": false,
+      "quote": "나는 너무 늦게 봉화를 올렸다고 믿었다. 하지만 아래의 수레들은 내 불을 보고 방향을 틀어 살아남았지.",
+      "description": "잊힌 기억과 지역의 이야기를 전하는 인물입니다.",
+      "quests": []
+    },
+    {
+      "id": "moon_path_messenger_memory",
+      "name": "달길 전령의 기억",
+      "role": "기억",
+      "image": "guide-art/moon_path_messenger_memory.webp",
+      "region": "inverted_moon_path",
+      "cell": [
+        0,
+        5
+      ],
+      "condition": "이 지역의 순서 퍼즐을 해결한 뒤 등장",
+      "category": "기억",
+      "approximate": false,
+      "quote": "우리는 큰길에 거짓 발자국을 남기고 아이들을 이 샛길로 보냈어. 이름 없는 전령이어도 모두 돌아온 것만으로 충분했지.",
+      "description": "잊힌 기억과 지역의 이야기를 전하는 인물입니다.",
+      "quests": []
+    },
+    {
+      "id": "echo_cavern_listener_memory",
+      "name": "울림지기의 기억",
+      "role": "기억",
+      "image": "guide-art/echo_cavern_listener_memory.webp",
+      "region": "windless_echo_cavern",
+      "cell": [
+        0,
+        5
+      ],
+      "condition": "이 지역의 순서 퍼즐을 해결한 뒤 등장",
+      "category": "기억",
+      "approximate": false,
+      "quote": "나는 날갯소리로 피난굴의 인원을 세었다. 바람이 멎은 날에도 마지막 한 명이 돌아올 때까지 벽을 두드렸지.",
+      "description": "잊힌 기억과 지역의 이야기를 전하는 인물입니다.",
+      "quests": []
+    },
+    {
+      "id": "town_prologue_theater_healer",
+      "name": "로아",
+      "role": "웃음막 치유사",
+      "image": "guide-art/town_prologue_theater_healer.webp",
+      "region": "prologue_theater",
+      "cell": [
+        -8,
+        4
+      ],
+      "category": "회복",
+      "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_prologue_theater_rumor",
+      "name": "벤",
+      "role": "웃음막 소식꾼",
+      "image": "guide-art/town_prologue_theater_rumor.webp",
+      "region": "prologue_theater",
+      "cell": [
+        8,
+        4
+      ],
+      "category": "소문",
+      "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_prologue_theater_investigator",
+      "name": "세린",
+      "role": "웃음막 조사관",
+      "image": "guide-art/town_prologue_theater_investigator.webp",
+      "region": "prologue_theater",
+      "cell": [
+        0,
+        5
+      ],
+      "category": "조사",
+      "description": "현재 막의 보스 조사 정보를 안내합니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_prologue_theater_craftsman",
+      "name": "도안",
+      "role": "웃음막 장인",
+      "image": "guide-art/town_prologue_theater_craftsman.webp",
+      "region": "prologue_theater",
+      "cell": [
+        -2,
+        5
+      ],
+      "category": "장인",
+      "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
+      "condition": "마을 복구 2단계 · 재건부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_prologue_theater_merchant",
+      "name": "미라",
+      "role": "웃음막 상인",
+      "image": "guide-art/town_prologue_theater_merchant.webp",
+      "region": "prologue_theater",
+      "cell": [
+        2,
+        5
+      ],
+      "category": "상인",
+      "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
+      "condition": "마을 복구 3단계 · 번영부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_prologue_theater_requester",
+      "name": "엘",
+      "role": "웃음막 주민",
+      "image": "guide-art/town_prologue_theater_requester.webp",
+      "region": "prologue_theater",
+      "cell": [
+        -8,
+        -4
+      ],
+      "category": "주민 부탁",
+      "description": "게임 내 하루에 한 번 정화 연고 1개를 부탁합니다. 보상은 금화 50와 주민 호감도입니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_cinder_city_healer",
+      "name": "유나",
+      "role": "대학로 치유사",
+      "image": "guide-art/town_cinder_city_healer.webp",
+      "region": "cinder_city",
+      "cell": [
+        -8,
+        4
+      ],
+      "category": "회복",
+      "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_cinder_city_rumor",
+      "name": "카덴",
+      "role": "대학로 소식꾼",
+      "image": "guide-art/town_cinder_city_rumor.webp",
+      "region": "cinder_city",
+      "cell": [
+        8,
+        4
+      ],
+      "category": "소문",
+      "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_cinder_city_investigator",
+      "name": "리온",
+      "role": "대학로 조사관",
+      "image": "guide-art/town_cinder_city_investigator.webp",
+      "region": "cinder_city",
+      "cell": [
+        0,
+        5
+      ],
+      "category": "조사",
+      "description": "현재 막의 보스 조사 정보를 안내합니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_cinder_city_craftsman",
+      "name": "바르",
+      "role": "대학로 장인",
+      "image": "guide-art/town_cinder_city_craftsman.webp",
+      "region": "cinder_city",
+      "cell": [
+        -2,
+        5
+      ],
+      "category": "장인",
+      "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
+      "condition": "마을 복구 2단계 · 재건부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_cinder_city_merchant",
+      "name": "테아",
+      "role": "대학로 상인",
+      "image": "guide-art/town_cinder_city_merchant.webp",
+      "region": "cinder_city",
+      "cell": [
+        2,
+        5
+      ],
+      "category": "상인",
+      "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
+      "condition": "마을 복구 3단계 · 번영부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_cinder_city_requester",
+      "name": "린",
+      "role": "대학로 주민",
+      "image": "guide-art/town_cinder_city_requester.webp",
+      "region": "cinder_city",
+      "cell": [
+        -8,
+        -4
+      ],
+      "category": "주민 부탁",
+      "description": "게임 내 하루에 한 번 정화 연고 1개를 부탁합니다. 보상은 금화 65와 주민 호감도입니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_frost_port_healer",
+      "name": "나비",
+      "role": "물결막 치유사",
+      "image": "guide-art/town_frost_port_healer.webp",
+      "region": "frost_port",
+      "cell": [
+        -8,
+        4
+      ],
+      "category": "회복",
+      "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_frost_port_rumor",
+      "name": "해든",
+      "role": "물결막 소식꾼",
+      "image": "guide-art/town_frost_port_rumor.webp",
+      "region": "frost_port",
+      "cell": [
+        8,
+        4
+      ],
+      "category": "소문",
+      "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_frost_port_investigator",
+      "name": "모라",
+      "role": "물결막 조사관",
+      "image": "guide-art/town_frost_port_investigator.webp",
+      "region": "frost_port",
+      "cell": [
+        0,
+        5
+      ],
+      "category": "조사",
+      "description": "현재 막의 보스 조사 정보를 안내합니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_frost_port_craftsman",
+      "name": "구스",
+      "role": "물결막 장인",
+      "image": "guide-art/town_frost_port_craftsman.webp",
+      "region": "frost_port",
+      "cell": [
+        -2,
+        5
+      ],
+      "category": "장인",
+      "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
+      "condition": "마을 복구 2단계 · 재건부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_frost_port_merchant",
+      "name": "노엘",
+      "role": "물결막 상인",
+      "image": "guide-art/town_frost_port_merchant.webp",
+      "region": "frost_port",
+      "cell": [
+        2,
+        5
+      ],
+      "category": "상인",
+      "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
+      "condition": "마을 복구 3단계 · 번영부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_frost_port_requester",
+      "name": "샤온",
+      "role": "물결막 주민",
+      "image": "guide-art/town_frost_port_requester.webp",
+      "region": "frost_port",
+      "cell": [
+        -8,
+        -4
+      ],
+      "category": "주민 부탁",
+      "description": "게임 내 하루에 한 번 열기 토닉 1개를 부탁합니다. 보상은 금화 80와 주민 호감도입니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_white_archive_healer",
+      "name": "이솔",
+      "role": "등불막 치유사",
+      "image": "guide-art/town_white_archive_healer.webp",
+      "region": "white_archive",
+      "cell": [
+        -8,
+        4
+      ],
+      "category": "회복",
+      "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_white_archive_rumor",
+      "name": "찬",
+      "role": "등불막 소식꾼",
+      "image": "guide-art/town_white_archive_rumor.webp",
+      "region": "white_archive",
+      "cell": [
+        8,
+        4
+      ],
+      "category": "소문",
+      "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_white_archive_investigator",
+      "name": "시엘",
+      "role": "등불막 조사관",
+      "image": "guide-art/town_white_archive_investigator.webp",
+      "region": "white_archive",
+      "cell": [
+        0,
+        5
+      ],
+      "category": "조사",
+      "description": "현재 막의 보스 조사 정보를 안내합니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_white_archive_craftsman",
+      "name": "오르",
+      "role": "등불막 장인",
+      "image": "guide-art/town_white_archive_craftsman.webp",
+      "region": "white_archive",
+      "cell": [
+        -2,
+        5
+      ],
+      "category": "장인",
+      "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
+      "condition": "마을 복구 2단계 · 재건부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_white_archive_merchant",
+      "name": "루나",
+      "role": "등불막 상인",
+      "image": "guide-art/town_white_archive_merchant.webp",
+      "region": "white_archive",
+      "cell": [
+        2,
+        5
+      ],
+      "category": "상인",
+      "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
+      "condition": "마을 복구 3단계 · 번영부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_white_archive_requester",
+      "name": "하린",
+      "role": "등불막 주민",
+      "image": "guide-art/town_white_archive_requester.webp",
+      "region": "white_archive",
+      "cell": [
+        -8,
+        -4
+      ],
+      "category": "주민 부탁",
+      "description": "게임 내 하루에 한 번 열기 토닉 1개를 부탁합니다. 보상은 금화 80와 주민 호감도입니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_howl_village_healer",
+      "name": "소야",
+      "role": "달가면 치유사",
+      "image": "guide-art/town_howl_village_healer.webp",
+      "region": "howl_village",
+      "cell": [
+        -8,
+        4
+      ],
+      "category": "회복",
+      "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_howl_village_rumor",
+      "name": "하쿠",
+      "role": "달가면 소식꾼",
+      "image": "guide-art/town_howl_village_rumor.webp",
+      "region": "howl_village",
+      "cell": [
+        8,
+        4
+      ],
+      "category": "소문",
+      "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_howl_village_investigator",
+      "name": "여울",
+      "role": "달가면 조사관",
+      "image": "guide-art/town_howl_village_investigator.webp",
+      "region": "howl_village",
+      "cell": [
+        0,
+        5
+      ],
+      "category": "조사",
+      "description": "현재 막의 보스 조사 정보를 안내합니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_howl_village_craftsman",
+      "name": "탄",
+      "role": "달가면 장인",
+      "image": "guide-art/town_howl_village_craftsman.webp",
+      "region": "howl_village",
+      "cell": [
+        -2,
+        5
+      ],
+      "category": "장인",
+      "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
+      "condition": "마을 복구 2단계 · 재건부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_howl_village_merchant",
+      "name": "메이",
+      "role": "달가면 상인",
+      "image": "guide-art/town_howl_village_merchant.webp",
+      "region": "howl_village",
+      "cell": [
+        2,
+        5
+      ],
+      "category": "상인",
+      "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
+      "condition": "마을 복구 3단계 · 번영부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_howl_village_requester",
+      "name": "누리",
+      "role": "달가면 주민",
+      "image": "guide-art/town_howl_village_requester.webp",
+      "region": "howl_village",
+      "cell": [
+        -8,
+        -4
+      ],
+      "category": "주민 부탁",
+      "description": "게임 내 하루에 한 번 열기 토닉 1개를 부탁합니다. 보상은 금화 95와 주민 호감도입니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_thread_market_healer",
+      "name": "루엔",
+      "role": "실타래 치유사",
+      "image": "guide-art/town_thread_market_healer.webp",
+      "region": "thread_market",
+      "cell": [
+        -8,
+        4
+      ],
+      "category": "회복",
+      "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_thread_market_rumor",
+      "name": "마루",
+      "role": "실타래 소식꾼",
+      "image": "guide-art/town_thread_market_rumor.webp",
+      "region": "thread_market",
+      "cell": [
+        8,
+        4
+      ],
+      "category": "소문",
+      "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_thread_market_investigator",
+      "name": "세라",
+      "role": "실타래 조사관",
+      "image": "guide-art/town_thread_market_investigator.webp",
+      "region": "thread_market",
+      "cell": [
+        0,
+        5
+      ],
+      "category": "조사",
+      "description": "현재 막의 보스 조사 정보를 안내합니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_thread_market_craftsman",
+      "name": "토비",
+      "role": "실타래 장인",
+      "image": "guide-art/town_thread_market_craftsman.webp",
+      "region": "thread_market",
+      "cell": [
+        -2,
+        5
+      ],
+      "category": "장인",
+      "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
+      "condition": "마을 복구 2단계 · 재건부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_thread_market_merchant",
+      "name": "로안",
+      "role": "실타래 상인",
+      "image": "guide-art/town_thread_market_merchant.webp",
+      "region": "thread_market",
+      "cell": [
+        2,
+        5
+      ],
+      "category": "상인",
+      "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
+      "condition": "마을 복구 3단계 · 번영부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_thread_market_requester",
+      "name": "제나",
+      "role": "실타래 주민",
+      "image": "guide-art/town_thread_market_requester.webp",
+      "region": "thread_market",
+      "cell": [
+        -8,
+        -4
+      ],
+      "category": "주민 부탁",
+      "description": "게임 내 하루에 한 번 짙은 잉크 1개를 부탁합니다. 보상은 금화 110와 주민 호감도입니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_erased_station_healer",
+      "name": "아델",
+      "role": "별노래 치유사",
+      "image": "guide-art/town_erased_station_healer.webp",
+      "region": "erased_station",
+      "cell": [
+        -8,
+        4
+      ],
+      "category": "회복",
+      "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_erased_station_rumor",
+      "name": "오웬",
+      "role": "별노래 소식꾼",
+      "image": "guide-art/town_erased_station_rumor.webp",
+      "region": "erased_station",
+      "cell": [
+        8,
+        4
+      ],
+      "category": "소문",
+      "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_erased_station_investigator",
+      "name": "레아",
+      "role": "별노래 조사관",
+      "image": "guide-art/town_erased_station_investigator.webp",
+      "region": "erased_station",
+      "cell": [
+        0,
+        5
+      ],
+      "category": "조사",
+      "description": "현재 막의 보스 조사 정보를 안내합니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_erased_station_craftsman",
+      "name": "가온",
+      "role": "별노래 장인",
+      "image": "guide-art/town_erased_station_craftsman.webp",
+      "region": "erased_station",
+      "cell": [
+        -2,
+        5
+      ],
+      "category": "장인",
+      "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
+      "condition": "마을 복구 2단계 · 재건부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_erased_station_merchant",
+      "name": "벨라",
+      "role": "별노래 상인",
+      "image": "guide-art/town_erased_station_merchant.webp",
+      "region": "erased_station",
+      "cell": [
+        2,
+        5
+      ],
+      "category": "상인",
+      "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
+      "condition": "마을 복구 3단계 · 번영부터 등장",
+      "approximate": true,
+      "quests": []
+    },
+    {
+      "id": "town_erased_station_requester",
+      "name": "유리",
+      "role": "별노래 주민",
+      "image": "guide-art/town_erased_station_requester.webp",
+      "region": "erased_station",
+      "cell": [
+        -8,
+        -4
+      ],
+      "category": "주민 부탁",
+      "description": "게임 내 하루에 한 번 짙은 잉크 1개를 부탁합니다. 보상은 금화 125와 주민 호감도입니다.",
+      "condition": "마을에서 만날 수 있습니다",
+      "approximate": true,
+      "quests": []
+    }
+  ]
+}
