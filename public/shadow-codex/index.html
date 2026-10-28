@@ -299,6 +299,7 @@ function skillHtml(id,tag){
   const parts=[];
   if(k.tg==='Self')parts.push(k.heal?`HP ${pct(k.heal)} 회복`:'자기 대상');
   else parts.push(`위력 ×${k.pw}`,k.ty==='Magical'?'마법':'물리',`명중 ${pct(k.acc)}`);
+  if(k.tg==='Self'&&k.heal>0)parts.push('회복 스킬 공용: 개체당 전투 3회 · 사용 후 2턴 대기');
   if(k.neutral)parts.push('무속성 (고정)');else if(k.el&&k.el!=='None')parts.push(EL[k.el][0]);else parts.push('시전자 속성');
   parts.push(`FP ${k.fp}${k.fg?` (+${k.fg})`:''}`);
   if(k.st&&k.st!=='None')parts.push(`${ST[k.st]} ${pct(k.sc)} · ${k.sd}턴`);
