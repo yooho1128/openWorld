@@ -51,3 +51,31 @@ node tools/check-world-guide.cjs
 
 Vite가 `public/shadow-codex/`를 그대로 `dist/shadow-codex/`에 복사하므로 별도 서버 API나 라우팅 설정이 필요 없다.
 openWorld main push가 기존 Vercel Git 연동의 배포 트리거다. 실제 배포 성공 상태는 Vercel 대시보드에서 확인한다.
+
+## 진화·아이템 안내와 연결
+
+- `/shadow-codex/evolution/`: 173개 진화 형태를 검색하고 레벨/선행 기억복원/조건 충족 경로/최종 조작을 확인한다.
+- `/shadow-codex/items/`: 21개 도구의 효과, 기본 가격, 구매 지역과 복구 단계, 퀘스트·동행 보상 획득법을 확인한다.
+- 기존 그림자 카드의 진화 영역에서 상세 방법으로 이동한다. 각 단계의 NPC·지역·아이템 칩을 누르면 해당 안내를 연다.
+- NPC·지역 안내에도 관련 진화 링크를 제공한다. 모바일 직접 링크는 선택한 상세로 스크롤하며 검색으로 돌아가는 버튼을 제공한다.
+- 보유 개체가 필요하다. 진명은 기억복원 이후 가능하며 각본집에서 구원/원한을 한 번 고른다.
+- 현재 MemoryAwakeningService는 레벨·기억 조건을 검사하며 진화 자체의 아이템/금화 비용을 소비하지 않는다.
+  퀘스트 보상과 선택적 기록/경험치 도구를 진화 재료와 분리해서 표시한다.
+- 44개 기억 조건은 개인 여정 완료, NPC 대화(후속 선택지 포함), 보스 승리/후일담, 동행 이벤트까지 소스를 역추적했다.
+  초기 6종의 개인 기억 여정과 스토리 이정표 별칭은 **둘 중 하나**로 안내한다.
+- 동행 이벤트 걸음 수는 같은 동행을 유지할 때 기준이다. 이동 이벤트에서 전투/대화가 끝난 뒤 발동할 수 있다.
+- 아이템 획득처는 상점/퀘스트/동행 보상 경로를 제공한다. 모든 야생 드롭을 열거하는 표는 아니다.
+
+세계 안내를 갱신한 뒤 진화 안내를 내보내야 양방향 링크가 함께 갱신된다.
+
+```sh
+python tools/export-world-guide.py --source ../unityGame
+python tools/export-evolution-guide.py --source ../unityGame
+python tools/check-world-data.py
+python tools/check-evolution-guide.py
+node tools/check-evolution-guide.cjs
+```
+
+기존 Unity의 `sync-shadow-codex.py`로 그림자 본문을 갱신한 경우에도 위의 두 내보내기를 마지막에 실행한다.
+진화 추적기는 해결하지 못한 조건이 있으면 실패하며, 데이터 검사기는 모든 형태·기억 조건·참조 대상과 보상/소모 구분을 검사한다.
+현재 조건 그래프는 JSON과 에디터 생성기/성장 서비스의 규칙을 기반으로 한다. 성장/아이템 정책을 바꿀 때 내보내기도 함께 검토한다.

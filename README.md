@@ -1,5 +1,9 @@
 # 에버글렌 연대기
 
+**[진화 안내](public/shadow-codex/evolution/index.html) · [아이템 안내](public/shadow-codex/items/index.html)**를 추가했습니다.
+173개 형태의 레벨·기억 여정·NPC 대화·보스·동행 이벤트를 행동 순서로 설명하고 NPC 위치/맵/아이템 획득처로 연결합니다.
+진화 자체의 아이템 소모는 없으며, 개인 여정 보상과 선택 도구를 구분합니다. NPC·맵에서도 관련 진화로 돌아올 수 있습니다.
+
 도감을 **[그림자](public/shadow-codex/index.html) · [월드 아틀라스](public/shadow-codex/atlas/index.html) · [NPC 안내](public/shadow-codex/npcs/index.html)**로 나눴습니다.
 63개 지역의 일러스트/연결 경로/출구 방향과 NPC 65명의 개별 모습/역할/등장 조건/대략 위치를 제공합니다.
 검색·역할/지역 필터·지도 확대·서로 이동하는 링크를 지원합니다. [데이터 갱신과 검증 안내](docs/WORLD_GUIDE.md).

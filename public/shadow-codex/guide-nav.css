@@ -1,1 +1,3 @@
 .guide-entry-nav{display:flex;gap:8px;flex-wrap:wrap;padding:15px 0 0}.guide-entry-nav a{display:block;padding:9px 16px;border:1px solid #354352;border-radius:4px;color:#d9d9d4;font-size:13px;background:#142031}.guide-entry-nav a:first-child{border-color:#d8b46e;color:#f0d19a}.guide-entry-nav a:hover,.guide-entry-nav a:focus-visible{background:#24354a;color:white}
+
+.evo-guide-link{display:block;width:fit-content;margin:12px 0 3px;padding:9px 12px;background:#263a4d;border:1px solid #8d794f;border-radius:4px;color:#f0d19a;font-size:12px}.evo-guide-link:hover{background:#344c60}.evo-cost{color:#a6d8bf;font-size:11px}

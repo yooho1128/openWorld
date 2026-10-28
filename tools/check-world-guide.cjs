@@ -24,6 +24,6 @@ try{
  await page.locator('#detail .place-link').click();await page.locator('#content').waitFor({state:'visible'});
  for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Atlas overflow '+width)}
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'/tmp/world-atlas-mobile.png'});
- await page.goto('http://127.0.0.1:4174/shadow-codex/');assert.equal(await page.locator('.guide-entry-nav a').count(),3);
+ await page.goto('http://127.0.0.1:4174/shadow-codex/');assert.equal(await page.locator('.guide-entry-nav a').count(),5);
  assert.deepEqual(errors,[]);assert.deepEqual(missing,[]);console.log('PASS: 63 region details, 65 NPC details/art, service conditions, routes, filters, cross links, 320–1440px widths, no JS/HTTP errors');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});

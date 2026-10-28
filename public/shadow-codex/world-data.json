@@ -76,7 +76,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "echo_village",
@@ -152,7 +153,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "moonlit_meadow",
@@ -231,7 +233,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "moonlit_boss_stage",
@@ -300,6 +303,23 @@
             0
           ],
           "condition": "달빛 무대의 보스 이야기 완료"
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#knight/restored",
+          "label": "성문의 수호자",
+          "id": "knight/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#crow/restored",
+          "label": "봉화의 날개",
+          "id": "crow/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#boss_moonlit_widow/restored",
+          "label": "월화의 상주",
+          "id": "boss_moonlit_widow/restored"
         }
       ]
     },
@@ -377,7 +397,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "ash_border",
@@ -452,7 +473,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "cinder_city",
@@ -535,7 +557,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "ruined_barracks",
@@ -612,6 +635,18 @@
             0
           ],
           "condition": ""
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#bell_knight/restored",
+          "label": "새벽을 알리는 기사",
+          "id": "bell_knight/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#kneeling_captain/restored",
+          "label": "마지막 성문대장",
+          "id": "kneeling_captain/restored"
         }
       ]
     },
@@ -693,6 +728,38 @@
           ],
           "condition": ""
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#knight/salvation",
+          "label": "진명·백성의 방패 카일",
+          "id": "knight/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#knight/grudge",
+          "label": "진명·재의 집행자 카일",
+          "id": "knight/grudge"
+        },
+        {
+          "href": "/shadow-codex/evolution/#ash_priest/restored",
+          "label": "이름의 장례사",
+          "id": "ash_priest/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#headless_guard/restored",
+          "label": "증언의 호위기사",
+          "id": "headless_guard/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#ash_king/salvation",
+          "label": "진명·새벽왕 아우렐",
+          "id": "ash_king/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#ash_king/grudge",
+          "label": "진명·장례왕 아우렐",
+          "id": "ash_king/grudge"
+        }
       ]
     },
     {
@@ -762,6 +829,13 @@
             0
           ],
           "condition": "제2막 「왕관의 재」 이야기 완료"
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#ash_king/restored",
+          "label": "패망을 인정한 왕",
+          "id": "ash_king/restored"
         }
       ]
     },
@@ -837,6 +911,18 @@
           ],
           "condition": ""
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#mage/restored",
+          "label": "해빙의 기록관",
+          "id": "mage/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#glacier_ferryman/restored",
+          "label": "새 항로의 사공",
+          "id": "glacier_ferryman/restored"
+        }
       ]
     },
     {
@@ -910,7 +996,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "forbidden_stacks",
@@ -992,6 +1079,13 @@
           ],
           "condition": ""
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#book_drake/restored",
+          "label": "걸어 다니는 서고",
+          "id": "book_drake/restored"
+        }
       ]
     },
     {
@@ -1067,6 +1161,43 @@
           ],
           "condition": ""
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#mage/salvation",
+          "label": "진명·기억사서 세라",
+          "id": "mage/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#mage/grudge",
+          "label": "진명·영점예언자 세라",
+          "id": "mage/grudge"
+        },
+        {
+          "href": "/shadow-codex/evolution/#mask/restored",
+          "label": "우는 광대",
+          "id": "mask/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#mirror_scribe/restored",
+          "label": "가능성의 필경사",
+          "id": "mirror_scribe/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#inverted_librarian/restored",
+          "label": "두 결말의 사서",
+          "id": "inverted_librarian/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#infinite_archive_dragon/salvation",
+          "label": "진명·청람의 기록룡 아르키온",
+          "id": "infinite_archive_dragon/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#infinite_archive_dragon/grudge",
+          "label": "진명·백지재앙 아르키온",
+          "id": "infinite_archive_dragon/grudge"
+        }
       ]
     },
     {
@@ -1135,6 +1266,13 @@
             0
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#infinite_archive_dragon/restored",
+          "label": "금서를 증언하는 용",
+          "id": "infinite_archive_dragon/restored"
         }
       ]
     },
@@ -1219,7 +1357,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "howl_village",
@@ -1291,6 +1430,18 @@
             8
           ],
           "condition": ""
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#beast/restored",
+          "label": "달언덕의 파수견",
+          "id": "beast/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#mask_hunter/restored",
+          "label": "숲의 거짓 발자국",
+          "id": "mask_hunter/restored"
         }
       ]
     },
@@ -1373,7 +1524,8 @@
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "bloodmoon_ridge",
@@ -1449,6 +1601,43 @@
             0
           ],
           "condition": ""
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#beast/salvation",
+          "label": "진명·귀향수 루프",
+          "id": "beast/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#beast/grudge",
+          "label": "진명·월식아 루프",
+          "id": "beast/grudge"
+        },
+        {
+          "href": "/shadow-codex/evolution/#crow/salvation",
+          "label": "진명·새벽전령 카라",
+          "id": "crow/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#crow/grudge",
+          "label": "진명·화장조 카라",
+          "id": "crow/grudge"
+        },
+        {
+          "href": "/shadow-codex/evolution/#bloodmane_stalker/restored",
+          "label": "사냥을 끝낸 추격자",
+          "id": "bloodmane_stalker/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#night_devouring_beast/salvation",
+          "label": "진명·월식수 루페온",
+          "id": "night_devouring_beast/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#night_devouring_beast/grudge",
+          "label": "진명·무월재앙 루페온",
+          "id": "night_devouring_beast/grudge"
         }
       ]
     },
@@ -1528,6 +1717,13 @@
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#night_devouring_beast/restored",
+          "label": "공포를 품은 수호수",
+          "id": "night_devouring_beast/restored"
+        }
       ]
     },
     {
@@ -1601,7 +1797,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "clockwork_alley",
@@ -1684,6 +1881,18 @@
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#puppet/restored",
+          "label": "스스로 춤추는 인형",
+          "id": "puppet/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#second_dancer/restored",
+          "label": "새 박자의 무희",
+          "id": "second_dancer/restored"
+        }
       ]
     },
     {
@@ -1760,6 +1969,33 @@
             0
           ],
           "condition": ""
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#puppet/salvation",
+          "label": "진명·자유인형 피노",
+          "id": "puppet/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#puppet/grudge",
+          "label": "진명·역조종자 피노",
+          "id": "puppet/grudge"
+        },
+        {
+          "href": "/shadow-codex/evolution/#wire_primadonna/restored",
+          "label": "실을 끊은 독창자",
+          "id": "wire_primadonna/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#last_puppeteer/salvation",
+          "label": "진명·자유극장주 마리온",
+          "id": "last_puppeteer/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#last_puppeteer/grudge",
+          "label": "진명·천사장 마리온",
+          "id": "last_puppeteer/grudge"
         }
       ]
     },
@@ -1845,7 +2081,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "puppeteer_stage",
@@ -1913,6 +2150,13 @@
             0
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#last_puppeteer/restored",
+          "label": "실을 놓은 연출가",
+          "id": "last_puppeteer/restored"
         }
       ]
     },
@@ -1987,6 +2231,18 @@
           ],
           "condition": ""
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#ticketless_passenger/salvation",
+          "label": "진명·귀향객 미라",
+          "id": "ticketless_passenger/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#ticketless_passenger/grudge",
+          "label": "진명·무한승객 미라",
+          "id": "ticketless_passenger/grudge"
+        }
       ]
     },
     {
@@ -2059,6 +2315,13 @@
             0
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#numbered_prisoner/restored",
+          "label": "이름을 새기는 죄수",
+          "id": "numbered_prisoner/restored"
         }
       ]
     },
@@ -2135,7 +2398,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "silent_court",
@@ -2212,6 +2476,28 @@
           ],
           "condition": ""
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#mask/salvation",
+          "label": "진명·미소지기 니오",
+          "id": "mask/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#mask/grudge",
+          "label": "진명·빙소귀 니오",
+          "id": "mask/grudge"
+        },
+        {
+          "href": "/shadow-codex/evolution/#high_censor_nox/salvation",
+          "label": "진명·기록수호자 녹티스",
+          "id": "high_censor_nox/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#high_censor_nox/grudge",
+          "label": "진명·무명왕 녹티스",
+          "id": "high_censor_nox/grudge"
+        }
       ]
     },
     {
@@ -2280,6 +2566,13 @@
             0
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#high_censor_nox/restored",
+          "label": "죄를 읽는 검열관",
+          "id": "high_censor_nox/restored"
         }
       ]
     },
@@ -2355,7 +2648,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "drowned_gallery",
@@ -2423,7 +2717,8 @@
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "name_islands",
@@ -2497,7 +2792,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "mourning_lighthouse",
@@ -2565,7 +2861,8 @@
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "widow_moon_palace",
@@ -2633,6 +2930,18 @@
             0
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#boss_moonlit_widow/salvation",
+          "label": "진명·월백화 연화",
+          "id": "boss_moonlit_widow/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#boss_moonlit_widow/grudge",
+          "label": "진명·식월귀 연화",
+          "id": "boss_moonlit_widow/grudge"
         }
       ]
     },
@@ -2708,7 +3017,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "endless_backstage",
@@ -2785,7 +3095,8 @@
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "first_actor_room",
@@ -2853,6 +3164,23 @@
             0
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#legend_first_actor/restored",
+          "label": "기억의 비극배우",
+          "id": "legend_first_actor/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#legend_first_actor/salvation",
+          "label": "진명·이야기의 수호자 아델",
+          "id": "legend_first_actor/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#legend_first_actor/grudge",
+          "label": "진명·가면왕 아델",
+          "id": "legend_first_actor/grudge"
         }
       ]
     },
@@ -2932,6 +3260,23 @@
           ],
           "condition": "해당 구간의 이야기 진행 조건을 완료해야 합니다"
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#legend_last_audience/restored",
+          "label": "별길의 검표원",
+          "id": "legend_last_audience/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#legend_last_audience/salvation",
+          "label": "진명·기억의 관람석 에스카",
+          "id": "legend_last_audience/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#legend_last_audience/grudge",
+          "label": "진명·포식극장 에스카",
+          "id": "legend_last_audience/grudge"
+        }
       ]
     },
     {
@@ -3000,7 +3345,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "painted_wagon_road",
@@ -3084,7 +3430,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "forgotten_tent",
@@ -3156,7 +3503,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "silent_clown_stage",
@@ -3208,7 +3556,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "poster_alley",
@@ -3283,7 +3632,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "rooftop_rehearsal",
@@ -3355,7 +3705,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "sealed_small_theater",
@@ -3407,7 +3758,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "tidal_boardwalk",
@@ -3482,6 +3834,18 @@
           ],
           "condition": ""
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#glacier_ferryman/salvation",
+          "label": "진명·귀항지기 하론",
+          "id": "glacier_ferryman/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#glacier_ferryman/grudge",
+          "label": "진명·빙해장송 하론",
+          "id": "glacier_ferryman/grudge"
+        }
       ]
     },
     {
@@ -3554,7 +3918,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "whale_back_stage",
@@ -3606,7 +3971,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "lantern_reed_field",
@@ -3681,7 +4047,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "shadow_well",
@@ -3753,7 +4120,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "matte_projection_room",
@@ -3805,7 +4173,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "mask_dance_pass",
@@ -3889,7 +4258,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "sealed_mask_room",
@@ -3970,7 +4340,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "moon_eater_ritual",
@@ -4022,7 +4393,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "stitch_field",
@@ -4097,7 +4469,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "abandoned_toy_store",
@@ -4169,7 +4542,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "clockwork_heart_stage",
@@ -4221,7 +4595,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "silent_foyer",
@@ -4302,6 +4677,18 @@
           ],
           "condition": ""
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#ink_conductor/salvation",
+          "label": "진명·해방역장 오르도",
+          "id": "ink_conductor/salvation"
+        },
+        {
+          "href": "/shadow-codex/evolution/#ink_conductor/grudge",
+          "label": "진명·검은 종착역 오르도",
+          "id": "ink_conductor/grudge"
+        }
       ]
     },
     {
@@ -4354,7 +4741,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "ashes_bell_tower",
@@ -4416,7 +4804,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "inverted_moon_path",
@@ -4477,7 +4866,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "regionId": "windless_echo_cavern",
@@ -4539,7 +4929,8 @@
           ],
           "condition": ""
         }
-      ]
+      ],
+      "evolutions": []
     }
   ],
   "npcs": [
@@ -4565,7 +4956,8 @@
             "아리아와 대화하기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_lantern_keeper",
@@ -4589,7 +4981,8 @@
             "등불지기 모엔의 이야기 듣기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_curtain_watcher",
@@ -4606,7 +4999,8 @@
       "approximate": false,
       "quote": "달의 무대가 끝났군. 저 너머부터는 왕관의 재가 길을 덮고 있다.",
       "description": "지역의 이야기를 따라 만나게 되는 인물입니다.",
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "npc_ash_scout",
@@ -4630,7 +5024,8 @@
             "재의 정찰병과 대화하기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_ember_archivist",
@@ -4654,7 +5049,8 @@
             "재의 기록관에게 진실 듣기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_ash_priest",
@@ -4677,6 +5073,13 @@
           "objectives": [
             "잿빛 사제의 명부 확인하기"
           ]
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#ash_priest/restored",
+          "label": "이름의 장례사",
+          "id": "ash_priest/restored"
         }
       ]
     },
@@ -4702,6 +5105,18 @@
             "빙하 뱃사공의 명부 확인하기"
           ]
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#mage/restored",
+          "label": "해빙의 기록관",
+          "id": "mage/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#glacier_ferryman/restored",
+          "label": "새 항로의 사공",
+          "id": "glacier_ferryman/restored"
+        }
       ]
     },
     {
@@ -4726,7 +5141,8 @@
             "눈송이 서기와 금서 색인 복원하기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_mirror_scribe",
@@ -4756,6 +5172,18 @@
             "거울 필경사에게 가면의 원래 얼굴 묻기"
           ]
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#mask/restored",
+          "label": "우는 광대",
+          "id": "mask/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#mirror_scribe/restored",
+          "label": "가능성의 필경사",
+          "id": "mirror_scribe/restored"
+        }
       ]
     },
     {
@@ -4780,7 +5208,8 @@
             "늪의 안내자와 대화하기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_moon_shaman",
@@ -4803,6 +5232,18 @@
           "objectives": [
             "달술사의 진실 듣기"
           ]
+        }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#beast/restored",
+          "label": "달언덕의 파수견",
+          "id": "beast/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#mask_hunter/restored",
+          "label": "숲의 거짓 발자국",
+          "id": "mask_hunter/restored"
         }
       ]
     },
@@ -4828,7 +5269,8 @@
             "실타래 상인과 대화하기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_second_dancer",
@@ -4858,6 +5300,18 @@
             "초침 무희에게 자유로운 동작 배우기"
           ]
         }
+      ],
+      "evolutions": [
+        {
+          "href": "/shadow-codex/evolution/#puppet/restored",
+          "label": "스스로 춤추는 인형",
+          "id": "puppet/restored"
+        },
+        {
+          "href": "/shadow-codex/evolution/#second_dancer/restored",
+          "label": "새 박자의 무희",
+          "id": "second_dancer/restored"
+        }
       ]
     },
     {
@@ -4882,7 +5336,8 @@
             "봉합 기사의 선택 듣기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_ink_conductor",
@@ -4906,7 +5361,8 @@
             "먹칠 역무원의 증언 듣기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_censor_surgeon",
@@ -4930,7 +5386,8 @@
             "봉합 검열관의 기록 확인하기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_wave_bard",
@@ -4954,7 +5411,8 @@
             "파도 악사의 노래 듣기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_name_keeper",
@@ -4978,7 +5436,8 @@
             "문패 거북과 이름의 주인 정하기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_inverted_guide",
@@ -5002,7 +5461,8 @@
             "거꾸로 안내원에게 마지막 무대의 길 묻기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "npc_rival_director",
@@ -5026,7 +5486,8 @@
             "또 다른 연출가의 마지막 선택 듣기"
           ]
         }
-      ]
+      ],
+      "evolutions": []
     },
     {
       "id": "ashes_watchman_memory",
@@ -5043,7 +5504,8 @@
       "approximate": false,
       "quote": "나는 너무 늦게 봉화를 올렸다고 믿었다. 하지만 아래의 수레들은 내 불을 보고 방향을 틀어 살아남았지.",
       "description": "잊힌 기억과 지역의 이야기를 전하는 인물입니다.",
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "moon_path_messenger_memory",
@@ -5060,7 +5522,8 @@
       "approximate": false,
       "quote": "우리는 큰길에 거짓 발자국을 남기고 아이들을 이 샛길로 보냈어. 이름 없는 전령이어도 모두 돌아온 것만으로 충분했지.",
       "description": "잊힌 기억과 지역의 이야기를 전하는 인물입니다.",
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "echo_cavern_listener_memory",
@@ -5077,7 +5540,8 @@
       "approximate": false,
       "quote": "나는 날갯소리로 피난굴의 인원을 세었다. 바람이 멎은 날에도 마지막 한 명이 돌아올 때까지 벽을 두드렸지.",
       "description": "잊힌 기억과 지역의 이야기를 전하는 인물입니다.",
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_prologue_theater_healer",
@@ -5093,7 +5557,8 @@
       "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_prologue_theater_rumor",
@@ -5109,7 +5574,8 @@
       "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_prologue_theater_investigator",
@@ -5125,7 +5591,8 @@
       "description": "현재 막의 보스 조사 정보를 안내합니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_prologue_theater_craftsman",
@@ -5141,7 +5608,8 @@
       "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
       "condition": "마을 복구 2단계 · 재건부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_prologue_theater_merchant",
@@ -5157,7 +5625,8 @@
       "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
       "condition": "마을 복구 3단계 · 번영부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_prologue_theater_requester",
@@ -5173,7 +5642,8 @@
       "description": "게임 내 하루에 한 번 정화 연고 1개를 부탁합니다. 보상은 금화 50와 주민 호감도입니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_cinder_city_healer",
@@ -5189,7 +5659,8 @@
       "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_cinder_city_rumor",
@@ -5205,7 +5676,8 @@
       "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_cinder_city_investigator",
@@ -5221,7 +5693,8 @@
       "description": "현재 막의 보스 조사 정보를 안내합니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_cinder_city_craftsman",
@@ -5237,7 +5710,8 @@
       "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
       "condition": "마을 복구 2단계 · 재건부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_cinder_city_merchant",
@@ -5253,7 +5727,8 @@
       "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
       "condition": "마을 복구 3단계 · 번영부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_cinder_city_requester",
@@ -5269,7 +5744,8 @@
       "description": "게임 내 하루에 한 번 정화 연고 1개를 부탁합니다. 보상은 금화 65와 주민 호감도입니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_frost_port_healer",
@@ -5285,7 +5761,8 @@
       "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_frost_port_rumor",
@@ -5301,7 +5778,8 @@
       "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_frost_port_investigator",
@@ -5317,7 +5795,8 @@
       "description": "현재 막의 보스 조사 정보를 안내합니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_frost_port_craftsman",
@@ -5333,7 +5812,8 @@
       "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
       "condition": "마을 복구 2단계 · 재건부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_frost_port_merchant",
@@ -5349,7 +5829,8 @@
       "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
       "condition": "마을 복구 3단계 · 번영부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_frost_port_requester",
@@ -5365,7 +5846,8 @@
       "description": "게임 내 하루에 한 번 열기 토닉 1개를 부탁합니다. 보상은 금화 80와 주민 호감도입니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_white_archive_healer",
@@ -5381,7 +5863,8 @@
       "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_white_archive_rumor",
@@ -5397,7 +5880,8 @@
       "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_white_archive_investigator",
@@ -5413,7 +5897,8 @@
       "description": "현재 막의 보스 조사 정보를 안내합니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_white_archive_craftsman",
@@ -5429,7 +5914,8 @@
       "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
       "condition": "마을 복구 2단계 · 재건부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_white_archive_merchant",
@@ -5445,7 +5931,8 @@
       "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
       "condition": "마을 복구 3단계 · 번영부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_white_archive_requester",
@@ -5461,7 +5948,8 @@
       "description": "게임 내 하루에 한 번 열기 토닉 1개를 부탁합니다. 보상은 금화 80와 주민 호감도입니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_howl_village_healer",
@@ -5477,7 +5965,8 @@
       "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_howl_village_rumor",
@@ -5493,7 +5982,8 @@
       "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_howl_village_investigator",
@@ -5509,7 +5999,8 @@
       "description": "현재 막의 보스 조사 정보를 안내합니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_howl_village_craftsman",
@@ -5525,7 +6016,8 @@
       "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
       "condition": "마을 복구 2단계 · 재건부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_howl_village_merchant",
@@ -5541,7 +6033,8 @@
       "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
       "condition": "마을 복구 3단계 · 번영부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_howl_village_requester",
@@ -5557,7 +6050,8 @@
       "description": "게임 내 하루에 한 번 열기 토닉 1개를 부탁합니다. 보상은 금화 95와 주민 호감도입니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_thread_market_healer",
@@ -5573,7 +6067,8 @@
       "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_thread_market_rumor",
@@ -5589,7 +6084,8 @@
       "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_thread_market_investigator",
@@ -5605,7 +6101,8 @@
       "description": "현재 막의 보스 조사 정보를 안내합니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_thread_market_craftsman",
@@ -5621,7 +6118,8 @@
       "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
       "condition": "마을 복구 2단계 · 재건부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_thread_market_merchant",
@@ -5637,7 +6135,8 @@
       "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
       "condition": "마을 복구 3단계 · 번영부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_thread_market_requester",
@@ -5653,7 +6152,8 @@
       "description": "게임 내 하루에 한 번 짙은 잉크 1개를 부탁합니다. 보상은 금화 110와 주민 호감도입니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_erased_station_healer",
@@ -5669,7 +6169,8 @@
       "description": "파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_erased_station_rumor",
@@ -5685,7 +6186,8 @@
       "description": "주변 지역의 소문과 탐험 단서를 알려줍니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_erased_station_investigator",
@@ -5701,7 +6203,8 @@
       "description": "현재 막의 보스 조사 정보를 안내합니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_erased_station_craftsman",
@@ -5717,7 +6220,8 @@
       "description": "복구 인력이 돌아오며 늘어나는 전문 판매품의 소식을 전합니다.",
       "condition": "마을 복구 2단계 · 재건부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_erased_station_merchant",
@@ -5733,7 +6237,8 @@
       "description": "마을에 돌아온 상인과 희귀 물자의 소식을 전합니다. 물품 구매는 마을 상점 메뉴에서 합니다.",
       "condition": "마을 복구 3단계 · 번영부터 등장",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     },
     {
       "id": "town_erased_station_requester",
@@ -5749,7 +6254,8 @@
       "description": "게임 내 하루에 한 번 짙은 잉크 1개를 부탁합니다. 보상은 금화 125와 주민 호감도입니다.",
       "condition": "마을에서 만날 수 있습니다",
       "approximate": true,
-      "quests": []
+      "quests": [],
+      "evolutions": []
     }
   ]
 }
