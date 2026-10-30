@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "3ce9b2e79d10d7db1382078a68ed0041baeaa8dc",
+  "sourceCommit": "48edbb9ae4410ce048ef2e115690c2aee715fb5a",
   "forms": [
     {
       "id": "knight/restored",
@@ -4449,6 +4449,40 @@
           ]
         },
         {
+          "title": "유리등불 야영지 · 보급대",
+          "steps": [
+            {
+              "text": "유리 해안 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "glass_coast",
+                  "label": "유리 해안",
+                  "href": "/shadow-codex/atlas/#glass_coast"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "막간 보급 대기실 · 보급대",
+          "steps": [
+            {
+              "text": "뒤집힌 로비 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "inverted_lobby",
+                  "label": "뒤집힌 로비",
+                  "href": "/shadow-codex/atlas/#inverted_lobby"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
           "title": "퀘스트 보상 · 달빛 아래의 비극",
           "quest": "prologue_05_boss",
           "count": 3,
@@ -4543,6 +4577,40 @@
                   "id": "town_cinder_city_rumor",
                   "label": "카덴",
                   "href": "/shadow-codex/npcs/#town_cinder_city_rumor"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "유리등불 야영지 · 보급대",
+          "steps": [
+            {
+              "text": "유리 해안 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "glass_coast",
+                  "label": "유리 해안",
+                  "href": "/shadow-codex/atlas/#glass_coast"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "막간 보급 대기실 · 보급대",
+          "steps": [
+            {
+              "text": "뒤집힌 로비 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "inverted_lobby",
+                  "label": "뒤집힌 로비",
+                  "href": "/shadow-codex/atlas/#inverted_lobby"
                 }
               ],
               "note": ""
@@ -4687,6 +4755,40 @@
                   "id": "town_erased_station_rumor",
                   "label": "오웬",
                   "href": "/shadow-codex/npcs/#town_erased_station_rumor"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "유리등불 야영지 · 보급대",
+          "steps": [
+            {
+              "text": "유리 해안 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "glass_coast",
+                  "label": "유리 해안",
+                  "href": "/shadow-codex/atlas/#glass_coast"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "막간 보급 대기실 · 보급대",
+          "steps": [
+            {
+              "text": "뒤집힌 로비 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "inverted_lobby",
+                  "label": "뒤집힌 로비",
+                  "href": "/shadow-codex/atlas/#inverted_lobby"
                 }
               ],
               "note": ""
@@ -5272,6 +5374,40 @@
           ]
         },
         {
+          "title": "유리등불 야영지 · 보급대",
+          "steps": [
+            {
+              "text": "유리 해안 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "glass_coast",
+                  "label": "유리 해안",
+                  "href": "/shadow-codex/atlas/#glass_coast"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "막간 보급 대기실 · 보급대",
+          "steps": [
+            {
+              "text": "뒤집힌 로비 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "inverted_lobby",
+                  "label": "뒤집힌 로비",
+                  "href": "/shadow-codex/atlas/#inverted_lobby"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
           "title": "퀘스트 보상 · 빈 배의 이름",
           "quest": "rumor_bubble_cave",
           "count": 1,
@@ -5416,6 +5552,40 @@
           ]
         },
         {
+          "title": "유리등불 야영지 · 보급대",
+          "steps": [
+            {
+              "text": "유리 해안 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "glass_coast",
+                  "label": "유리 해안",
+                  "href": "/shadow-codex/atlas/#glass_coast"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "막간 보급 대기실 · 보급대",
+          "steps": [
+            {
+              "text": "뒤집힌 로비 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "inverted_lobby",
+                  "label": "뒤집힌 로비",
+                  "href": "/shadow-codex/atlas/#inverted_lobby"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
           "title": "퀘스트 보상 · 달빛을 거스르는 발자국",
           "quest": "rumor_sealed_mask",
           "count": 1,
@@ -5530,6 +5700,40 @@
                   "id": "town_erased_station_rumor",
                   "label": "오웬",
                   "href": "/shadow-codex/npcs/#town_erased_station_rumor"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "유리등불 야영지 · 보급대",
+          "steps": [
+            {
+              "text": "유리 해안 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "glass_coast",
+                  "label": "유리 해안",
+                  "href": "/shadow-codex/atlas/#glass_coast"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "막간 보급 대기실 · 보급대",
+          "steps": [
+            {
+              "text": "뒤집힌 로비 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "inverted_lobby",
+                  "label": "뒤집힌 로비",
+                  "href": "/shadow-codex/atlas/#inverted_lobby"
                 }
               ],
               "note": ""
@@ -6788,6 +6992,40 @@
               "note": ""
             }
           ]
+        },
+        {
+          "title": "유리등불 야영지 · 보급대",
+          "steps": [
+            {
+              "text": "유리 해안 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "glass_coast",
+                  "label": "유리 해안",
+                  "href": "/shadow-codex/atlas/#glass_coast"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "막간 보급 대기실 · 보급대",
+          "steps": [
+            {
+              "text": "뒤집힌 로비 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "inverted_lobby",
+                  "label": "뒤집힌 로비",
+                  "href": "/shadow-codex/atlas/#inverted_lobby"
+                }
+              ],
+              "note": ""
+            }
+          ]
         }
       ],
       "relatedForms": []
@@ -6823,6 +7061,40 @@
                   "id": "town_erased_station_rumor",
                   "label": "오웬",
                   "href": "/shadow-codex/npcs/#town_erased_station_rumor"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "유리등불 야영지 · 보급대",
+          "steps": [
+            {
+              "text": "유리 해안 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "glass_coast",
+                  "label": "유리 해안",
+                  "href": "/shadow-codex/atlas/#glass_coast"
+                }
+              ],
+              "note": ""
+            }
+          ]
+        },
+        {
+          "title": "막간 보급 대기실 · 보급대",
+          "steps": [
+            {
+              "text": "뒤집힌 로비 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.",
+              "refs": [
+                {
+                  "kind": "region",
+                  "id": "inverted_lobby",
+                  "label": "뒤집힌 로비",
+                  "href": "/shadow-codex/atlas/#inverted_lobby"
                 }
               ],
               "note": ""

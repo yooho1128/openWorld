@@ -86,3 +86,21 @@ node tools/check-evolution-guide.cjs
 연습용은 Lv.1~19에서 최대 20, 주석은 Lv.20~49에서 최대 50, 완성은 Lv.50~79에서 최대 80까지 성장시킨다.
 상한까지 남은 경험치만 지급하며 Lv.80 이후는 전투 경험치로 성장한다.
 진화에 대본을 필수 재료로 요구하지 않는 기존 안내는 유지한다.
+## 후반 보급 거점
+
+Unity의 `JourneyHubCatalog.json`에서 유리 해안/뒤집힌 로비의 거점 이름·보급대/귀환 칸·상품을 읽는다.
+상점 소스의 기본 휴식 요금도 함께 내보낸다. NPC 수와 기존 7개 마을 분류는 유지한다.
+월드 아틀라스의 보급 거점 필터/이름 검색과 상세 안내, 각 8종 아이템 구입처를 양방향 링크로 연결했다.
+두 지역은 야생 조우가 있는 필드이며 방문/이야기 조건을 충족해야 빠른 이동할 수 있다고 안내한다.
+
+```sh
+python tools/export-world-guide.py --source ../unityGame
+python tools/export-evolution-guide.py --source ../unityGame
+python tools/check-world-data.py
+python tools/check-evolution-guide.py
+node tools/check-hub-guide.cjs
+npm run build
+```
+
+2개 거점/아이템 링크/유형·이름 검색/320·390·1440px Chromium 검사와 기존 지역·NPC·진화 안내 브라우저 검사 통과.
+Vite 빌드 통과. 게임의 Unity 실행·저장·귀환은 웹 검사 범위에 포함하지 않는다.

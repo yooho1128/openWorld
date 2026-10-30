@@ -8,6 +8,15 @@ d=json.loads((root/'world-data.json').read_text());regions={r['regionId']:r for 
 assert len(d['regions'])==len(regions)==63
 assert len(d['npcs'])==len(npcs)==65
 assert len(d['pages'])==4
+assert {r['regionId'] for r in d['regions'] if r.get('hub')}=={'glass_coast','inverted_lobby'}
+evolution=json.loads((root/'evolution-data.json').read_text());items={i['itemId']:i for i in evolution['items']}
+for r in d['regions']:
+ if not r.get('hub'):continue
+ hub=r['hub'];assert not r.get('isSettlement') and r['act']>=7 and hub['restCost']==30
+ assert len(hub['cell'])==len(hub['checkpoint'])==2 and len(hub['supplies'])==8
+ for supply in hub['supplies']:
+  assert supply['id'] in items
+  assert any(s['title']==hub['name']+' · 보급대' for s in items[supply['id']]['sources'])
 assert Counter(n['category'] for n in npcs.values())==Counter({'이야기':20,'기억':3,'회복':7,'소문':7,'조사':7,'장인':7,'상인':7,'주민 부탁':7})
 for page in d['pages']:
  assert Image.open(root/page['image']).size==(1536,1024)

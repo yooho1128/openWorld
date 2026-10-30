@@ -51,6 +51,11 @@ for case in re.finditer(r'case "([^"]+)":([\s\S]*?)break;',code):
  if case[1] in byid and npc:
   placements[npc[1]]=dict(region=case[1],cell=[0,5],dialogue=re.search(r'npcFirst = "([^"]+)"',body)[1],condition='이 지역의 순서 퍼즐을 해결한 뒤 등장')
 items={i['itemId']:i['displayName'] for i in load('CoreContentCatalog')['items']}
+for file in src.glob('*Catalog.json'):
+ for item in json.loads(file.read_text()).get('items',[]):
+  if isinstance(item,dict):items[item['itemId']]=item['displayName']
+hubs={h['regionId']:h for h in load('JourneyHubCatalog')['entries']}
+rest_cost=int(re.search(r'private int restCost = (\d+)',(root/'Assets/Scripts/UI/SettlementShopController.cs').read_text())[1])
 services={
  'healer':([ -8,4],'회복','파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.',0),
  'rumor':([8,4],'소문','주변 지역의 소문과 탐험 단서를 알려줍니다.',0),
@@ -92,6 +97,9 @@ def condition(flag,target):
  return '해당 구간의 이야기 진행 조건을 완료해야 합니다'
 for r in regions:
  rid=r['regionId'];r['atlas']=locations[rid];r['npcs']=[n['id'] for n in npcs if n['region']==rid];r['condition']=condition(r.get('requiredFlag'),rid)
+ if rid in hubs:
+  hub=hubs[rid];r['hub']=dict(name=hub['name'],cell=[hub['x'],hub['y']],checkpoint=[hub['checkpointX'],hub['checkpointY']],restCost=rest_cost,
+   supplies=[dict(id=id,name=items[id]) for id in hub['itemIds']])
  r['shadows']=[dict(name=name,id=shadows.get(name)) for name in r.get('featuredShadows',[])];r['quests']=[dict(title=q['title'],summary=q['summary']) for q in quests if any(o.get('targetId')=='area_'+rid for o in q['objectives'])]
  r['exits']=[]
  for i,target in enumerate(r.get('connectedRegionIds',[])):

@@ -90,6 +90,11 @@ for it in items.values():
    elif it['itemId'] in special:cond='소문 해결 후 마을 복구 '+str(1 if special.index(it['itemId'])==0 else 2)+'단계부터 전문 판매품에 추가'
    else:continue
    it['sources'].append(dict(title=regions[rid]['displayName']+' · 마을 상점',steps=[step(cond,ref('region',rid),ref('npc','town_'+rid+'_rumor'))]))
+for hub in load('JourneyHubCatalog')['entries']:
+ for id in hub['itemIds']:
+  it=items[id];rid=hub['regionId']
+  assert not it.get('isEventOnly') and not it.get('isKeyItem') and it['shopUnlockAct']<=regions[rid]['act']
+  it['sources'].append(dict(title=hub['name']+' · 보급대',steps=[step(regions[rid]['displayName']+' 북서쪽의 보급대에서 구매합니다. 해당 지역을 방문하면 빠른 이동과 귀환 지점을 이용할 수 있습니다.',ref('region',rid))]))
 for q in quests:
  if q.get('rewardItemId') in items:items[q['rewardItemId']]['sources'].append(dict(title='퀘스트 보상 · '+q['title'],quest=q['questId'],count=q['rewardItemCount'],steps=[]))
 for e in events:

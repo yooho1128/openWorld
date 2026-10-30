@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "3ce9b2e79d10d7db1382078a68ed0041baeaa8dc",
+  "sourceCommit": "48edbb9ae4410ce048ef2e115690c2aee715fb5a",
   "pages": [
     {
       "title": "유랑촌 · 재의 왕국",
@@ -2611,6 +2611,52 @@
         "npc_wave_bard"
       ],
       "condition": "",
+      "hub": {
+        "name": "유리등불 야영지",
+        "cell": [
+          -7,
+          3
+        ],
+        "checkpoint": [
+          -7,
+          2
+        ],
+        "restCost": 30,
+        "supplies": [
+          {
+            "id": "potion",
+            "name": "회복 시약"
+          },
+          {
+            "id": "greater_potion",
+            "name": "농축 회복 시약"
+          },
+          {
+            "id": "tonic",
+            "name": "열기 토닉"
+          },
+          {
+            "id": "restoration_tea",
+            "name": "새벽 정화차"
+          },
+          {
+            "id": "curtain_elixir",
+            "name": "커튼콜 영약"
+          },
+          {
+            "id": "focus_elixir",
+            "name": "무대 열기 영약"
+          },
+          {
+            "id": "ink",
+            "name": "짙은 잉크"
+          },
+          {
+            "id": "silver_ink",
+            "name": "진명의 은빛 잉크"
+          }
+        ]
+      },
       "shadows": [
         {
           "name": "유리 소라",
@@ -2980,6 +3026,52 @@
         "npc_inverted_guide"
       ],
       "condition": "",
+      "hub": {
+        "name": "막간 보급 대기실",
+        "cell": [
+          -7,
+          3
+        ],
+        "checkpoint": [
+          -7,
+          2
+        ],
+        "restCost": 30,
+        "supplies": [
+          {
+            "id": "potion",
+            "name": "회복 시약"
+          },
+          {
+            "id": "greater_potion",
+            "name": "농축 회복 시약"
+          },
+          {
+            "id": "tonic",
+            "name": "열기 토닉"
+          },
+          {
+            "id": "restoration_tea",
+            "name": "새벽 정화차"
+          },
+          {
+            "id": "curtain_elixir",
+            "name": "커튼콜 영약"
+          },
+          {
+            "id": "focus_elixir",
+            "name": "무대 열기 영약"
+          },
+          {
+            "id": "ink",
+            "name": "짙은 잉크"
+          },
+          {
+            "id": "silver_ink",
+            "name": "진명의 은빛 잉크"
+          }
+        ]
+      },
       "shadows": [
         {
           "name": "거꾸로 안내원",
