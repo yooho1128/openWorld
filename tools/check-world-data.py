@@ -17,6 +17,11 @@ for r in d['regions']:
  for supply in hub['supplies']:
   assert supply['id'] in items
   assert any(s['title']==hub['name']+' · 보급대' for s in items[supply['id']]['sources'])
+puzzles=[r['puzzle'] for r in d['regions'] if r.get('puzzle')]
+assert len(puzzles)==3 and {p['kind'] for p in puzzles}=={'Sequence','Toggle','Mirrors'}
+for p in puzzles:
+ assert len(p['nodes'])==3 and len(p['exits'])==2 and p['clue'] and p['steps']
+ for cell in [p['board']]+p['exits']+[n['cell'] for n in p['nodes']]:assert len(cell)==2 and -10<=cell[0]<=10 and -8<=cell[1]<=8
 assert Counter(n['category'] for n in npcs.values())==Counter({'이야기':20,'기억':3,'회복':7,'소문':7,'조사':7,'장인':7,'상인':7,'주민 부탁':7})
 for page in d['pages']:
  assert Image.open(root/page['image']).size==(1536,1024)

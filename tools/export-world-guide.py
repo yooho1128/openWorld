@@ -55,6 +55,26 @@ for file in src.glob('*Catalog.json'):
  for item in json.loads(file.read_text()).get('items',[]):
   if isinstance(item,dict):items[item['itemId']]=item['displayName']
 hubs={h['regionId']:h for h in load('JourneyHubCatalog')['entries']}
+puzzles={p['regionId']:p for p in load('RegionalPuzzleCatalog')['entries']}
+def puzzle_guide(p):
+ if p['kind']=='Sequence':steps=[p['nodeNames'][i]+' 조사' for i in p['sequence']]
+ elif p['kind']=='Toggle':
+  solutions=[]
+  for mask in range(8):
+   result=0
+   for i,value in enumerate(p['toggleMasks']):
+    if mask&(1<<i):result^=value
+   if result==p['goalMask']:solutions.append(mask)
+  assert solutions,'Unsolvable puzzle: '+p['id']
+  mask=min(solutions,key=lambda m:(m.bit_count(),m));steps=[p['nodeNames'][i]+' 한 번 조사' for i in range(3) if mask&(1<<i)]
+ else:
+  assert p['kind']=='Mirrors'
+  directions=['북 ↑','동 →','남 ↓','서 ←']
+  steps=[name+'을 '+directions[turns]+' 방향으로 (초기 상태에서 '+str(turns)+'번 조사)' for name,turns in zip(p['nodeNames'],p['rotations'])]
+ return dict(id=p['id'],title=p['title'],kind=p['kind'],clue=p['clue'],completionText=p['completionText'],
+  board=[p['board']['x'],p['board']['y']],nodes=[dict(name=name,cell=[cell['x'],cell['y']]) for name,cell in zip(p['nodeNames'],p['nodes'])],
+  exits=[[c['x'],c['y']] for c in p['exits']],steps=steps)
+
 rest_cost=int(re.search(r'private int restCost = (\d+)',(root/'Assets/Scripts/UI/SettlementShopController.cs').read_text())[1])
 services={
  'healer':([ -8,4],'회복','파티를 쉬게 하고 회복합니다. 기본 비용은 금화 30이며 소문 해결과 마을 복구에 따라 할인됩니다.',0),
@@ -97,6 +117,7 @@ def condition(flag,target):
  return '해당 구간의 이야기 진행 조건을 완료해야 합니다'
 for r in regions:
  rid=r['regionId'];r['atlas']=locations[rid];r['npcs']=[n['id'] for n in npcs if n['region']==rid];r['condition']=condition(r.get('requiredFlag'),rid)
+ if rid in puzzles:r['puzzle']=puzzle_guide(puzzles[rid])
  if rid in hubs:
   hub=hubs[rid];r['hub']=dict(name=hub['name'],cell=[hub['x'],hub['y']],checkpoint=[hub['checkpointX'],hub['checkpointY']],restCost=rest_cost,
    supplies=[dict(id=id,name=items[id]) for id in hub['itemIds']])

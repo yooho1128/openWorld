@@ -104,3 +104,32 @@ npm run build
 
 2개 거점/아이템 링크/유형·이름 검색/320·390·1440px Chromium 검사와 기존 지역·NPC·진화 안내 브라우저 검사 통과.
 Vite 빌드 통과. 게임의 Unity 실행·저장·귀환은 웹 검사 범위에 포함하지 않는다.
+
+
+## 지역 퍼즐 안내
+
+Unity `RegionalPuzzleCatalog.json`의 3종을 월드 아틀라스의 지역 상세에 반영한다.
+단서판·세 장치·두 지름길의 초기 위치와 위치 범례, 조작 방법을 제공한다.
+기존 오브젝트 때문에 실제 위치가 가까운 빈 칸으로 조정될 수 있음을 안내한다.
+게임의 필수 진행/아이템 보상 조건과 구분한다. 단서와 해법은 기본으로 접어 두며 독자가 선택해서 연다.
+순서 배열·XOR 토글·반사경 회전 목표에서 초기 상태 해법을 계산한다. 임의로 별도 정답을 작성하지 않는다.
+이전의 숨겨진 지역 순서 퍼즐/NPC 등장 조건은 유지한다.
+
+`지역 퍼즐` 필터와 퍼즐 이름 검색으로 3지역을 바로 찾는다.
+전투 복기는 게임 내부의 개인 로컬 기록이므로 웹으로 수집하거나 내보내지 않는다.
+
+```sh
+python tools/export-world-guide.py --source ../unityGame
+python tools/export-evolution-guide.py --source ../unityGame
+python tools/check-world-data.py
+python tools/check-evolution-guide.py
+node tools/check-puzzle-guide.cjs
+node tools/check-hub-guide.cjs
+node tools/check-world-guide.cjs
+node tools/check-evolution-guide.cjs
+npm run build
+```
+
+3종/각 6개 위치 표식/접힌 단서·해법/검색·분류/320·390·1440px Chromium 및 기존 전체 안내 검사 통과.
+Vite 빌드 통과(기존 Phaser 본편 번들 크기 안내 존재). Unity 장치 조작·물리·저장·실기기 검증은 포함하지 않는다.
+main push는 기존 Vercel 배포를 트리거하며 실제 배포 완료 여부는 Vercel에서 별도 확인한다.
